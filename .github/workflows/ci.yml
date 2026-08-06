@@ -46,7 +46,7 @@ jobs:
       - name: Build
         run: pnpm build
         env:
-          # Build-time public placeholders only; never put real secrets in CI.
+          # Public build-time values (anon key is browser-safe; never put service-role or Resend secrets here).
           NEXT_PUBLIC_APP_URL: http://localhost:3000
-          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: public-anon-key-for-ci
+          NEXT_PUBLIC_SUPABASE_URL: https://lkgxzrvcozfxydpmbtqq.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrZ3h6cnZjb3pmeHlkcG1idHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2MjgzNjUsImV4cCI6MjA2MjIwNDM2NX0.Cw2GhjRPonK2IF3YeYIUdkkD7lZMj3Pv4ZEChxqHDxs
