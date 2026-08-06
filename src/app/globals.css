@@ -96,20 +96,20 @@
 }
 
 .dark {
-  --background: oklch(0.16 0.015 55);
-  --foreground: oklch(0.97 0.01 75);
-  --card: oklch(0.2 0.015 55);
-  --card-foreground: oklch(0.97 0.01 75);
-  --popover: oklch(0.2 0.015 55);
-  --popover-foreground: oklch(0.97 0.01 75);
+  --background: #000000;
+  --foreground: oklch(0.97 0 0);
+  --card: oklch(0.14 0 0);
+  --card-foreground: oklch(0.97 0 0);
+  --popover: oklch(0.14 0 0);
+  --popover-foreground: oklch(0.97 0 0);
   --primary: #ff6300;
   --primary-foreground: #ffffff;
-  --secondary: oklch(0.26 0.02 55);
-  --secondary-foreground: oklch(0.97 0.01 75);
-  --muted: oklch(0.26 0.02 55);
-  --muted-foreground: oklch(0.72 0.02 75);
-  --accent: oklch(0.28 0.04 45);
-  --accent-foreground: oklch(0.97 0.01 75);
+  --secondary: oklch(0.2 0 0);
+  --secondary-foreground: oklch(0.97 0 0);
+  --muted: oklch(0.2 0 0);
+  --muted-foreground: oklch(0.7 0 0);
+  --accent: oklch(0.22 0 0);
+  --accent-foreground: oklch(0.97 0 0);
   --destructive: oklch(0.65 0.2 25);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 14%);
@@ -124,13 +124,13 @@
   --chart-2: oklch(0.65 0.14 145);
   --chart-3: oklch(0.7 0.1 240);
   --chart-4: oklch(0.78 0.14 75);
-  --chart-5: oklch(0.72 0.02 75);
-  --sidebar: oklch(0.18 0.015 55);
-  --sidebar-foreground: oklch(0.97 0.01 75);
+  --chart-5: oklch(0.72 0 0);
+  --sidebar: #000000;
+  --sidebar-foreground: oklch(0.97 0 0);
   --sidebar-primary: #ff6300;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: oklch(0.28 0.04 45);
-  --sidebar-accent-foreground: oklch(0.97 0.01 75);
+  --sidebar-accent: oklch(0.22 0 0);
+  --sidebar-accent-foreground: oklch(0.97 0 0);
   --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: #ff6300;
 }
@@ -145,6 +145,38 @@
   body {
     @apply h-full overflow-hidden bg-background text-foreground;
   }
+}
+
+/* Rounded blob with top-right step for floating corner actions */
+.nestflow-stepped {
+  --nf-step-r: 1.75rem;
+  --nf-step-x: 3.5rem;
+  --nf-step-y: 3.125rem;
+  --nf-step-inner: 1.15rem;
+  border-radius: var(--nf-step-r);
+}
+
+.nestflow-stepped.nestflow-stepped--2 {
+  --nf-step-x: 6.5rem;
+}
+
+.nestflow-stepped::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  z-index: 1;
+  width: var(--nf-step-x);
+  height: var(--nf-step-y);
+  pointer-events: none;
+  background: var(--nf-step-cut, var(--background));
+  border-bottom-left-radius: var(--nf-step-inner);
+  border-top-right-radius: calc(var(--nf-step-r) + 1px);
+}
+
+.nestflow-stepped > * {
+  position: relative;
+  z-index: 2;
 }
 
 .nf-scroll {

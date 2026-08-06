@@ -1,14 +1,18 @@
+import { redirect } from "next/navigation";
+
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { TaskList } from "@/components/tasks/task-list";
+import { listAssignablePeopleForProfile } from "@/lib/admin/queries";
+import { canAccessWorkViews } from "@/lib/auth/navigation";
 import { requireActiveProfile } from "@/lib/auth/session";
-import {
-  listAssignablePeople,
-  listTasks,
-  listWorkspaces,
-} from "@/lib/tasks/queries";
+import { listTasks, listWorkspaces } from "@/lib/tasks/queries";
 
 export default async function ListPage() {
   const profile = await requireActiveProfile();
+  if (!canAccessWorkViews(profile.roles)) {
+    redirect("/app");
+  }
+
   const canAssign =
     profile.roles.includes("admin") ||
     profile.roles.includes("hr") ||
@@ -17,7 +21,7 @@ export default async function ListPage() {
   const [tasks, workspaces, people] = await Promise.all([
     listTasks(),
     listWorkspaces(),
-    listAssignablePeople(),
+    listAssignablePeopleForProfile(profile),
   ]);
 
   return (

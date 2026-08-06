@@ -21,33 +21,53 @@ export type NavItem = {
 const baseNav: NavItem[] = [
   { href: "/app", label: "Dashboard", icon: "dashboard" },
   { href: "/app/my-tasks", label: "My Tasks", icon: "my-tasks" },
-  { href: "/app/board", label: "Board", icon: "board" },
-  { href: "/app/list", label: "List", icon: "list" },
-  { href: "/app/calendar", label: "Calendar", icon: "calendar" },
+  {
+    href: "/app/board",
+    label: "Board",
+    icon: "board",
+    roles: ["staff", "line_manager"],
+  },
+  {
+    href: "/app/list",
+    label: "List",
+    icon: "list",
+    roles: ["staff", "line_manager"],
+  },
+  {
+    href: "/app/calendar",
+    label: "Calendar",
+    icon: "calendar",
+    roles: ["staff", "line_manager", "hr"],
+  },
 ];
 
 const roleNav: NavItem[] = [
   {
     href: "/app/team",
     label: "Team",
-    roles: ["admin", "line_manager"],
+    roles: ["line_manager"],
     icon: "team",
   },
   {
     href: "/app/people",
     label: "People tasks",
-    roles: ["admin", "hr"],
+    roles: ["hr"],
     icon: "people",
   },
   {
     href: "/app/admin",
-    label: "Admin",
+    label: "Overview",
     roles: ["admin"],
     icon: "admin",
   },
 ];
 
 export function navForRoles(roles: AppRole[]): NavItem[] {
+  // Administrators work from Overview only (task lists and boards are for other roles).
+  if (primaryRole(roles) === "admin") {
+    return [{ href: "/app/admin", label: "Overview", icon: "admin" }];
+  }
+
   const allowed = new Set(roles);
   return [...baseNav, ...roleNav].filter((item) => {
     if (!item.roles || item.roles.length === 0) {
@@ -55,6 +75,11 @@ export function navForRoles(roles: AppRole[]): NavItem[] {
     }
     return item.roles.some((role) => allowed.has(role));
   });
+}
+
+/** Board and List remain for staff and line managers only. */
+export function canAccessWorkViews(roles: AppRole[]): boolean {
+  return roles.some((role) => role === "staff" || role === "line_manager");
 }
 
 export function homePathForRoles(roles: AppRole[]): string {
@@ -65,7 +90,7 @@ export function homePathForRoles(roles: AppRole[]): string {
     case "hr":
       return "/app/people";
     case "line_manager":
-      return "/app/team";
+      return "/app";
     case "staff":
       return "/app";
     default: {

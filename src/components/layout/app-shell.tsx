@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   CalendarDays,
+  ChartColumn,
   Columns3,
   LayoutGrid,
   List,
   ListTodo,
   Menu,
-  Settings,
   UserRound,
   Users,
   type LucideIcon,
@@ -32,6 +32,8 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -56,7 +58,7 @@ const navIcons: Record<NavIcon, LucideIcon> = {
   calendar: CalendarDays,
   team: Users,
   people: UserRound,
-  admin: Settings,
+  admin: ChartColumn,
 };
 
 function initials(profile: NestFlowProfile) {
@@ -122,6 +124,58 @@ function IconRail({
   );
 }
 
+function MobileNavList({
+  items,
+  onNavigate,
+}: {
+  items: NavItem[];
+  onNavigate?: () => void;
+}) {
+  const pathname = usePathname();
+
+  return (
+    <nav aria-label="Primary" className="flex flex-col gap-1 px-3">
+      {items.map((item) => {
+        const active = isActivePath(pathname, item.href);
+        const Icon = navIcons[item.icon];
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onNavigate}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors",
+              active
+                ? "bg-primary text-primary-foreground shadow-[0_8px_20px_-10px_rgba(255,99,0,0.7)]"
+                : "text-foreground hover:bg-muted",
+            )}
+          >
+            <span
+              className={cn(
+                "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
+                active
+                  ? "bg-white/20 text-primary-foreground"
+                  : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground",
+              )}
+            >
+              <Icon className="size-4" />
+            </span>
+            <span className="min-w-0 flex-1 truncate">{item.label}</span>
+            {active ? (
+              <span
+                className="size-1.5 shrink-0 rounded-full bg-primary-foreground/90"
+                aria-hidden
+              />
+            ) : null}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 export function AppShell({
   profile,
   navItems,
@@ -170,19 +224,79 @@ export function AppShell({
                     <Menu className="size-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left">
-                  <SheetHeader>
-                    <SheetTitle className="flex items-center gap-2">
-                      <NestFlowMark size="sm" />
-                      NestFlow
-                    </SheetTitle>
+                <SheetContent
+                  side="left"
+                  className="w-[min(100%,20rem)] gap-0 border-border/80 p-0 sm:max-w-xs"
+                >
+                  <SheetHeader className="border-b border-border/80 px-5 py-5 text-left">
+                    <div className="flex items-center gap-3 pr-8">
+                      <Link
+                        href="/app"
+                        aria-label="NestFlow home"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <NestFlowMark size="sm" className="rounded-xl" />
+                      </Link>
+                      <div className="min-w-0">
+                        <SheetTitle className="font-heading text-lg font-semibold tracking-tight">
+                          NestFlow
+                        </SheetTitle>
+                        <SheetDescription className="text-xs">
+                          Plan. Assign. Deliver.
+                        </SheetDescription>
+                      </div>
+                    </div>
                   </SheetHeader>
-                  <div className="mt-8 flex justify-center">
-                    <IconRail
+
+                  <div className="nf-scroll flex-1 overflow-y-auto py-4">
+                    <MobileNavList
                       items={navItems}
                       onNavigate={() => setMobileOpen(false)}
                     />
                   </div>
+
+                  <SheetFooter className="border-t border-border/80 bg-muted/30 p-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="size-10 shrink-0 ring-2 ring-border">
+                        {profile.avatarUrl ? (
+                          <AvatarImage src={profile.avatarUrl} alt="" />
+                        ) : null}
+                        <AvatarFallback className="bg-primary text-xs text-primary-foreground">
+                          {initials(profile)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">
+                          {profile.fullName ?? "NestFlow user"}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {displayRole}
+                          {profile.nestId ? ` · ${profile.nestId}` : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link
+                          href="/app/profile"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          Profile
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground"
+                        onClick={() => {
+                          setMobileOpen(false);
+                          void signOutAction();
+                        }}
+                      >
+                        Sign out
+                      </Button>
+                    </div>
+                  </SheetFooter>
                 </SheetContent>
               </Sheet>
             </div>

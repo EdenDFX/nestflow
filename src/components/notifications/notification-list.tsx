@@ -2,6 +2,9 @@
 
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { toast } from "sonner";
 
 import {
   markAllNotificationsReadAction,
@@ -75,14 +78,25 @@ export function NotificationList({
 }
 
 export function MarkAllReadButton({ disabled }: { disabled?: boolean }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+
   return (
     <Button
       type="button"
       variant="ghost"
       size="sm"
-      disabled={disabled}
+      disabled={disabled || pending}
       onClick={() => {
-        void markAllNotificationsReadAction();
+        startTransition(async () => {
+          const result = await markAllNotificationsReadAction();
+          if (!result.ok) {
+            toast.error(result.error ?? "Could not mark notifications read.");
+            return;
+          }
+          toast.success("All notifications marked read.");
+          router.refresh();
+        });
       }}
     >
       Mark all read

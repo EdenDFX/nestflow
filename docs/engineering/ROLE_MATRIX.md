@@ -12,10 +12,14 @@ Derived from ADR-003 and enforced in:
 | Invite / activate / deactivate | Yes | No | Yes | No |
 | Manage departments | Yes | No | No | No |
 | View audit log | Yes | No | No | No |
-| Assign / reassign tasks | Yes | Yes | Yes | No |
-| Team board / workload / blocked | Yes | Yes | No | No |
+| Assign / reassign tasks | Yes (any) | Yes (roster) | Yes (self, admin, line managers only) | No |
+| Board / List views | No | Yes | No | Yes |
+| Team board / workload / blocked | No (see Overview reports) | Yes | No | No |
+| Admin Overview (all tasks, log, reports) | Yes | No | No | No |
+| People suite | Optional (if also HR) | No | Yes | No |
 | HR people workspaces (`kind=hr`) | Yes | No | Yes | No |
-| Create tasks in general workspaces | Yes | Yes | Yes | Yes |
+| Create & update permitted tasks | Yes | Yes (team) | Yes (HR + own) | Yes (own / assigned only) |
+| View others' team tasks without assignment | Yes | Yes (managed teams) | HR queues only | No |
 | Comment / checklist / status (in scope) | Yes | Yes | Yes | Yes |
 
 Automated assertions live in `src/lib/security/authz.test.ts` (`pnpm test`).

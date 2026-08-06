@@ -4,12 +4,22 @@ import Link from "next/link";
 import {
   ArrowDownRight,
   ArrowUpRight,
+  ChevronDown,
   Filter,
   Search,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
+import { TaskDueTimer } from "@/components/tasks/task-due-timer";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  SteppedCard,
+  SteppedCardActionLink,
+  isSteppedCardLightTone,
+  type SteppedCardTone,
+} from "@/components/ui/stepped-card";
+import { UserAvatars } from "@/components/ui/user-avatars";
 import { roleLabel, type AppRole, type NestFlowProfile } from "@/lib/auth/types";
 import {
   STATUS_LABELS,
@@ -38,6 +48,28 @@ const filterToStatus: Record<Exclude<StatusFilter, "All">, TaskStatus> = {
   Review: "review",
 };
 
+/** Card surface by task status (To Do green, Blocked red, Review yellow, Completed grey). */
+function toneForStatus(status: TaskStatus): SteppedCardTone {
+  switch (status) {
+    case "todo":
+      return "todo";
+    case "blocked":
+      return "blocked";
+    case "review":
+      return "review";
+    case "completed":
+      return "completed";
+    case "in_progress":
+      return "primary";
+    case "backlog":
+      return "ink";
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
 type WorkspaceDashboardProps = {
   profile: NestFlowProfile;
   role: AppRole;
@@ -47,6 +79,20 @@ type WorkspaceDashboardProps = {
   people: TaskAssignee[];
   canAssign: boolean;
 };
+
+function personInitials(person: {
+  fullName?: string | null;
+  nestId?: string | null;
+  email?: string | null;
+}) {
+  const source = person.fullName?.trim() || person.nestId || person.email || "NF";
+  return source
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("")
+    .slice(0, 2);
+}
 
 export function WorkspaceDashboard({
   profile,
@@ -100,7 +146,13 @@ export function WorkspaceDashboard({
       badge: "Due",
       href: "/app/my-tasks",
     },
-  ];
+  ].filter((item) => {
+    // Admin home skips Board and List; those views are for staff and line managers.
+    if (role === "admin" && (item.id === "board" || item.id === "list")) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-8">
@@ -153,27 +205,73 @@ export function WorkspaceDashboard({
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {focusItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className="relative overflow-hidden rounded-[1.5rem] border border-border/80 bg-card p-4 transition-colors hover:border-primary/40"
-            >
-              <div className="flex size-10 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary">
-                {item.badge.slice(0, 1)}
-              </div>
-              <h3 className="mt-4 font-heading text-base font-semibold">
-                {item.title}
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">{item.subtitle}</p>
-              <div className="mt-5 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">NestFlow</span>
-                <span className="rounded-full bg-muted px-2.5 py-1 text-xs text-foreground/80">
-                  {item.badge}
-                </span>
-              </div>
-            </Link>
-          ))}
+          {focusItems.map((item, index) => {
+            const tone = index % 2 === 0 ? "primary" : "ink";
+            const onPrimary = tone === "primary";
+
+            return (
+              <SteppedCard
+                key={item.id}
+                tone={tone}
+                cornerActions={
+                  <SteppedCardActionLink
+                    href={item.href}
+                    aria-label={`Open ${item.title}`}
+                  >
+                    <ArrowUpRight className="size-4" />
+                  </SteppedCardActionLink>
+                }
+              >
+                <div className="space-y-4">
+                  <div
+                    className={cn(
+                      "flex size-11 items-center justify-center rounded-full text-sm font-semibold",
+                      onPrimary
+                        ? "bg-[#1c1917]/10 text-[#1c1917]"
+                        : "bg-white/10 text-white",
+                    )}
+                  >
+                    {item.badge.slice(0, 1)}
+                  </div>
+                  <div className="space-y-1.5 pe-2">
+                    <h3 className="font-heading text-xl font-semibold tracking-tight">
+                      {item.title}
+                    </h3>
+                    <p
+                      className={cn(
+                        "text-sm",
+                        onPrimary ? "text-[#1c1917]/70" : "text-white/65",
+                      )}
+                    >
+                      {item.subtitle}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium",
+                      onPrimary
+                        ? "border-[#1c1917]/15 bg-white/35 text-[#1c1917]"
+                        : "border-white/15 bg-white/10 text-white",
+                    )}
+                  >
+                    {item.badge}
+                    <ChevronDown className="size-3.5 opacity-70" aria-hidden />
+                  </span>
+                  <span
+                    className={cn(
+                      "text-xs font-medium",
+                      onPrimary ? "text-[#1c1917]/55" : "text-white/50",
+                    )}
+                  >
+                    NestFlow
+                  </span>
+                </div>
+              </SteppedCard>
+            );
+          })}
         </div>
       </section>
 
@@ -194,65 +292,149 @@ export function WorkspaceDashboard({
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {visibleTasks.length === 0 ? (
-            <div className="col-span-full rounded-[1.5rem] border border-dashed border-border/80 p-8 text-center text-sm text-muted-foreground">
+            <div className="col-span-full rounded-[1.75rem] border border-dashed border-border/80 p-8 text-center text-sm text-muted-foreground">
               No tasks yet. Create your first NestFlow task to populate this
               workspace.
             </div>
           ) : (
-            visibleTasks.map((task, index) => {
-              const accent = index === 0;
+            visibleTasks.map((task) => {
+              const tone = toneForStatus(task.status);
+              const onLight = isSteppedCardLightTone(tone);
+              const lead = task.assignees[0];
+              const avatarUsers = task.assignees.map((assignee) => ({
+                id: assignee.userId,
+                name:
+                  assignee.fullName?.trim() ||
+                  assignee.nestId ||
+                  assignee.email ||
+                  "Someone",
+                image: assignee.avatarUrl,
+              }));
+              const greyed = task.status === "completed";
+
               return (
-                <article
+                <SteppedCard
                   key={task.id}
-                  className={cn(
-                    "flex min-h-[180px] flex-col justify-between rounded-[1.5rem] border p-4",
-                    accent
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border/80 bg-card",
-                  )}
-                >
-                  <div className="space-y-2">
-                    <p
-                      className={cn(
-                        "text-xs font-medium",
-                        accent
-                          ? "text-primary-foreground/80"
-                          : "text-muted-foreground",
-                      )}
+                  tone={tone}
+                  className={cn(greyed && "grayscale-[0.35]")}
+                  cornerActions={
+                    <SteppedCardActionLink
+                      href={`/app/tasks/${task.id}`}
+                      aria-label={`Open ${task.title}`}
                     >
-                      {task.dueAt
-                        ? `Due ${new Date(task.dueAt).toLocaleDateString()}`
-                        : "No due date"}{" "}
-                      · {task.priority}
-                    </p>
-                    <h3 className="font-heading text-lg font-semibold tracking-tight">
-                      {task.title}
-                    </h3>
+                      <ArrowUpRight className="size-4" />
+                    </SteppedCardActionLink>
+                  }
+                >
+                  <div className="space-y-3">
+                    {lead ? (
+                      <Avatar className="size-10 ring-2 ring-black/10 dark:ring-white/10">
+                        {lead.avatarUrl ? (
+                          <AvatarImage src={lead.avatarUrl} alt="" />
+                        ) : null}
+                        <AvatarFallback
+                          className={cn(
+                            "text-xs font-semibold",
+                            onLight
+                              ? "bg-[#1c1917] text-white"
+                              : "bg-white/20 text-white",
+                          )}
+                        >
+                          {personInitials(lead)}
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      <Avatar className="size-10 ring-2 ring-black/10 dark:ring-white/10">
+                        <AvatarFallback
+                          className={cn(
+                            "text-xs font-semibold",
+                            onLight
+                              ? "bg-[#1c1917] text-white"
+                              : "bg-white/20 text-white",
+                          )}
+                        >
+                          NF
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+
+                    <div className="space-y-2 pe-2">
+                      <h3 className="font-heading text-xl font-semibold tracking-tight">
+                        <Link
+                          href={`/app/tasks/${task.id}`}
+                          className="hover:underline"
+                        >
+                          {task.title}
+                        </Link>
+                      </h3>
+
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        {avatarUsers.length > 0 ? (
+                          <UserAvatars
+                            users={avatarUsers}
+                            size={22}
+                            maxVisible={3}
+                            overlap={55}
+                            focusScale={1.18}
+                            isOverlapOnly
+                            tooltipPlacement="top"
+                            inverted={!onLight}
+                          />
+                        ) : (
+                          <span
+                            className={cn(
+                              "text-[11px] font-medium",
+                              onLight ? "text-[#1c1917]/60" : "text-white/55",
+                            )}
+                          >
+                            Unassigned
+                          </span>
+                        )}
+                        <TaskDueTimer
+                          dueAt={task.dueAt}
+                          status={task.status}
+                          tone={
+                            onLight
+                              ? tone === "completed"
+                                ? "surface"
+                                : "on-primary"
+                              : "on-ink"
+                          }
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between gap-2">
+
+                  <div className="flex items-center gap-2">
                     <span
                       className={cn(
-                        "rounded-full px-3 py-1.5 text-xs font-medium",
-                        accent
-                          ? "bg-black/20 text-primary-foreground"
-                          : "bg-muted text-foreground/80",
+                        "inline-flex min-w-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium",
+                        onLight
+                          ? "border-[#1c1917]/15 bg-white/40 text-[#1c1917]"
+                          : "border-white/20 bg-white/10 text-white",
+                        greyed && "border-border/60 bg-background/40",
                       )}
                     >
-                      {STATUS_LABELS[task.status]}
+                      {lead ? (
+                        <Avatar className="size-4" size="sm">
+                          {lead.avatarUrl ? (
+                            <AvatarImage src={lead.avatarUrl} alt="" />
+                          ) : null}
+                          <AvatarFallback className="bg-black/20 text-[7px]">
+                            {personInitials(lead)}
+                          </AvatarFallback>
+                        </Avatar>
+                      ) : null}
+                      <span className="truncate">
+                        {STATUS_LABELS[task.status]}
+                      </span>
+                      <ChevronDown
+                        className="size-3.5 shrink-0 opacity-70"
+                        aria-hidden
+                      />
                     </span>
-                    <Link
-                      href={`/app/tasks/${task.id}`}
-                      className={cn(
-                        "rounded-full px-3 py-1.5 text-xs font-medium",
-                        accent
-                          ? "bg-white text-black"
-                          : "border border-border hover:bg-accent",
-                      )}
-                    >
-                      Open
-                    </Link>
                   </div>
-                </article>
+                </SteppedCard>
               );
             })
           )}

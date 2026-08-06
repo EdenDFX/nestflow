@@ -43,6 +43,7 @@ describe("rolesAllow capability matrix", () => {
     expect(rolesAllow(["hr"], "access_hr_workspaces")).toBe(true);
     expect(rolesAllow(["hr"], "view_audit")).toBe(false);
     expect(rolesAllow(["hr"], "manage_departments")).toBe(false);
+    expect(rolesAllow(["hr"], "assign_tasks")).toBe(true);
   });
 
   it("allows admin everything in the matrix", () => {
@@ -50,6 +51,27 @@ describe("rolesAllow capability matrix", () => {
     expect(rolesAllow(["admin"], "view_audit")).toBe(true);
     expect(rolesAllow(["admin"], "access_hr_workspaces")).toBe(true);
     expect(rolesAllow(["admin"], "manage_team_suite")).toBe(true);
+  });
+});
+
+describe("nav work views", () => {
+  it("excludes Board and List for HR and admin-only", async () => {
+    const { navForRoles, canAccessWorkViews } = await import(
+      "@/lib/auth/navigation"
+    );
+    const hrNav = navForRoles(["hr"]);
+    expect(hrNav.some((item) => item.href === "/app/board")).toBe(false);
+    expect(hrNav.some((item) => item.href === "/app/list")).toBe(false);
+    expect(canAccessWorkViews(["hr"])).toBe(false);
+    expect(canAccessWorkViews(["admin"])).toBe(false);
+    expect(canAccessWorkViews(["staff"])).toBe(true);
+    expect(canAccessWorkViews(["line_manager"])).toBe(true);
+  });
+
+  it("gives administrators a focused overview nav", async () => {
+    const { navForRoles } = await import("@/lib/auth/navigation");
+    const adminNav = navForRoles(["admin"]);
+    expect(adminNav.map((item) => item.href)).toEqual(["/app/admin"]);
   });
 });
 

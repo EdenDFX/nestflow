@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { TaskBoard } from "@/components/tasks/task-board";
+import { TeamPerformanceGrid } from "@/components/admin/team-performance-grid";
+import { TeamTaskBoard } from "@/components/admin/team-task-board";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
 import { Button } from "@/components/ui/button";
+import type { ManagedTeamSummary } from "@/lib/admin/queries";
 import type { WorkloadRow } from "@/lib/admin/types";
 import type {
   NestFlowTask,
@@ -14,7 +16,7 @@ import type {
   TaskAssignee,
 } from "@/lib/tasks/types";
 
-type TeamTab = "board" | "workload" | "blocked";
+type TeamTab = "performance" | "board" | "blocked";
 
 export function TeamSuite({
   tasks,
@@ -24,6 +26,8 @@ export function TeamSuite({
   people,
   canAssign,
   defaultAssigneeId,
+  managedTeams,
+  isOrgWide,
 }: {
   tasks: NestFlowTask[];
   blocked: NestFlowTask[];
@@ -32,19 +36,58 @@ export function TeamSuite({
   people: TaskAssignee[];
   canAssign: boolean;
   defaultAssigneeId?: string;
+  managedTeams: ManagedTeamSummary[];
+  isOrgWide: boolean;
 }) {
-  const [tab, setTab] = useState<TeamTab>("board");
+  const [tab, setTab] = useState<TeamTab>("performance");
+  const teamLabel = isOrgWide
+    ? "Organisation"
+    : managedTeams.length > 0
+      ? managedTeams.map((team) => team.name).join(" · ")
+      : "No managed team";
+
+  const openTotal = workload.reduce((sum, row) => sum + row.openCount, 0);
+  const blockedTotal = workload.reduce((sum, row) => sum + row.blockedCount, 0);
+  const overdueTotal = workload.reduce((sum, row) => sum + row.overdueCount, 0);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
           <h1 className="font-heading text-3xl font-semibold tracking-tight">
-            Team
+            {teamLabel}
           </h1>
-          <p className="text-muted-foreground">
-            Managed-team board, workload distribution, and blocked queue.
+          <p className="max-w-2xl text-muted-foreground">
+            {isOrgWide
+              ? "Org-wide performance, board, and blocked queue."
+              : "Performance and work for people HR / Admin placed on your roster."}
           </p>
+          <dl className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-xs text-muted-foreground">
+            <div>
+              <dt className="inline">People </dt>
+              <dd className="inline tabular-nums font-medium text-foreground">
+                {workload.length}
+              </dd>
+            </div>
+            <div>
+              <dt className="inline">Open </dt>
+              <dd className="inline tabular-nums font-medium text-foreground">
+                {openTotal}
+              </dd>
+            </div>
+            <div>
+              <dt className="inline">Blocked </dt>
+              <dd className="inline tabular-nums font-medium text-foreground">
+                {blockedTotal}
+              </dd>
+            </div>
+            <div>
+              <dt className="inline">Overdue </dt>
+              <dd className="inline tabular-nums font-medium text-foreground">
+                {overdueTotal}
+              </dd>
+            </div>
+          </dl>
         </div>
         <TaskCreateDialog
           workspaces={workspaces}
@@ -57,8 +100,8 @@ export function TeamSuite({
       <div className="flex flex-wrap gap-2">
         {(
           [
+            ["performance", "Performance"],
             ["board", "Team board"],
-            ["workload", "Workload"],
             ["blocked", `Blocked (${blocked.length})`],
           ] as const
         ).map(([id, label]) => (
@@ -74,44 +117,18 @@ export function TeamSuite({
         ))}
       </div>
 
-      {tab === "board" ? <TaskBoard initialTasks={tasks} /> : null}
+      {tab === "performance" ? (
+        <TeamPerformanceGrid workload={workload} />
+      ) : null}
 
-      {tab === "workload" ? (
-        <div className="overflow-x-auto rounded-xl border border-border/80">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-border/80 bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 font-medium">Person</th>
-                <th className="px-3 py-2 font-medium">Open</th>
-                <th className="px-3 py-2 font-medium">Blocked</th>
-                <th className="px-3 py-2 font-medium">Overdue</th>
-                <th className="px-3 py-2 font-medium">Completed</th>
-              </tr>
-            </thead>
-            <tbody>
-              {workload.map((row) => (
-                <tr key={row.userId} className="border-b border-border/60">
-                  <td className="px-3 py-2.5">
-                    <p className="font-medium">{row.fullName ?? "Unnamed"}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {row.nestId ?? row.email}
-                    </p>
-                  </td>
-                  <td className="px-3 py-2.5">{row.openCount}</td>
-                  <td className="px-3 py-2.5">{row.blockedCount}</td>
-                  <td className="px-3 py-2.5">{row.overdueCount}</td>
-                  <td className="px-3 py-2.5">{row.completedCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {tab === "board" ? (
+        <TeamTaskBoard initialTasks={tasks} roster={workload} />
       ) : null}
 
       {tab === "blocked" ? (
         <div className="space-y-2">
           {blocked.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="rounded-2xl border border-dashed border-border/80 px-4 py-8 text-sm text-muted-foreground">
               No blocked tasks in your managed teams.
             </p>
           ) : (
@@ -119,7 +136,7 @@ export function TeamSuite({
               <Link
                 key={task.id}
                 href={`/app/tasks/${task.id}`}
-                className="block rounded-xl border border-border/80 px-4 py-3 transition-colors hover:bg-muted/50"
+                className="block rounded-2xl border border-border/80 px-4 py-3 transition-colors hover:bg-muted/50"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge status={task.status} />

@@ -254,6 +254,7 @@ Never expose R2 credentials to the browser. Never rely on unguessable public URL
 - Views: `nf_departments`, `nf_invites`, `nf_audit_events`, `nf_user_roles`
 - RPCs: `nestflow_set_profile_status`, `nestflow_set_user_roles`, `nestflow_set_profile_department`, `nestflow_record_audit`
 - `can_view_task` hides `kind=hr` workspaces from non-HR/non-admin
+- Task visibility is participant-based: creator or assignee. Team membership alone does not grant access. Line managers see tasks on teams they manage; HR sees `kind=hr` workspace tasks; admin sees all.
 
 ## 16. M6 hardening notes (applied)
 
@@ -261,4 +262,4 @@ Never expose R2 credentials to the browser. Never rely on unguessable public URL
 - Workspace select policy excludes `kind=hr` unless admin/hr
 - App authz matrix + Vitest coverage; login/invite rate limits; Sentry optional via DSN
 - Ops docs: `ROLE_MATRIX.md`, `SECURITY_CHECKLIST.md`, `BACKUP.md`
-- Privileges: `authenticated` / `service_role` GRANTs on nestflow notification tables (required because `nf_*` views use `security_invoker=true`)
+- Privileges: `authenticated` / `service_role` GRANTs on nestflow tables that power `nf_*` views (required because those views use `security_invoker=true`). Includes notification tables and M5 tables `departments`, `invites`, `audit_events`.

@@ -8,13 +8,14 @@ export default async function CalendarPage() {
   const dated = tasks.filter((task) => task.dueAt);
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-1 sm:space-y-2">
+        <h1 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
           Calendar
         </h1>
-        <p className="text-muted-foreground">
-          {dated.length} tasks with due dates across your accessible workspaces.
+        <p className="text-sm text-muted-foreground sm:text-base">
+          {dated.length} task{dated.length === 1 ? "" : "s"} with due dates across your
+          accessible workspaces.
         </p>
       </div>
       <TaskCalendar tasks={tasks} />

@@ -10,7 +10,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentProps } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -48,9 +48,9 @@ function formatClock(totalSeconds: number) {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-function formatIslandDate(date: Date) {
+function formatIslandDate(date: Date, compact = false) {
   return new Intl.DateTimeFormat("en-GB", {
-    weekday: "short",
+    ...(compact ? {} : { weekday: "short" as const }),
     day: "numeric",
     month: "short",
   }).format(date);
@@ -234,12 +234,12 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
   return (
     <div
       className={cn(
-        "hidden min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-full border px-2.5 py-1.5 lg:flex",
+        "flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-full border px-1.5 py-1 sm:px-2.5 sm:py-1.5",
         "border-black/10 bg-[#1c1917] text-white shadow-[0_10px_40px_-24px_rgba(0,0,0,0.35)]",
         "dark:border-white/10 dark:bg-white dark:text-black dark:shadow-[0_10px_40px_-24px_rgba(0,0,0,0.45)]",
         !prefersReducedMotion &&
           "transition-[padding,gap] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        isFocusExpanded && "gap-0 px-2",
+        isFocusExpanded && "gap-0 px-1.5 sm:px-2",
         className,
       )}
       role="region"
@@ -312,7 +312,7 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
             <button
               type="button"
               onClick={resetPomodoro}
-              className="rounded-full p-1 transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
+              className="hidden rounded-full p-1 transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none sm:inline-flex"
               aria-label="Reset pomodoro"
             >
               <RotateCcw className="size-3.5" />
@@ -323,7 +323,7 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
 
       <div
         className={cn(
-          "flex min-w-0 items-center gap-2 overflow-hidden",
+          "flex min-w-0 items-center gap-1 overflow-hidden sm:gap-2",
           !prefersReducedMotion &&
             "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
           isFocusExpanded
@@ -332,13 +332,14 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
         )}
         aria-hidden={isFocusExpanded}
       >
-        <IslandChip className="bg-white/8 text-white/70 dark:bg-black/[0.04] dark:text-black/70">
-          <span className="text-xs font-semibold tabular-nums">
-            {formatIslandDate(now)}
+        <IslandChip className="bg-white/8 px-2 text-white/70 sm:px-2.5 dark:bg-black/[0.04] dark:text-black/70">
+          <span className="text-[10px] font-semibold tabular-nums sm:text-xs">
+            <span className="sm:hidden">{formatIslandDate(now, true)}</span>
+            <span className="hidden sm:inline">{formatIslandDate(now)}</span>
           </span>
         </IslandChip>
 
-        <IslandChip className="gap-2 bg-white/8 dark:bg-black/[0.04]">
+        <IslandChip className="hidden gap-2 bg-white/8 lg:inline-flex dark:bg-black/[0.04]">
           <Avatar className="size-6 ring-2 ring-[#1c1917] dark:ring-white">
             {profile.avatarUrl ? (
               <AvatarImage src={profile.avatarUrl} alt="" />
@@ -400,7 +401,7 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
 
         <IslandChip
           className={cn(
-            "ml-auto gap-1.5",
+            "ml-auto gap-1 px-2 sm:gap-1.5 sm:px-2.5",
             health.tone === "healthy" &&
               "bg-emerald-500/20 text-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-800",
             health.tone === "watch" &&
@@ -408,9 +409,10 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
             health.tone === "risk" &&
               "bg-red-500/20 text-red-300 dark:bg-red-500/15 dark:text-red-800",
           )}
+          aria-label={health.label}
         >
           <Activity className="size-3.5" aria-hidden />
-          <span className="text-xs font-semibold">{health.label}</span>
+          <span className="text-[10px] font-semibold sm:text-xs">{health.label}</span>
         </IslandChip>
       </div>
     </div>
@@ -420,16 +422,15 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
 function IslandChip({
   children,
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+  ...props
+}: ComponentProps<"div">) {
   return (
     <div
       className={cn(
         "inline-flex h-8 shrink-0 items-center rounded-full px-2.5",
         className,
       )}
+      {...props}
     >
       {children}
     </div>

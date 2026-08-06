@@ -1,10 +1,11 @@
 import { PeopleSuite } from "@/components/admin/people-suite";
 import { requireRoles } from "@/lib/auth/guards";
-import { getHrSuiteData } from "@/lib/admin/queries";
 import {
-  listAssignablePeople,
-  listWorkspaces,
-} from "@/lib/tasks/queries";
+  getHrSuiteData,
+  listAssignablePeopleForProfile,
+  listTeamsWithRoster,
+} from "@/lib/admin/queries";
+import { listWorkspaces } from "@/lib/tasks/queries";
 
 export default async function PeopleTasksPage() {
   const profile = await requireRoles(["admin", "hr"]);
@@ -13,11 +14,12 @@ export default async function PeopleTasksPage() {
     profile.roles.includes("hr") ||
     profile.roles.includes("line_manager");
 
-  const [{ hrTasks, employees, invites }, workspaces, people] =
+  const [{ hrTasks, employees, invites }, workspaces, people, roster] =
     await Promise.all([
       getHrSuiteData(),
       listWorkspaces({ includeHr: true }),
-      listAssignablePeople(),
+      listAssignablePeopleForProfile(profile),
+      listTeamsWithRoster(),
     ]);
 
   return (
@@ -31,6 +33,8 @@ export default async function PeopleTasksPage() {
       canManageStatus={
         profile.roles.includes("admin") || profile.roles.includes("hr")
       }
+      teams={roster.teams}
+      memberships={roster.memberships}
     />
   );
 }

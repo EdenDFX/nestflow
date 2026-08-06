@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireActiveProfile } from "@/lib/auth/session";
-import { isAppRole } from "@/lib/auth/types";
+import { isAppRole, type AppRole } from "@/lib/auth/types";
+import { listManagedTeamMemberIds, listUserIdsWithRoles } from "@/lib/admin/queries";
 import { notifyMany } from "@/lib/notifications/notify";
 import { rolesAllow } from "@/lib/security/authz";
 import { createClient } from "@/lib/supabase/server";
@@ -12,10 +14,12 @@ import { recordActivity } from "@/lib/tasks/activity";
 import {
   canTransition,
   isTaskStatus,
+  STATUS_LABELS,
   TASK_PRIORITIES,
   TASK_STATUSES,
   type TaskStatus,
 } from "@/lib/tasks/types";
+import { pgUuid } from "@/lib/validation/ids";
 
 export type ActionResult = {
   ok: boolean;
@@ -24,14 +28,155 @@ export type ActionResult = {
   taskId?: string;
 };
 
+/** Assignees + creator for a task (for watch/status fan-out). */
+async function listTaskParticipantIds(
+  supabase: SupabaseClient,
+  taskId: string,
+): Promise<{ title: string; userIds: string[] } | null> {
+  const { data: task } = await supabase
+    .from("nf_tasks")
+    .select("title, created_by")
+    .eq("id", taskId)
+    .maybeSingle();
+
+  if (!task) {
+    return null;
+  }
+
+  const { data: assignees } = await supabase
+    .from("nf_task_assignees")
+    .select("user_id")
+    .eq("task_id", taskId);
+
+  const userIds = new Set<string>();
+  if (task.created_by) {
+    userIds.add(task.created_by as string);
+  }
+  for (const row of assignees ?? []) {
+    userIds.add(row.user_id as string);
+  }
+
+  return {
+    title: (task.title as string) ?? "Task",
+    userIds: [...userIds],
+  };
+}
+
+/**
+ * In-app status alerts for participants (PRD: in-app includes status changes).
+ * Email/push stay off for this event type via preference gates.
+ */
+async function notifyStatusChange(params: {
+  supabase: SupabaseClient;
+  taskId: string;
+  actorId: string;
+  from: TaskStatus;
+  to: TaskStatus;
+  blockedReason?: string | null;
+}) {
+  const participants = await listTaskParticipantIds(
+    params.supabase,
+    params.taskId,
+  );
+  if (!participants) {
+    return;
+  }
+
+  const recipients = participants.userIds.filter((id) => id !== params.actorId);
+  if (recipients.length === 0) {
+    return;
+  }
+
+  const fromLabel = STATUS_LABELS[params.from];
+  const toLabel = STATUS_LABELS[params.to];
+  const title =
+    params.to === "completed"
+      ? "Task completed"
+      : params.to === "blocked"
+        ? "Task blocked"
+        : params.to === "review"
+          ? "Task ready for review"
+          : "Task status updated";
+
+  const body =
+    params.to === "blocked" && params.blockedReason?.trim()
+      ? `${participants.title} · ${params.blockedReason.trim()}`
+      : `${fromLabel} → ${toLabel} · ${participants.title}`;
+
+  await notifyMany(recipients, {
+    eventType: "task_status_changed",
+    title,
+    body,
+    taskId: params.taskId,
+    href: `/app/tasks/${params.taskId}`,
+    metadata: {
+      from: params.from,
+      to: params.to,
+      actorId: params.actorId,
+    },
+    idempotencyKey: `status:${params.taskId}:${params.from}:${params.to}:${Date.now()}`,
+  });
+}
+
+async function assertAssigneesInScope(
+  profile: { userId: string; roles: AppRole[] },
+  assigneeIds: string[],
+): Promise<ActionResult | null> {
+  if (assigneeIds.length === 0) {
+    return null;
+  }
+
+  // Admins keep full assign scope.
+  if (profile.roles.includes("admin")) {
+    return null;
+  }
+
+  // HR: self, admins, and line managers only (not staff or other HR-only users).
+  if (profile.roles.includes("hr")) {
+    const privilegedIds = await listUserIdsWithRoles([
+      "admin",
+      "line_manager",
+    ]);
+    privilegedIds.add(profile.userId);
+
+    const outside = assigneeIds.filter((id) => !privilegedIds.has(id));
+    if (outside.length > 0) {
+      return {
+        ok: false,
+        code: "FORBIDDEN",
+        error:
+          "HR can only assign tasks to themselves, administrators, or line managers.",
+      };
+    }
+    return null;
+  }
+
+  if (profile.roles.includes("line_manager")) {
+    const memberIds = await listManagedTeamMemberIds(profile.userId, false);
+    const allowed = new Set(memberIds ?? [profile.userId]);
+    allowed.add(profile.userId);
+
+    const outside = assigneeIds.filter((id) => !allowed.has(id));
+    if (outside.length > 0) {
+      return {
+        ok: false,
+        code: "FORBIDDEN",
+        error: "Line managers can only assign people on their managed team.",
+      };
+    }
+  }
+
+  return null;
+}
+
 const createTaskSchema = z.object({
-  workspaceId: z.string().uuid(),
+  workspaceId: pgUuid,
   title: z.string().trim().min(1, "Title is required.").max(200),
   description: z.string().trim().max(5000).optional().default(""),
   status: z.enum(TASK_STATUSES).default("todo"),
   priority: z.enum(TASK_PRIORITIES).default("medium"),
   dueAt: z.string().optional().nullable(),
-  assigneeIds: z.array(z.string().uuid()).default([]),
+  assigneeIds: z.array(pgUuid).default([]),
   blockedReason: z.string().trim().optional().nullable(),
   tags: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
 });
@@ -39,12 +184,12 @@ const createTaskSchema = z.object({
 const updateTaskSchema = createTaskSchema
   .partial()
   .extend({
-    taskId: z.string().uuid(),
+    taskId: pgUuid,
     title: z.string().trim().min(1).max(200).optional(),
   });
 
 const statusSchema = z.object({
-  taskId: z.string().uuid(),
+  taskId: pgUuid,
   status: z.enum(TASK_STATUSES),
   blockedReason: z.string().trim().optional().nullable(),
 });
@@ -96,6 +241,12 @@ export async function createTaskAction(
       error: "Only managers, HR, or admins can assign tasks.",
     };
   }
+
+  const scopeError = await assertAssigneesInScope(
+    profile,
+    parsed.data.assigneeIds,
+  );
+  if (scopeError) return scopeError;
 
   const supabase = await createClient();
   const dueAt =
@@ -214,6 +365,19 @@ export async function updateTaskAction(
   }
 
   const supabase = await createClient();
+
+  let previousStatus: TaskStatus | null = null;
+  if (parsed.data.status !== undefined) {
+    const { data: current } = await supabase
+      .from("nf_tasks")
+      .select("status")
+      .eq("id", parsed.data.taskId)
+      .maybeSingle();
+    if (current && isTaskStatus(current.status as string)) {
+      previousStatus = current.status as TaskStatus;
+    }
+  }
+
   const updates: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };
@@ -266,6 +430,12 @@ export async function updateTaskAction(
       };
     }
 
+    const scopeError = await assertAssigneesInScope(
+      profile,
+      parsed.data.assigneeIds,
+    );
+    if (scopeError) return scopeError;
+
     const { data: existingAssignees } = await supabase
       .from("nf_task_assignees")
       .select("user_id")
@@ -302,6 +472,21 @@ export async function updateTaskAction(
     eventType: "task_updated",
     summary: "Updated task details",
   });
+
+  if (
+    parsed.data.status !== undefined &&
+    previousStatus &&
+    previousStatus !== parsed.data.status
+  ) {
+    await notifyStatusChange({
+      supabase,
+      taskId: parsed.data.taskId,
+      actorId: profile.userId,
+      from: previousStatus,
+      to: parsed.data.status,
+      blockedReason: parsed.data.blockedReason,
+    });
+  }
 
   if (parsed.data.assigneeIds !== undefined) {
     const previous = new Set(previousAssigneeIds);
@@ -401,6 +586,15 @@ export async function changeTaskStatusAction(
     metadata: { from, to },
   });
 
+  await notifyStatusChange({
+    supabase,
+    taskId: parsed.data.taskId,
+    actorId: profile.userId,
+    from,
+    to,
+    blockedReason: parsed.data.blockedReason,
+  });
+
   revalidateTaskPaths(parsed.data.taskId);
   return { ok: true, taskId: parsed.data.taskId };
 }
@@ -408,7 +602,7 @@ export async function changeTaskStatusAction(
 export async function archiveTaskAction(taskId: string): Promise<ActionResult> {
   const profile = await requireActiveProfile();
 
-  if (!z.string().uuid().safeParse(taskId).success) {
+  if (!pgUuid.safeParse(taskId).success) {
     return { ok: false, code: "VALIDATION_ERROR", error: "Invalid task id." };
   }
 

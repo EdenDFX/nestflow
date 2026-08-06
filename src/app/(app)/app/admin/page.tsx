@@ -1,28 +1,17 @@
-import { AdminSuite } from "@/components/admin/admin-suite";
+import { AdminOversight } from "@/components/admin/admin-oversight";
+import { getAdminOversightData } from "@/lib/admin/queries";
 import { requireRoles } from "@/lib/auth/guards";
-import {
-  listAuditEvents,
-  listDepartments,
-  listDirectoryUsers,
-  listInvites,
-} from "@/lib/admin/queries";
 
 export default async function AdminPage() {
   await requireRoles(["admin"]);
-
-  const [users, departments, invites, auditEvents] = await Promise.all([
-    listDirectoryUsers(),
-    listDepartments(),
-    listInvites(),
-    listAuditEvents(150),
-  ]);
+  const { tasks, log, report, users } = await getAdminOversightData();
 
   return (
-    <AdminSuite
+    <AdminOversight
+      tasks={tasks}
+      log={log}
+      report={report}
       users={users}
-      departments={departments}
-      invites={invites}
-      auditEvents={auditEvents}
     />
   );
 }

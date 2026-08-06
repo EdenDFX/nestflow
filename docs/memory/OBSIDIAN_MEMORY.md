@@ -97,11 +97,15 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 - M2 task tables in `nestflow` with public `nf_*` views
 - Default seeded workspace: General
 - M3 collaboration tables: checklist_items, comments, attachments, activity_events (+ `nf_*` views)
-- Attachments require R2 env (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`); UI shows not-configured until set
+- Attachments: R2 EU bucket `nestflow-attachments` with signed URLs; set `R2_*` including `R2_ENDPOINT=https://{account_id}.eu.r2.cloudflarestorage.com`. Supabase stores metadata only (`nestflow.attachments` / `nf_attachments`). Setup: `docs/engineering/R2_SETUP.md`, `pnpm r2:setup`.
 - M4 notifications: in-app + Resend + Web Push; prefs on profile; cron `/api/cron/overdue`
 - Notification delivery needs `RESEND_*`, VAPID keys, `CRON_SECRET`, and `SUPABASE_SERVICE_ROLE_KEY` (for overdue scan)
 - M5 role suites live at `/app/admin`, `/app/team`, `/app/people`
 - Assign `line_manager` / `hr` roles from Admin to unlock those suites (seed currently has admin + staff)
+- Seed teams: Creative (Chide LM), CRM (Kehinde LM), Project (Adira LM)
+- Adira: NestByEden gear Admin unchanged; NestFlow role is `line_manager` only (Project Team)
+- Ecktale (hr@): NestFlow role is `hr` (NestByEden gear Admin may remain separately)
+- Line managers only see/assign people on teams where `is_manager`; HR/Admin assign roster via Admin → Teams
 - HR tasks use workspace kind `hr` (`People & HR`); visibility limited to HR + Admin
 - M6: force RLS, authz tests (`pnpm test`), rate limits, Sentry (set `NEXT_PUBLIC_SENTRY_DSN`), backup notes in `docs/engineering/BACKUP.md`
 - Supabase **Free** accepted for soft launch; Pro upgrade deferred. Use weekly `pg_dump` + keep-warm crons (see BACKUP.md)

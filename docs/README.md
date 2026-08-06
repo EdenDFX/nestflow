@@ -42,6 +42,7 @@ Internal documentation for **NestFlow**, the task-management platform for Nest b
 | [ARCHITECTURE.md](engineering/ARCHITECTURE.md) | Application structure, services, data flows, security boundaries |
 | [API.md](engineering/API.md) | Server Actions, Route Handlers, webhooks, error contracts |
 | [DATABASE.md](engineering/DATABASE.md) | Tables, relationships, indexes, RLS, migrations |
+| [R2_SETUP.md](engineering/R2_SETUP.md) | Cloudflare R2 attachments + Supabase metadata ops |
 | [ROLE_MATRIX.md](engineering/ROLE_MATRIX.md) | Capability matrix by role |
 | [SECURITY_CHECKLIST.md](engineering/SECURITY_CHECKLIST.md) | M6 production readiness checklist |
 | [BACKUP.md](engineering/BACKUP.md) | Backup / restore verification notes |

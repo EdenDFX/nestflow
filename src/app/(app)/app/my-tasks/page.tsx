@@ -1,9 +1,9 @@
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { TaskList } from "@/components/tasks/task-list";
+import { listAssignablePeopleForProfile } from "@/lib/admin/queries";
 import { requireActiveProfile } from "@/lib/auth/session";
 import {
   getTaskCounters,
-  listAssignablePeople,
   listTasks,
   listWorkspaces,
 } from "@/lib/tasks/queries";
@@ -16,10 +16,15 @@ export default async function MyTasksPage() {
     profile.roles.includes("line_manager");
 
   const [tasks, counters, workspaces, people] = await Promise.all([
-    listTasks({ assigneeId: profile.userId }),
-    getTaskCounters(profile.userId),
-    listWorkspaces(),
-    listAssignablePeople(),
+    listTasks({
+      assigneeId: profile.userId,
+      includeCreatedBy: profile.userId,
+    }),
+    getTaskCounters({ userId: profile.userId }),
+    listWorkspaces({
+      includeHr: profile.roles.includes("admin") || profile.roles.includes("hr"),
+    }),
+    listAssignablePeopleForProfile(profile),
   ]);
 
   return (

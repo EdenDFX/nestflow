@@ -24,28 +24,41 @@ import {
   setProfileStatusAction,
   setUserRolesAction,
 } from "@/lib/admin/actions";
+import { TeamRosterPanel } from "@/components/admin/team-roster-panel";
 import { PERMISSION_MATRIX } from "@/lib/admin/types";
 import type {
   AuditEvent,
   Department,
   DirectoryUser,
   Invite,
+  NestFlowTeam,
+  TeamMembershipRow,
 } from "@/lib/admin/types";
 import { APP_ROLES, roleLabel, type AppRole } from "@/lib/auth/types";
 import { cn } from "@/lib/utils";
 
-type AdminTab = "users" | "departments" | "permissions" | "audit" | "invites";
+type AdminTab =
+  | "users"
+  | "teams"
+  | "departments"
+  | "permissions"
+  | "audit"
+  | "invites";
 
 export function AdminSuite({
   users,
   departments,
   invites,
   auditEvents,
+  teams,
+  memberships,
 }: {
   users: DirectoryUser[];
   departments: Department[];
   invites: Invite[];
   auditEvents: AuditEvent[];
+  teams: NestFlowTeam[];
+  memberships: TeamMembershipRow[];
 }) {
   const [tab, setTab] = useState<AdminTab>("users");
   const [query, setQuery] = useState("");
@@ -77,7 +90,7 @@ export function AdminSuite({
           Admin
         </h1>
         <p className="text-muted-foreground">
-          Users, departments, permissions, invites, and audit history.
+          Users, teams, departments, permissions, invites, and audit history.
         </p>
       </div>
 
@@ -85,6 +98,7 @@ export function AdminSuite({
         {(
           [
             ["users", "Users"],
+            ["teams", "Teams"],
             ["invites", "Invites"],
             ["departments", "Departments"],
             ["permissions", "Permissions"],
@@ -116,6 +130,13 @@ export function AdminSuite({
 
       {tab === "users" ? (
         <UsersPanel users={filteredUsers} departments={departments} />
+      ) : null}
+      {tab === "teams" ? (
+        <TeamRosterPanel
+          teams={teams}
+          memberships={memberships}
+          users={users}
+        />
       ) : null}
       {tab === "invites" ? <InvitesPanel invites={invites} /> : null}
       {tab === "departments" ? (

@@ -1,10 +1,10 @@
 import { TeamSuite } from "@/components/admin/team-suite";
 import { requireRoles } from "@/lib/auth/guards";
-import { getTeamSuiteData } from "@/lib/admin/queries";
 import {
-  listAssignablePeople,
-  listWorkspaces,
-} from "@/lib/tasks/queries";
+  getTeamSuiteData,
+  listAssignablePeopleForProfile,
+} from "@/lib/admin/queries";
+import { listWorkspaces } from "@/lib/tasks/queries";
 
 export default async function TeamPage() {
   const profile = await requireRoles(["admin", "line_manager"]);
@@ -13,14 +13,15 @@ export default async function TeamPage() {
     profile.roles.includes("line_manager") ||
     profile.roles.includes("hr");
 
-  const [{ tasks, blocked, workload }, workspaces, people] = await Promise.all([
-    getTeamSuiteData(profile),
-    listWorkspaces({
-      includeHr:
-        profile.roles.includes("admin") || profile.roles.includes("hr"),
-    }),
-    listAssignablePeople(),
-  ]);
+  const [{ tasks, blocked, workload, managedTeams, isOrgWide }, workspaces, people] =
+    await Promise.all([
+      getTeamSuiteData(profile),
+      listWorkspaces({
+        includeHr:
+          profile.roles.includes("admin") || profile.roles.includes("hr"),
+      }),
+      listAssignablePeopleForProfile(profile),
+    ]);
 
   return (
     <TeamSuite
@@ -31,6 +32,8 @@ export default async function TeamPage() {
       people={people}
       canAssign={canAssign}
       defaultAssigneeId={profile.userId}
+      managedTeams={managedTeams}
+      isOrgWide={isOrgWide}
     />
   );
 }

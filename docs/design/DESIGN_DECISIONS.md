@@ -201,11 +201,12 @@ Authenticated NestFlow needs operational workspace chrome that matches the orang
 
 ### Decision
 
-- App shell uses a dark stage (`#0a0908`) with a slim icon rail, top “Today” strip, and avatar/notifications
+- App shell uses a pure black stage (`#000000`) with a slim icon rail, top workspace strip, and avatar/notifications
 - Dashboard maps the reference layout to NestFlow: Workspace header, New Task, Open / In progress / Blocked stats, Focus cards, Today’s Tasks with NestFlow statuses
-- Preview task cards are visual scaffolding until M2 task data
+- Focus and recent-task cards use a stepped blob surface (`SteppedCard`): large radii, top-right notch for circular actions, primary / ink tones with dark outline buttons
+- Live task data fills those cards (M2+); older static preview scaffolding is retired
 - Shell follows document light/dark theme via CSS tokens (no forced local `.dark` lock)
-- Header `WorkspaceIsland` is a dynamic status strip: pomodoro timer, live date, assignee avatar with You tag, team preview, project (department), and time-of-day health
+- Header `WorkspaceIsland` is a dynamic status strip: pomodoro timer, live date, assignee avatar with You tag, team preview, project (department), and time-of-day health. Narrow viewports show a compact set (pomodoro, short date, health); You / team / project chips appear from `lg` / `xl` / `2xl`.
 
 ### Consequences
 

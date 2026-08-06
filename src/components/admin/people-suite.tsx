@@ -14,12 +14,18 @@ import {
   createInviteAction,
   setProfileStatusAction,
 } from "@/lib/admin/actions";
-import type { DirectoryUser, Invite } from "@/lib/admin/types";
+import { TeamRosterPanel } from "@/components/admin/team-roster-panel";
+import type {
+  DirectoryUser,
+  Invite,
+  NestFlowTeam,
+  TeamMembershipRow,
+} from "@/lib/admin/types";
 import type { NestFlowTask, NestFlowWorkspace } from "@/lib/tasks/types";
 import type { TaskAssignee } from "@/lib/tasks/types";
 import { cn } from "@/lib/utils";
 
-type PeopleTab = "queues" | "status" | "invites";
+type PeopleTab = "queues" | "status" | "invites" | "teams";
 
 export function PeopleSuite({
   hrTasks,
@@ -29,6 +35,8 @@ export function PeopleSuite({
   people,
   canAssign,
   canManageStatus,
+  teams = [],
+  memberships = [],
 }: {
   hrTasks: NestFlowTask[];
   employees: DirectoryUser[];
@@ -37,6 +45,8 @@ export function PeopleSuite({
   people: TaskAssignee[];
   canAssign: boolean;
   canManageStatus: boolean;
+  teams?: NestFlowTeam[];
+  memberships?: TeamMembershipRow[];
 }) {
   const [tab, setTab] = useState<PeopleTab>("queues");
   const [query, setQuery] = useState("");
@@ -55,6 +65,15 @@ export function PeopleSuite({
     );
   }, [employees, query]);
 
+  const tabs = (
+    [
+      ["queues", `Queues (${hrTasks.length})`],
+      ["status", "Employee status"],
+      ["teams", "Teams"],
+      ["invites", `Invites (${invites.filter((i) => i.status === "pending").length})`],
+    ] as const
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -63,7 +82,7 @@ export function PeopleSuite({
             People tasks
           </h1>
           <p className="text-muted-foreground">
-            HR queues, employee status, and invite coordination.
+            HR queues, team rosters, employee status, and invite coordination.
           </p>
         </div>
         {hrWorkspaceIds.size > 0 ? (
@@ -76,13 +95,7 @@ export function PeopleSuite({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["queues", `Queues (${hrTasks.length})`],
-            ["status", "Employee status"],
-            ["invites", `Invites (${invites.filter((i) => i.status === "pending").length})`],
-          ] as const
-        ).map(([id, label]) => (
+        {tabs.map(([id, label]) => (
           <Button
             key={id}
             type="button"
@@ -162,6 +175,14 @@ export function PeopleSuite({
             </table>
           </div>
         </div>
+      ) : null}
+
+      {tab === "teams" ? (
+        <TeamRosterPanel
+          teams={teams}
+          memberships={memberships}
+          users={employees}
+        />
       ) : null}
 
       {tab === "invites" ? <HrInvitesPanel invites={invites} /> : null}

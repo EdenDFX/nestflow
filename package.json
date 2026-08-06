@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "r2:setup": "node --env-file=.env.local scripts/r2-setup.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1102.0",
@@ -26,6 +27,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "lucide-react": "^1.28.0",
+    "motion": "^13.0.0",
     "next": "16.3.0",
     "radix-ui": "^1.6.7",
     "react": "19.2.8",

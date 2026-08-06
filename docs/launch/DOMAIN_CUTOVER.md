@@ -21,7 +21,7 @@ Parent domain `nestbyeden.com` is already purchased (Name.com). Subdomain does n
 | Optional | Notes |
 | --- | --- |
 | `RESEND_*` | Email notifications |
-| `R2_*` | Attachments |
+| `R2_*` | Attachments (see `docs/engineering/R2_SETUP.md`; enable R2 in Cloudflare first) |
 | `NEXT_PUBLIC_VAPID_*` / `VAPID_*` | Web Push |
 | `NEXT_PUBLIC_SENTRY_DSN` | Error monitoring |
 

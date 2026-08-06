@@ -45,15 +45,91 @@ export type AuditEvent = {
   createdAt: string;
 };
 
+/** Org-wide task row for administrator oversight. */
+export type OversightTaskRow = {
+  id: string;
+  title: string;
+  status: string;
+  priority: string;
+  workspaceName: string;
+  workspaceKind: "general" | "hr";
+  createdById: string;
+  createdByName: string | null;
+  createdByNestId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  dueAt: string | null;
+  completedAt: string | null;
+  assigneeNames: string[];
+  lastUpdateSummary: string | null;
+  lastUpdateAt: string | null;
+  lastUpdateBy: string | null;
+};
+
+export type OversightLogEntry = {
+  id: string;
+  source: "task" | "admin";
+  at: string;
+  actorName: string | null;
+  summary: string;
+  detail: string;
+  taskId: string | null;
+  taskTitle: string | null;
+};
+
+export type AdminReportSnapshot = {
+  totalTasks: number;
+  openTasks: number;
+  overdue: number;
+  blocked: number;
+  unassignedOpen: number;
+  completedLast7Days: number;
+  createdLast7Days: number;
+  updatedLast7Days: number;
+  byStatus: { status: string; label: string; count: number }[];
+  byWorkspace: {
+    name: string;
+    open: number;
+    total: number;
+    overdue: number;
+  }[];
+  topCreators: { name: string; count: number }[];
+};
+
 export type WorkloadRow = {
   userId: string;
   fullName: string | null;
   nestId: string | null;
   email: string | null;
+  department: string | null;
   openCount: number;
   blockedCount: number;
   overdueCount: number;
   completedCount: number;
+  isManager?: boolean;
+  focusTaskId?: string | null;
+  focusTaskTitle?: string | null;
+  focusTaskStatus?: string | null;
+};
+
+export type NestFlowTeam = {
+  id: string;
+  name: string;
+  slug: string;
+  isArchived: boolean;
+  memberCount: number;
+  managerIds: string[];
+};
+
+export type TeamMembershipRow = {
+  id: string;
+  teamId: string;
+  teamName: string;
+  userId: string;
+  fullName: string | null;
+  nestId: string | null;
+  email: string | null;
+  isManager: boolean;
 };
 
 export type PermissionRow = {

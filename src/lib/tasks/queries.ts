@@ -163,7 +163,10 @@ export async function listAssignablePeople(): Promise<TaskAssignee[]> {
 
 export async function listTasks(options?: {
   workspaceId?: string;
+  /** When set, keep only tasks where this user is an assignee. Prefer omitting for RLS-scoped “my work” lists. */
   assigneeId?: string;
+  /** When true with assigneeId false path, also include tasks the user created (collaboration scope). */
+  includeCreatedBy?: string;
   status?: TaskStatus | TaskStatus[];
   includeArchived?: boolean;
 }): Promise<NestFlowTask[]> {
@@ -194,10 +197,18 @@ export async function listTasks(options?: {
 
   let tasks = await hydrateTasks((data ?? []) as TaskRow[]);
 
-  if (options?.assigneeId) {
-    tasks = tasks.filter((task) =>
-      task.assignees.some((assignee) => assignee.userId === options.assigneeId),
-    );
+  if (options?.assigneeId || options?.includeCreatedBy) {
+    const assigneeId = options.assigneeId;
+    const creatorId = options.includeCreatedBy;
+    tasks = tasks.filter((task) => {
+      const isAssignee = assigneeId
+        ? task.assignees.some((assignee) => assignee.userId === assigneeId)
+        : false;
+      const isCreator = creatorId ? task.createdBy === creatorId : false;
+      if (assigneeId && creatorId) return isAssignee || isCreator;
+      if (assigneeId) return isAssignee;
+      return isCreator;
+    });
   }
 
   return tasks;
@@ -220,9 +231,23 @@ export async function getTaskById(taskId: string): Promise<NestFlowTask | null> 
   return task ?? null;
 }
 
-export async function getTaskCounters(userId?: string): Promise<TaskCounters> {
+/**
+ * Counters for tasks the current session can already see (RLS).
+ * Optional userId restricts further to assignee and/or creator participation.
+ */
+export async function getTaskCounters(options?: {
+  userId?: string;
+  /** Count only participation (assignee or creator). Default true when userId set. */
+  participantOnly?: boolean;
+}): Promise<TaskCounters> {
+  const userId = options?.userId;
+  const participantOnly =
+    options?.participantOnly ?? Boolean(userId);
+
   const tasks = await listTasks(
-    userId ? { assigneeId: userId } : undefined,
+    userId && participantOnly
+      ? { assigneeId: userId, includeCreatedBy: userId }
+      : undefined,
   );
   const now = Date.now();
 

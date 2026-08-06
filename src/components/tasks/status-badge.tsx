@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 
 const statusClass: Record<TaskStatus, string> = {
   backlog: "bg-muted text-muted-foreground",
-  todo: "bg-secondary text-secondary-foreground",
+  todo: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
   in_progress: "bg-primary/15 text-primary",
   blocked: "bg-red-500/15 text-red-600 dark:text-red-300",
-  review: "bg-sky-500/15 text-sky-700 dark:text-sky-300",
-  completed: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  review: "bg-amber-400/20 text-amber-800 dark:text-amber-200",
+  completed: "bg-muted text-muted-foreground opacity-80",
 };
 
 const priorityClass: Record<TaskPriority, string> = {

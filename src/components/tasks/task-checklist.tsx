@@ -37,6 +37,7 @@ export function TaskChecklist({
         return;
       }
       setTitle("");
+      toast.success("Checklist item added.");
       router.refresh();
     });
   }
@@ -106,6 +107,7 @@ export function TaskChecklist({
                     toast.error(result.error ?? "Could not remove item.");
                     return;
                   }
+                  toast.success("Checklist item removed.");
                   router.refresh();
                 })
               }

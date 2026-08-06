@@ -13,6 +13,7 @@ import {
 } from "@/lib/security/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { pgUuid } from "@/lib/validation/ids";
 
 export type AdminActionResult = {
   ok: boolean;
@@ -340,6 +341,120 @@ export async function revokeInviteAction(
     entityType: "invite",
     entityId: parsed.data,
     summary: "Revoked invite",
+  });
+
+  revalidateAdminPaths();
+  return { ok: true };
+}
+
+export async function setTeamMembershipAction(input: {
+  teamId: string;
+  userId: string;
+  isManager?: boolean;
+  remove?: boolean;
+}): Promise<AdminActionResult> {
+  const profile = await requireRoles(["admin", "hr"]);
+  assertCapability(profile.roles, "invite_users");
+
+  const parsed = z
+    .object({
+      // Seed teams use placeholder hex ids that fail RFC UUID but are valid Postgres uuid.
+      teamId: pgUuid,
+      userId: pgUuid,
+      isManager: z.boolean().optional().default(false),
+      remove: z.boolean().optional().default(false),
+    })
+    .safeParse(input);
+
+  if (!parsed.success) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      error: "Invalid team assignment.",
+    };
+  }
+
+  const supabase = await createClient();
+
+  if (parsed.data.remove) {
+    const { error } = await supabase
+      .from("nf_team_memberships")
+      .delete()
+      .eq("team_id", parsed.data.teamId)
+      .eq("user_id", parsed.data.userId);
+
+    if (error) {
+      return { ok: false, code: "FORBIDDEN", error: error.message };
+    }
+
+    await recordAuditLocal({
+      action: "team_member_removed",
+      entityType: "team",
+      entityId: parsed.data.teamId,
+      summary: `Removed member from team`,
+      metadata: { userId: parsed.data.userId },
+    });
+
+    revalidateAdminPaths();
+    return { ok: true };
+  }
+
+  const { error } = await supabase.from("nf_team_memberships").upsert(
+    {
+      team_id: parsed.data.teamId,
+      user_id: parsed.data.userId,
+      is_manager: parsed.data.isManager,
+    },
+    { onConflict: "team_id,user_id" },
+  );
+
+  if (error) {
+    return { ok: false, code: "FORBIDDEN", error: error.message };
+  }
+
+  // Functional team assignment replaces General. People should not keep dual General membership.
+  const { data: targetTeam } = await supabase
+    .from("nf_teams")
+    .select("id, slug, name")
+    .eq("id", parsed.data.teamId)
+    .maybeSingle();
+
+  const targetIsGeneral =
+    targetTeam?.slug === "general" ||
+    targetTeam?.name?.toLowerCase() === "general";
+
+  if (targetTeam && !targetIsGeneral) {
+    const { data: generalTeams } = await supabase
+      .from("nf_teams")
+      .select("id")
+      .or("slug.eq.general,name.eq.General");
+
+    for (const general of generalTeams ?? []) {
+      if (general.id === parsed.data.teamId) continue;
+      const { error: leaveGeneralError } = await supabase
+        .from("nf_team_memberships")
+        .delete()
+        .eq("team_id", general.id)
+        .eq("user_id", parsed.data.userId);
+
+      if (leaveGeneralError) {
+        console.error("leave general after team assign failed", leaveGeneralError);
+      }
+    }
+  }
+
+  await recordAuditLocal({
+    action: "team_member_assigned",
+    entityType: "team",
+    entityId: parsed.data.teamId,
+    summary: parsed.data.isManager
+      ? "Assigned line manager to team"
+      : "Assigned team member",
+    metadata: {
+      userId: parsed.data.userId,
+      isManager: parsed.data.isManager,
+      leftGeneral: Boolean(targetTeam && !targetIsGeneral),
+    },
   });
 
   revalidateAdminPaths();
