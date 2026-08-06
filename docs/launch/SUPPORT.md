@@ -42,7 +42,7 @@ Update the concrete chat channel name here once chosen: ________
 
 ## Free-tier note
 
-If the Supabase project paused, restore it from the Supabase dashboard. Production hourly cron (`/api/cron/overdue`) and health checks reduce pause risk by generating traffic.
+If the Supabase project paused, restore it from the Supabase dashboard. Production daily cron (`/api/cron/overdue`) and health checks reduce pause risk by generating traffic. Hobby Vercel allows at most one run per day per cron.
 
 ## Escalation contacts
 

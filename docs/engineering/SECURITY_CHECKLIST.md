@@ -56,4 +56,4 @@ Restore drill date: ________  Operator: ________
 - [x] Service role / R2 / Resend / VAPID keys never exposed to the browser
 - [ ] Production env vars verified in Vercel (no placeholders)
 - [ ] `NEXT_PUBLIC_APP_URL=https://tasks.nestbyeden.com`
-- [ ] Hourly cron configured so Free project stays warm
+- [ ] Daily cron configured so Free project stays warm (Hobby allows once per day)

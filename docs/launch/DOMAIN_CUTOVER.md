@@ -25,7 +25,7 @@ Parent domain `nestbyeden.com` is already purchased (Name.com). Subdomain does n
 | `NEXT_PUBLIC_VAPID_*` / `VAPID_*` | Web Push |
 | `NEXT_PUBLIC_SENTRY_DSN` | Error monitoring |
 
-4. Confirm `vercel.json` crons are active (hourly overdue scan also helps keep Free Supabase warm).
+4. Confirm `vercel.json` crons are active (daily overdue scan + health check also help keep Free Supabase warm on Hobby).
 
 ## 2. DNS (Name.com)
 

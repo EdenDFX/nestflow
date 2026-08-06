@@ -25,7 +25,7 @@ NestFlow runs on the **shared NestByEden Supabase Free** project for the foresee
 | Constraint | NestFlow response |
 | --- | --- |
 | No automated PITR / daily platform backups | Weekly (or pre-migration) `pg_dump` of `nestflow` |
-| Project may pause after ~7 days of inactivity | Keep production traffic or hourly cron (`/api/cron/overdue` + `/api/health`) so the project stays warm |
+| Project may pause after ~7 days of inactivity | Keep production traffic or daily crons (`/api/cron/overdue` + `/api/health`; Hobby limit) so the project stays warm |
 | Soft resource limits | ~20 internal users is within Free limits; watch DB size and Auth MAU |
 | Shared project with gear system | Never drop shared `public.profiles` / Auth users; NestFlow stays in `nestflow` schema |
 
