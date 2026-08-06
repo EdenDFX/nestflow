@@ -1,4 +1,4 @@
 allowBuilds:
-  '@sentry/cli': set this to true or false
+  '@sentry/cli': false
   sharp: false
   unrs-resolver: false
