@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Product | NestFlow |
-| Status | Draft for implementation planning |
-| Version | 0.1.0 |
-| Last updated | 2026-08-05 |
+| Status | Soft launch 1.0.0 shipped; PRD surface close-out (M7.1) open |
+| Version | 0.1.1 |
+| Last updated | 2026-08-06 |
 | Planned URL | `tasks.nestbyeden.com` |
 | Related gear system | Nest by Eden gear management (`nestbyeden`) |
 
@@ -223,16 +223,20 @@ Users can configure channel preferences where operationally allowed.
 
 ## 10. Out of scope for later versions
 
-Tracked in [ROADMAP.md](ROADMAP.md):
+Tracked in [ROADMAP.md](ROADMAP.md) as **M8+** and [TASKS.md](TASKS.md) as T-080–T-087:
 
-- Recurring tasks
-- Approvals
-- Task dependencies graph
-- Time tracking
-- Performance reports
-- Gear-system deep links
-- Passkeys / MFA
-- Advanced automation rules
+| Enhancement | Task | Notes |
+| --- | --- | --- |
+| Recurring tasks | T-080 | Schedule-generated instances |
+| Approvals | T-081 | Approve / reject workflow |
+| Task dependencies graph | T-082 | Blocked-by rules |
+| Time tracking | T-083 | Optional logs and totals |
+| Performance / delivery reports | T-084 | Extend Admin + team performance surfaces |
+| Gear-system deep links | T-085 | External references only |
+| Advanced automation + templates | T-086 | Includes HR template libraries (v1.1) |
+| Passkeys / MFA | T-087 | Optional stronger auth |
+
+PRD §5 surfaces still closing under M7.1 (merge, do not replace): Admin org/settings/health, manager bulk reassign, Staff Mentions / quick update, global search. See TASKS T-070–T-079.
 
 ## 11. Open questions
 
@@ -247,3 +251,4 @@ Tracked in [ROADMAP.md](ROADMAP.md):
 | Version | Date | Notes |
 | --- | --- | --- |
 | 0.1.0 | 2026-08-05 | Initial PRD from planning sessions |
+| 0.1.1 | 2026-08-06 | Status after 1.0.0 soft launch; M7.1 merge plan + M8 task IDs |

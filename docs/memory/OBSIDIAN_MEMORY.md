@@ -6,7 +6,7 @@ Stable project memory for AI agents and future sessions. Store only approved, du
 
 When this file disagrees with an ADR or PRD, the ADR/PRD wins. Update this file after decisions are accepted.
 
-Last reviewed: 2026-08-05
+Last reviewed: 2026-08-06
 
 ## Product
 
@@ -112,6 +112,15 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 - M7 launch pack: `docs/launch/` (internal guide, support, domain cutover); CHANGELOG `1.0.0`; `/api/health`
 - Seed verified: 20 profiles, departments Account/Admin-Projects/Creative GFX/HR, workspaces General + People & HR
 - Remaining ops for go-live: Vercel env + DNS CNAME `tasks` → Vercel, Auth redirect URLs (DOMAIN_CUTOVER.md)
+- M7.1 PRD surface close-out (merge only; do not delete suites): T-070–T-079 in `docs/product/TASKS.md`
+- `AdminOversight` is live `/app/admin`; `AdminSuite` still exists and must be re-wired, not deleted
+- Manager reassign works in `updateTaskAction`; task detail UI still incomplete for assignee picker / bulk
+- Global search, Staff Mentions surface, Admin health/templates/org settings remain open
+- M8+ shipped (except passkeys/MFA T-087): recurring, approvals, dependencies, time tracking, extended reports, gear links, templates + automation
+- M8 tables: task_dependencies, time_entries, task_templates, automation_rules (+ task columns for recurrence/approval/gear)
+- Optional `NEXT_PUBLIC_GEAR_APP_URL` for gear deep links
+- Templates/automation UI: People suite → Templates & automation tab
+- Task detail M8 panel: recurrence, deps, time, approval, gear
 
 ## Reading pointers
 

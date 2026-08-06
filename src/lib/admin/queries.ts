@@ -12,6 +12,7 @@ import type {
   WorkloadRow,
 } from "@/lib/admin/types";
 import { createClient } from "@/lib/supabase/server";
+import { getDeliveryReportExtras, sumTimeMinutesByUser } from "@/lib/tasks/m8-queries";
 import type { NestFlowTask, TaskAssignee } from "@/lib/tasks/types";
 import { STATUS_LABELS, type TaskStatus } from "@/lib/tasks/types";
 import { listAssignablePeople, listTasks } from "@/lib/tasks/queries";
@@ -418,6 +419,9 @@ export async function getTeamSuiteData(profile: {
   }
 
   const now = Date.now();
+  const minutesByUser = await sumTimeMinutesByUser(
+    scopedPeople.map((person) => person.userId),
+  );
   const workload: WorkloadRow[] = scopedPeople.map((person) => {
     const theirs = tasks.filter((task) =>
       task.assignees.some((assignee) => assignee.userId === person.userId),
@@ -444,6 +448,7 @@ export async function getTeamSuiteData(profile: {
       ).length,
       completedCount: theirs.filter((task) => task.status === "completed")
         .length,
+      minutesLogged: minutesByUser.get(person.userId) ?? 0,
       isManager: managerIdSet.has(person.userId),
       focusTaskId: focusTask?.id ?? null,
       focusTaskTitle: focusTask?.title ?? null,
@@ -742,6 +747,8 @@ export async function getAdminOversightData(): Promise<{
     .sort((a, b) => b.count - a.count)
     .slice(0, 6);
 
+  const delivery = await getDeliveryReportExtras(tasks);
+
   const report: AdminReportSnapshot = {
     totalTasks: tasks.length,
     openTasks: openTasks.length,
@@ -765,6 +772,11 @@ export async function getAdminOversightData(): Promise<{
     byStatus,
     byWorkspace: [...byWorkspaceMap.values()].sort((a, b) => b.open - a.open),
     topCreators,
+    pendingApprovals: delivery.pendingApprovals,
+    recurringOpen: delivery.recurringOpen,
+    totalMinutesLogged: delivery.totalMinutesLogged,
+    approvedCompleted: delivery.approvedCompleted,
+    completionRate30d: delivery.completionRate30d,
   };
 
   return { tasks: oversightTasks, log, report, users };

@@ -3,8 +3,8 @@
 | Field | Value |
 | --- | --- |
 | Product | NestFlow |
-| Status | Active planning |
-| Last updated | 2026-08-05 |
+| Status | Soft launch pack shipped; PRD surface close-out + M8+ backlog open |
+| Last updated | 2026-08-06 |
 
 ## Release philosophy
 
@@ -116,18 +116,41 @@ M0 Foundations → M1 Auth & shell → M2 Tasks core → M3 Collaboration
 
 **Exit criteria:** Employees actively creating and completing tasks in production (after DNS cutover).
 
+## M7.1 — PRD surface close-out (merge existing work)
+
+**Goal:** Close PRD §5 gaps without deleting role suite work shipped in M5–M7.
+
+**Principle:** Extend and re-wire. Never drop `AdminOversight`, `AdminSuite`, team/people suites, or task collaboration modules.
+
+| Area | Current state | Merge plan |
+| --- | --- | --- |
+| Admin management | `AdminSuite` built; `/app/admin` shows `AdminOversight` only | Tab-compose both under Overview (T-070) |
+| Admin org / branding | Design tokens only | Lightweight org settings panel (T-071) |
+| Admin notification templates | Shared Resend HTML + prefs | Read-only Admin overview of event → channel (T-072) |
+| Admin system health | `/api/health` only | Admin UI on top of health probe + env readiness (T-073) |
+| Manager assign | Create assign + server `assigneeIds`; detail UI incomplete | Detail assignee picker + bulk reassign on team views (T-074) |
+| HR status | Activate/deactivate + queues + invites live | Deactivate prompts for open work / reassignment (T-075) |
+| HR templates | Not started | Defer to M8 T-086 (PRD v1.1) |
+| Staff mentions | Notification events only | Dedicated Mentions surface reusing notifications (T-077) |
+| Staff quick update | Full task detail | Compact actions from My Tasks (T-078) |
+| Global search | Local filters only | App-wide command / page with RLS (T-079 / T-035) |
+
+**Exit criteria:** PRD §5 surfaces for Admin, Manager, HR, and Staff are usable or explicitly deferred with task IDs; no existing suite code removed.
+
 ## M8+ — Post-launch enhancements
 
-Prioritised after launch feedback:
+| Priority | Enhancement | Task | Status | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | Recurring tasks | T-080 | done | Rule on task; spawn on complete |
+| 2 | Approvals | T-081 | done | Request / approve / reject |
+| 3 | Task dependencies | T-082 | done | Blocks complete while open deps remain |
+| 4 | Time tracking | T-083 | done | Minutes on task + report rollups |
+| 5 | Performance / delivery reports | T-084 | done | Admin Reports + team performance grids extended |
+| 6 | Gear-system deep links | T-085 | done | gear_ref / gear_url + optional base URL |
+| 7 | Advanced automation + templates | T-086 | done | People → Templates & automation |
+| 8 | Passkeys / MFA | T-087 | open | Stronger auth after password baseline |
 
-1. Recurring tasks
-2. Approvals
-3. Task dependencies
-4. Time tracking
-5. Performance / delivery reports
-6. Gear-system task links
-7. Passkeys / MFA
-8. Advanced automation and templates
+M8 does not include deep gear inventory, public signup, native apps, or full HRIS (PRD non-goals).
 
 ## Dependencies
 

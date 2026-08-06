@@ -94,6 +94,12 @@ export type AdminReportSnapshot = {
     overdue: number;
   }[];
   topCreators: { name: string; count: number }[];
+  /** M8 delivery extras */
+  pendingApprovals: number;
+  recurringOpen: number;
+  totalMinutesLogged: number;
+  approvedCompleted: number;
+  completionRate30d: number | null;
 };
 
 export type WorkloadRow = {
@@ -106,6 +112,7 @@ export type WorkloadRow = {
   blockedCount: number;
   overdueCount: number;
   completedCount: number;
+  minutesLogged: number;
   isManager?: boolean;
   focusTaskId?: string | null;
   focusTaskTitle?: string | null;

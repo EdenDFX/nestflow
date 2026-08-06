@@ -164,7 +164,7 @@ function PerformanceCard({
         </p>
       </div>
 
-      <dl className="grid grid-cols-3 gap-2 text-center text-xs">
+      <dl className="grid grid-cols-4 gap-2 text-center text-xs">
         <div className="rounded-lg bg-muted/50 px-2 py-2">
           <dt className="text-muted-foreground">Blocked</dt>
           <dd className="mt-0.5 tabular-nums font-semibold">
@@ -181,6 +181,14 @@ function PerformanceCard({
           <dt className="text-muted-foreground">Done</dt>
           <dd className="mt-0.5 tabular-nums font-semibold">
             {row.completedCount}
+          </dd>
+        </div>
+        <div className="rounded-lg bg-muted/50 px-2 py-2">
+          <dt className="text-muted-foreground">Time</dt>
+          <dd className="mt-0.5 tabular-nums font-semibold">
+            {row.minutesLogged >= 60
+              ? `${Math.round((row.minutesLogged / 60) * 10) / 10}h`
+              : `${row.minutesLogged}m`}
           </dd>
         </div>
       </dl>

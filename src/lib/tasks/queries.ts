@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { mapM8TaskFields } from "@/lib/tasks/m8-queries";
 import {
   isTaskPriority,
   isTaskStatus,
@@ -24,6 +25,18 @@ type TaskRow = {
   archived_at: string | null;
   created_at: string;
   updated_at: string;
+  recurrence_rule?: string | null;
+  recurrence_interval?: number | null;
+  recurrence_ends_at?: string | null;
+  recurrence_parent_id?: string | null;
+  approval_status?: string | null;
+  approval_note?: string | null;
+  approval_requested_by?: string | null;
+  approval_requested_at?: string | null;
+  approval_decided_by?: string | null;
+  approval_decided_at?: string | null;
+  gear_ref?: string | null;
+  gear_url?: string | null;
 };
 
 type AssigneeRow = {
@@ -63,6 +76,7 @@ function mapTask(
     updatedAt: row.updated_at,
     assignees,
     tags,
+    ...mapM8TaskFields(row as unknown as Record<string, unknown>),
   };
 }
 
@@ -174,7 +188,7 @@ export async function listTasks(options?: {
   let query = supabase
     .from("nf_tasks")
     .select(
-      "id, workspace_id, title, description, status, priority, due_at, blocked_reason, created_by, completed_at, archived_at, created_at, updated_at",
+      "id, workspace_id, title, description, status, priority, due_at, blocked_reason, created_by, completed_at, archived_at, created_at, updated_at, recurrence_rule, recurrence_interval, recurrence_ends_at, recurrence_parent_id, approval_status, approval_note, approval_requested_by, approval_requested_at, approval_decided_by, approval_decided_at, gear_ref, gear_url",
     )
     .order("updated_at", { ascending: false });
 
@@ -219,7 +233,7 @@ export async function getTaskById(taskId: string): Promise<NestFlowTask | null> 
   const { data, error } = await supabase
     .from("nf_tasks")
     .select(
-      "id, workspace_id, title, description, status, priority, due_at, blocked_reason, created_by, completed_at, archived_at, created_at, updated_at",
+      "id, workspace_id, title, description, status, priority, due_at, blocked_reason, created_by, completed_at, archived_at, created_at, updated_at, recurrence_rule, recurrence_interval, recurrence_ends_at, recurrence_parent_id, approval_status, approval_note, approval_requested_by, approval_requested_at, approval_decided_by, approval_decided_at, gear_ref, gear_url",
     )
     .eq("id", taskId)
     .maybeSingle();

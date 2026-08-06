@@ -9,7 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- Nothing yet
+- M8 task enhancements: recurring rules (spawn next on complete), approvals, dependencies, time tracking, gear deep links
+- Admin performance/delivery report extras (pending approvals, recurring open, hours logged, 30-day completion rate)
+- Team performance grid shows logged time per person
+- HR People suite: Templates & automation (task templates + simple automation rules)
 
 ### Changed
 

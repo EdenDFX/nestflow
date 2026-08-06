@@ -8,6 +8,7 @@ import { TaskActivity } from "@/components/tasks/task-activity";
 import { TaskAttachments } from "@/components/tasks/task-attachments";
 import { TaskChecklist } from "@/components/tasks/task-checklist";
 import { TaskComments } from "@/components/tasks/task-comments";
+import { TaskM8Panel } from "@/components/tasks/task-m8-panel";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ import {
   updateTaskAction,
 } from "@/lib/tasks/actions";
 import type { TaskCollaboration } from "@/lib/tasks/collaboration-types";
+import type { TaskM8Extras } from "@/lib/tasks/m8-types";
 import {
   PRIORITY_LABELS,
   STATUS_LABELS,
@@ -40,12 +42,16 @@ import {
 export function TaskDetail({
   task,
   canAssign,
+  canDecideApproval,
   collaboration,
+  m8,
   r2Configured,
 }: {
   task: NestFlowTask;
   canAssign: boolean;
+  canDecideApproval: boolean;
   collaboration: TaskCollaboration;
+  m8: TaskM8Extras;
   r2Configured: boolean;
 }) {
   const router = useRouter();
@@ -227,6 +233,11 @@ export function TaskDetail({
 
         <TaskChecklist taskId={task.id} items={collaboration.checklist} />
         <TaskComments taskId={task.id} comments={collaboration.comments} />
+        <TaskM8Panel
+          task={task}
+          extras={m8}
+          canDecideApproval={canDecideApproval}
+        />
       </div>
 
       <aside className="space-y-8 lg:sticky lg:top-20 lg:self-start">

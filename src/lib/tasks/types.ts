@@ -36,6 +36,19 @@ export type NestFlowTask = {
   updatedAt: string;
   assignees: TaskAssignee[];
   tags: string[];
+  /** M8 fields (nullable defaults when column absent from legacy rows). */
+  recurrenceRule: "daily" | "weekly" | "monthly" | null;
+  recurrenceInterval: number;
+  recurrenceEndsAt: string | null;
+  recurrenceParentId: string | null;
+  approvalStatus: "none" | "pending" | "approved" | "rejected";
+  approvalNote: string | null;
+  approvalRequestedBy: string | null;
+  approvalRequestedAt: string | null;
+  approvalDecidedBy: string | null;
+  approvalDecidedAt: string | null;
+  gearRef: string | null;
+  gearUrl: string | null;
 };
 
 export type NestFlowWorkspace = {

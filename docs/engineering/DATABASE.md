@@ -256,10 +256,10 @@ Never expose R2 credentials to the browser. Never rely on unguessable public URL
 - `can_view_task` hides `kind=hr` workspaces from non-HR/non-admin
 - Task visibility is participant-based: creator or assignee. Team membership alone does not grant access. Line managers see tasks on teams they manage; HR sees `kind=hr` workspace tasks; admin sees all.
 
-## 16. M6 hardening notes (applied)
+## 17. M8 schema notes (applied)
 
-- `FORCE ROW LEVEL SECURITY` on all `nestflow` tables
-- Workspace select policy excludes `kind=hr` unless admin/hr
-- App authz matrix + Vitest coverage; login/invite rate limits; Sentry optional via DSN
-- Ops docs: `ROLE_MATRIX.md`, `SECURITY_CHECKLIST.md`, `BACKUP.md`
-- Privileges: `authenticated` / `service_role` GRANTs on nestflow tables that power `nf_*` views (required because those views use `security_invoker=true`). Includes notification tables and M5 tables `departments`, `invites`, `audit_events`.
+- Task columns: recurrence_*, approval_*, gear_ref, gear_url
+- Tables: `task_dependencies`, `time_entries`, `task_templates`, `automation_rules`
+- Public views: `nf_task_dependencies`, `nf_time_entries`, `nf_task_templates`, `nf_automation_rules`
+- `nf_tasks` view includes M8 columns; FORCE RLS + can_view/can_edit task helpers for task-scoped rows
+- Optional env: `NEXT_PUBLIC_GEAR_APP_URL` for gear deep links

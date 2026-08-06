@@ -12,6 +12,11 @@ import { rolesAllow } from "@/lib/security/authz";
 import { createClient } from "@/lib/supabase/server";
 import { recordActivity } from "@/lib/tasks/activity";
 import {
+  runAutomationsForTask,
+  spawnRecurringInstanceIfNeeded,
+} from "@/lib/tasks/m8-actions";
+import { listOpenDependencyTitles } from "@/lib/tasks/m8-queries";
+import {
   canTransition,
   isTaskStatus,
   STATUS_LABELS,
@@ -333,6 +338,12 @@ export async function createTaskAction(
     summary: `Created task "${parsed.data.title}"`,
   });
 
+  await runAutomationsForTask({
+    taskId: task.id,
+    actorId: profile.userId,
+    trigger: "task_created",
+  });
+
   const assignedOthers = assigneeIds.filter((id) => id !== profile.userId);
   if (assignedOthers.length > 0) {
     await notifyMany(assignedOthers, {
@@ -403,6 +414,16 @@ export async function updateTaskAction(
         code: "VALIDATION_ERROR",
         error: "Blocked tasks need a reason.",
       };
+    }
+    if (parsed.data.status === "completed") {
+      const openDeps = await listOpenDependencyTitles(parsed.data.taskId);
+      if (openDeps.length > 0) {
+        return {
+          ok: false,
+          code: "CONFLICT",
+          error: `Complete dependency first: ${openDeps.slice(0, 3).join(", ")}.`,
+        };
+      }
     }
     updates.status = parsed.data.status;
     updates.blocked_reason =
@@ -564,6 +585,17 @@ export async function changeTaskStatusAction(
     };
   }
 
+  if (to === "completed") {
+    const openDeps = await listOpenDependencyTitles(parsed.data.taskId);
+    if (openDeps.length > 0) {
+      return {
+        ok: false,
+        code: "CONFLICT",
+        error: `Complete dependency first: ${openDeps.slice(0, 3).join(", ")}.`,
+      };
+    }
+  }
+
   const { error } = await supabase
     .from("nf_tasks")
     .update({
@@ -582,7 +614,7 @@ export async function changeTaskStatusAction(
     taskId: parsed.data.taskId,
     actorId: profile.userId,
     eventType: "status_changed",
-    summary: `Moved status from ${from} to ${to}`,
+    summary: `Moved status from ${STATUS_LABELS[from]} to ${STATUS_LABELS[to]}`,
     metadata: { from, to },
   });
 
@@ -594,6 +626,29 @@ export async function changeTaskStatusAction(
     to,
     blockedReason: parsed.data.blockedReason,
   });
+
+  if (from !== to) {
+    await runAutomationsForTask({
+      taskId: parsed.data.taskId,
+      actorId: profile.userId,
+      trigger: "status_changed",
+      fromStatus: from,
+      toStatus: to,
+    });
+    if (to === "completed") {
+      await spawnRecurringInstanceIfNeeded({
+        taskId: parsed.data.taskId,
+        actorId: profile.userId,
+      });
+      await runAutomationsForTask({
+        taskId: parsed.data.taskId,
+        actorId: profile.userId,
+        trigger: "task_completed",
+        fromStatus: from,
+        toStatus: to,
+      });
+    }
+  }
 
   revalidateTaskPaths(parsed.data.taskId);
   return { ok: true, taskId: parsed.data.taskId };

@@ -5,6 +5,10 @@ import {
   listAssignablePeopleForProfile,
   listTeamsWithRoster,
 } from "@/lib/admin/queries";
+import {
+  listAutomationRules,
+  listTaskTemplates,
+} from "@/lib/tasks/m8-queries";
 import { listWorkspaces } from "@/lib/tasks/queries";
 
 export default async function PeopleTasksPage() {
@@ -14,13 +18,21 @@ export default async function PeopleTasksPage() {
     profile.roles.includes("hr") ||
     profile.roles.includes("line_manager");
 
-  const [{ hrTasks, employees, invites }, workspaces, people, roster] =
-    await Promise.all([
-      getHrSuiteData(),
-      listWorkspaces({ includeHr: true }),
-      listAssignablePeopleForProfile(profile),
-      listTeamsWithRoster(),
-    ]);
+  const [
+    { hrTasks, employees, invites },
+    workspaces,
+    people,
+    roster,
+    templates,
+    automationRules,
+  ] = await Promise.all([
+    getHrSuiteData(),
+    listWorkspaces({ includeHr: true }),
+    listAssignablePeopleForProfile(profile),
+    listTeamsWithRoster(),
+    listTaskTemplates({ activeOnly: true }),
+    listAutomationRules(),
+  ]);
 
   return (
     <PeopleSuite
@@ -35,6 +47,8 @@ export default async function PeopleTasksPage() {
       }
       teams={roster.teams}
       memberships={roster.memberships}
+      templates={templates}
+      automationRules={automationRules}
     />
   );
 }

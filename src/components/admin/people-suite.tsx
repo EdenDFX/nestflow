@@ -15,17 +15,19 @@ import {
   setProfileStatusAction,
 } from "@/lib/admin/actions";
 import { TeamRosterPanel } from "@/components/admin/team-roster-panel";
+import { TemplatesAutomationPanel } from "@/components/admin/templates-automation-panel";
 import type {
   DirectoryUser,
   Invite,
   NestFlowTeam,
   TeamMembershipRow,
 } from "@/lib/admin/types";
+import type { AutomationRule, TaskTemplate } from "@/lib/tasks/m8-types";
 import type { NestFlowTask, NestFlowWorkspace } from "@/lib/tasks/types";
 import type { TaskAssignee } from "@/lib/tasks/types";
 import { cn } from "@/lib/utils";
 
-type PeopleTab = "queues" | "status" | "invites" | "teams";
+type PeopleTab = "queues" | "status" | "invites" | "teams" | "templates";
 
 export function PeopleSuite({
   hrTasks,
@@ -37,6 +39,8 @@ export function PeopleSuite({
   canManageStatus,
   teams = [],
   memberships = [],
+  templates = [],
+  automationRules = [],
 }: {
   hrTasks: NestFlowTask[];
   employees: DirectoryUser[];
@@ -47,6 +51,8 @@ export function PeopleSuite({
   canManageStatus: boolean;
   teams?: NestFlowTeam[];
   memberships?: TeamMembershipRow[];
+  templates?: TaskTemplate[];
+  automationRules?: AutomationRule[];
 }) {
   const [tab, setTab] = useState<PeopleTab>("queues");
   const [query, setQuery] = useState("");
@@ -70,6 +76,7 @@ export function PeopleSuite({
       ["queues", `Queues (${hrTasks.length})`],
       ["status", "Employee status"],
       ["teams", "Teams"],
+      ["templates", "Templates & automation"],
       ["invites", `Invites (${invites.filter((i) => i.status === "pending").length})`],
     ] as const
   );
@@ -182,6 +189,14 @@ export function PeopleSuite({
           teams={teams}
           memberships={memberships}
           users={employees}
+        />
+      ) : null}
+
+      {tab === "templates" ? (
+        <TemplatesAutomationPanel
+          templates={templates}
+          rules={automationRules}
+          workspaces={workspaces}
         />
       ) : null}
 
