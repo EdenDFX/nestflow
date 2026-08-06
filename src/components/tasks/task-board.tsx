@@ -18,7 +18,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
@@ -161,12 +161,14 @@ function BoardColumn({
 
 export function TaskBoard({ initialTasks }: { initialTasks: NestFlowTask[] }) {
   const [tasks, setTasks] = useState(initialTasks);
+  const [prevInitialTasks, setPrevInitialTasks] = useState(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  useEffect(() => {
+  if (initialTasks !== prevInitialTasks) {
+    setPrevInitialTasks(initialTasks);
     setTasks(initialTasks);
-  }, [initialTasks]);
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
