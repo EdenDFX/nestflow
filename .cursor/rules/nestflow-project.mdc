@@ -1,0 +1,56 @@
+---
+description: NestFlow product identity, stack, and documentation hierarchy
+alwaysApply: true
+---
+
+# NestFlow Project Context
+
+NestFlow is an internal task-management system for Eden / Nest by Eden.
+
+- Product name: NestFlow
+- Planned URL: tasks.nestbyeden.com
+- Tagline: Plan. Assign. Deliver.
+- Primary brand colour: `#FF6300`
+- Modes: light and dark
+
+## Stack (approved)
+
+- Next.js App Router + TypeScript
+- Tailwind CSS + shadcn/ui
+- Supabase (Auth, Postgres, Realtime; shared NestByEden project)
+- Cloudflare R2 (private NestFlow attachments; ADR-004)
+- React Hook Form + Zod
+- TanStack Table
+- dnd-kit
+- Motion for React (selective)
+- Resend (email)
+- Web Push API
+- Vitest + Playwright
+- Vercel deployment
+- pnpm
+
+## Roles
+
+Administrator, Line Manager, HR, Staff.
+
+## Documentation hierarchy
+
+When documents disagree, prefer this order:
+
+1. Approved ADR (`docs/decisions/`)
+2. PRD (`docs/product/PRD.md`)
+3. Architecture and database docs
+4. Design and component docs
+5. Coding rules
+6. Roadmap / Tasks
+7. `docs/memory/OBSIDIAN_MEMORY.md`
+
+Memory summarises approved facts. It must never silently override source documents.
+
+## Agent behaviour
+
+- Read `docs/memory/OBSIDIAN_MEMORY.md` at the start of substantial work.
+- Prefer Server Components by default; Client Components only for interaction.
+- Never expose the Supabase service-role key or R2 secrets to the browser.
+- Do not invent product names, statuses, or roles outside the docs.
+- Follow `docs/engineering/CODING_RULES.md` for implementation work.

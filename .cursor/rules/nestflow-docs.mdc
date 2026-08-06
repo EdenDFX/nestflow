@@ -1,0 +1,17 @@
+---
+description: Keep NestFlow documentation aligned when changing product or engineering behaviour
+globs: docs/**/*.md
+alwaysApply: false
+---
+
+# Documentation Maintenance
+
+When editing NestFlow docs:
+
+- Update `docs/CHANGELOG.md` only for released, user-visible changes.
+- Record significant technical choices as ADRs in `docs/decisions/`.
+- Record significant UX or visual choices in `docs/design/DESIGN_DECISIONS.md`.
+- Keep `docs/memory/OBSIDIAN_MEMORY.md` in sync with approved decisions only.
+- Never store secrets, API keys, passwords, or personal employee data in docs.
+- Prefer precise language. Follow the dash-usage project rule.
+- Cross-link related docs instead of duplicating long explanations.

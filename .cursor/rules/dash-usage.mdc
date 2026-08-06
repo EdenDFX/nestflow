@@ -1,0 +1,56 @@
+---
+description: Controls the use of em dashes and en dashes in written content
+alwaysApply: true
+---
+
+# Writing Style: Dash Usage
+
+Do not use em dashes (—) or en dashes (–) as substitutes for commas, parentheses, colons, semicolons, or periods. Prefer standard punctuation instead.
+
+## Preferred punctuation
+
+- Use a comma for a brief aside.
+  - Correct: "The report, once finished, was long."
+
+- Use a period or semicolon to separate two complete clauses.
+  - Correct: "It was late. We left."
+  - Correct: "It was late; we left."
+
+- Use parentheses for a genuine aside.
+  - Correct: "The result (unexpectedly) changed the outcome."
+
+- Use a colon to introduce a list or explanation.
+  - Correct: "One thing mattered: speed."
+
+## En dashes
+
+Use an en dash (–) only for:
+
+- Numeric ranges, such as `10–20`
+- Date ranges, such as `2025–2026`
+- Page ranges, such as `pages 15–22`
+
+Never use an en dash as a stylistic pause.
+
+## Em dashes
+
+Use an em dash (—) only when a genuine interruption or abrupt break in thought must be represented.
+
+- Use it sparingly.
+- Never use more than one em dash in a paragraph.
+- Do not use it merely to create emphasis or a dramatic pause.
+
+## Rewriting requirement
+
+If a sentence can be rewritten clearly with a comma, colon, semicolon, period, or parentheses, rewrite it using that punctuation.
+
+Apply this rule to:
+
+- User-facing interface text
+- Documentation
+- Comments
+- Commit messages
+- Pull-request descriptions
+- Generated content
+
+Do not alter valid hyphens used in compound words, command-line flags, filenames, URLs, code syntax, or negative numbers.

@@ -1,0 +1,16 @@
+---
+description: TypeScript and Next.js conventions for NestFlow application code
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# NestFlow TypeScript Conventions
+
+- Place imports at the top of the file. No inline imports unless a documented circular-dependency exception exists.
+- Prefer Server Components by default. Mark Client Components with `"use client"` only when required.
+- Validate all external input with Zod.
+- Use exhaustive `switch` handling for unions and enums, with a `never` check in the default case.
+- Colocate feature logic under clear domain folders. Prefer shared UI from NestFlow components built on shadcn/ui.
+- Do not use `any`. Prefer unknown + narrowing.
+- Server Actions and Route Handlers must enforce authentication and authorisation before mutating data.
+- Keep UI copy free of em dashes used as stylistic pauses (see dash-usage rule).

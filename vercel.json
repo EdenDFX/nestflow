@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/overdue",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/health",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}
