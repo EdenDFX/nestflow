@@ -13,13 +13,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import Link from "next/link";
-import {
-  useMemo,
-  useState,
-  useSyncExternalStore,
-  useTransition,
-  type ReactNode,
-} from "react";
+import { useMemo, useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { BadgeAlertIcon } from "@/components/icons/badge-alert";
@@ -48,22 +42,6 @@ import {
   type TaskStatus,
 } from "@/lib/tasks/types";
 import { cn } from "@/lib/utils";
-
-const WIDE_QUERY = "(min-width: 1100px)";
-
-function subscribeWide(onChange: () => void) {
-  const media = window.matchMedia(WIDE_QUERY);
-  media.addEventListener("change", onChange);
-  return () => media.removeEventListener("change", onChange);
-}
-
-function useWideBoardLayout() {
-  return useSyncExternalStore(
-    subscribeWide,
-    () => window.matchMedia(WIDE_QUERY).matches,
-    () => false,
-  );
-}
 
 const statusIcon: Record<TaskStatus, ReactNode> = {
   backlog: <LayersIcon className="inline-flex" size={14} aria-hidden />,
@@ -301,14 +279,12 @@ function StatusBranch({
   expandedId,
   onToggle,
   onMove,
-  compact,
 }: {
   status: TaskStatus;
   tasks: NestFlowTask[];
   expandedId: string | null;
   onToggle: (taskId: string) => void;
   onMove: (taskId: string, status: TaskStatus) => void;
-  compact?: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -317,9 +293,8 @@ function StatusBranch({
       ref={setNodeRef}
       className={cn(
         "relative min-w-0 w-full rounded-xl p-1",
-        compact
-          ? "flex flex-col gap-2.5"
-          : "grid grid-cols-1 gap-2.5 sm:grid-cols-2",
+        "grid grid-cols-1 gap-2.5 sm:grid-cols-2",
+        "min-[1100px]:flex min-[1100px]:flex-col",
         isOver && "bg-primary/5",
       )}
     >
@@ -350,7 +325,7 @@ function StatusBranch({
 function WideConnectors() {
   return (
     <svg
-      className="pointer-events-none absolute inset-x-0 top-[2.65rem] h-8 w-full text-border"
+      className="pointer-events-none absolute inset-x-0 top-[2.65rem] hidden h-8 w-full text-border min-[1100px]:block"
       viewBox="0 0 100 32"
       preserveAspectRatio="none"
       aria-hidden
@@ -393,7 +368,6 @@ export function TaskBoard({ initialTasks }: { initialTasks: NestFlowTask[] }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const wide = useWideBoardLayout();
 
   if (initialTasks !== prevInitialTasks) {
     setPrevInitialTasks(initialTasks);
@@ -501,37 +475,15 @@ export function TaskBoard({ initialTasks }: { initialTasks: NestFlowTask[] }) {
             backgroundSize: "16px 16px",
           }}
         >
-          {wide ? (
-            <div className="relative overflow-x-auto">
-              <div className="relative mx-auto grid w-full min-w-[980px] max-w-[1280px] grid-cols-6 gap-3 px-4 py-6 md:gap-4 md:px-6">
-                <WideConnectors />
-                {TASK_STATUSES.map((status) => (
-                  <div
-                    key={status}
-                    className="relative z-10 flex min-w-0 flex-col gap-4"
-                  >
-                    <StatusHub
-                      status={status}
-                      count={columns[status].length}
-                      active={activeTask?.status === status}
-                    />
-                    <StatusBranch
-                      status={status}
-                      tasks={columns[status]}
-                      expandedId={expandedId}
-                      onToggle={toggleExpanded}
-                      onMove={moveTask}
-                      compact
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-0 p-4 sm:p-5">
+          <div className="relative min-[1100px]:overflow-x-auto">
+            <div className="relative mx-auto grid w-full grid-cols-1 p-4 sm:p-5 min-[1100px]:min-w-[980px] min-[1100px]:max-w-[1280px] min-[1100px]:grid-cols-6 min-[1100px]:gap-4 min-[1100px]:p-6">
+              <WideConnectors />
               {TASK_STATUSES.map((status, index) => (
-                <div key={status} className="relative flex gap-3">
-                  <div className="flex w-4 shrink-0 flex-col items-center pt-5">
+                <div
+                  key={status}
+                  className="relative z-10 flex min-w-0 gap-3 min-[1100px]:flex-col min-[1100px]:gap-4"
+                >
+                  <div className="flex w-4 shrink-0 flex-col items-center pt-5 min-[1100px]:hidden">
                     <span className="size-2.5 rounded-full border border-primary/50 bg-background" />
                     {index < TASK_STATUSES.length - 1 ? (
                       <span
@@ -542,7 +494,7 @@ export function TaskBoard({ initialTasks }: { initialTasks: NestFlowTask[] }) {
                   </div>
                   <div
                     className={cn(
-                      "min-w-0 flex-1 space-y-3 pb-5",
+                      "min-w-0 flex-1 space-y-3 pb-5 min-[1100px]:flex min-[1100px]:w-full min-[1100px]:flex-col min-[1100px]:gap-4 min-[1100px]:space-y-0 min-[1100px]:pb-0",
                       index === TASK_STATUSES.length - 1 && "pb-1",
                     )}
                   >
@@ -550,7 +502,7 @@ export function TaskBoard({ initialTasks }: { initialTasks: NestFlowTask[] }) {
                       status={status}
                       count={columns[status].length}
                       active={activeTask?.status === status}
-                      className="max-w-md"
+                      className="max-w-md min-[1100px]:max-w-none"
                     />
                     <StatusBranch
                       status={status}
@@ -563,7 +515,7 @@ export function TaskBoard({ initialTasks }: { initialTasks: NestFlowTask[] }) {
                 </div>
               ))}
             </div>
-          )}
+          </div>
         </div>
 
         <DragOverlay>

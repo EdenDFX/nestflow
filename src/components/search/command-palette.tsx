@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { searchWorkspaceAction } from "@/lib/search/actions";
-import { OPEN_SEARCH_EVENT, openCommandPalette } from "@/lib/search/types";
+import { OPEN_SEARCH_EVENT } from "@/lib/search/types";
 import type { SearchResults } from "@/lib/search/types";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
 import { personLabel } from "@/lib/people/label";
@@ -22,9 +21,13 @@ import { cn } from "@/lib/utils";
 
 const EMPTY: SearchResults = { query: "", tasks: [], people: [] };
 
-export function CommandPalette() {
+export function CommandPalette({
+  defaultOpen = false,
+}: {
+  defaultOpen?: boolean;
+}) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults>(EMPTY);
   const [pending, startTransition] = useTransition();
@@ -197,22 +200,5 @@ export function CommandPalette() {
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-export function SearchTrigger() {
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      className="h-8 gap-2 rounded-full px-3 text-muted-foreground"
-      onClick={() => openCommandPalette()}
-      aria-label="Search tasks and people"
-    >
-      Search
-      <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline">
-        ⌘K
-      </kbd>
-    </Button>
   );
 }

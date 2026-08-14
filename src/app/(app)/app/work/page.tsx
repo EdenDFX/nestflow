@@ -1,15 +1,48 @@
+import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 
-import { TaskBoard } from "@/components/tasks/task-board";
-import { TaskCalendar } from "@/components/tasks/task-calendar";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
-import { TaskList } from "@/components/tasks/task-list";
 import { WorkViewSwitcher } from "@/components/tasks/work-view-switcher";
 import { listAssignablePeopleForProfile } from "@/lib/admin/queries";
 import { canAccessWorkViews } from "@/lib/auth/navigation";
 import { requireActiveProfile } from "@/lib/auth/session";
 import { listTasks, listWorkspaces } from "@/lib/tasks/queries";
 import { isWorkView, type WorkView } from "@/lib/tasks/work-views";
+
+const TaskBoard = dynamic(
+  () => import("@/components/tasks/task-board").then((mod) => mod.TaskBoard),
+  {
+    loading: () => (
+      <div
+        className="h-[28rem] rounded-xl bg-muted/40"
+        aria-hidden
+      />
+    ),
+  },
+);
+const TaskList = dynamic(
+  () => import("@/components/tasks/task-list").then((mod) => mod.TaskList),
+  {
+    loading: () => (
+      <div
+        className="h-[28rem] rounded-xl border border-border bg-muted/20"
+        aria-hidden
+      />
+    ),
+  },
+);
+const TaskCalendar = dynamic(
+  () =>
+    import("@/components/tasks/task-calendar").then((mod) => mod.TaskCalendar),
+  {
+    loading: () => (
+      <div
+        className="h-[28rem] rounded-xl bg-muted/40"
+        aria-hidden
+      />
+    ),
+  },
+);
 
 const VIEW_COPY: Record<WorkView, { title: string; body: string }> = {
   board: {

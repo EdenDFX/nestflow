@@ -6,6 +6,7 @@ import {
   listPushSubscriptionCount,
 } from "@/lib/notifications/queries";
 import { isResendConfigured } from "@/lib/notifications/email";
+import { isGoogleChatConfigured } from "@/lib/notifications/google-chat";
 import { isWebPushConfigured } from "@/lib/notifications/push";
 
 export default async function ProfilePage() {
@@ -65,7 +66,8 @@ export default async function ProfilePage() {
           </dt>
           <dd className="mt-1 text-sm text-muted-foreground">
             Email {isResendConfigured() ? "ready" : "not configured"} · Push{" "}
-            {isWebPushConfigured() ? "ready" : "not configured"}
+            {isWebPushConfigured() ? "ready" : "not configured"} · Chat{" "}
+            {isGoogleChatConfigured() ? "ready" : "not configured"}
           </dd>
         </div>
       </dl>

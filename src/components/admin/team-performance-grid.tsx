@@ -154,10 +154,10 @@ function PerformanceCard({
         >
           <div
             className={cn(
-              "h-full rounded-full transition-[width] duration-300",
+              "h-full w-full origin-left rounded-full motion-safe:transition-transform duration-300",
               toneBarClass[load.tone],
             )}
-            style={{ width: `${load.fillPercent}%` }}
+            style={{ transform: `scaleX(${load.fillPercent / 100})` }}
           />
         </div>
         <p className="text-[11px] text-muted-foreground">

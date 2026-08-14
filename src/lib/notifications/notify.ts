@@ -1,5 +1,9 @@
 import { sendNotificationEmail } from "@/lib/notifications/email";
 import {
+  sendGoogleChatToUser,
+  wantsGoogleChat,
+} from "@/lib/notifications/google-chat";
+import {
   sendWebPushPayload,
   sendWebPushToUser,
 } from "@/lib/notifications/push";
@@ -40,6 +44,10 @@ function mapPreferences(
     pushAssignment: Boolean(data.push_assignment ?? true),
     pushMention: Boolean(data.push_mention ?? true),
     pushOverdue: Boolean(data.push_overdue ?? true),
+    chatAssignment: Boolean(data.chat_assignment ?? true),
+    chatMention: Boolean(data.chat_mention ?? true),
+    chatDueSoon: Boolean(data.chat_due_soon ?? true),
+    chatOverdue: Boolean(data.chat_overdue ?? true),
   };
 }
 
@@ -116,33 +124,48 @@ async function loadPreferences(
   return mapPreferences(userId, data);
 }
 
-async function resolveRecipientEmail(userId: string, system: boolean) {
+async function resolveRecipientProfile(userId: string, system: boolean) {
   if (system) {
     const admin = createAdminClient();
     if (!admin) return null;
     const { data } = await admin
       .from("profiles")
-      .select("email")
+      .select("email, full_name")
       .eq("id", userId)
       .maybeSingle();
-    return data?.email ?? null;
+    return data ?? null;
   }
 
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("email")
+    .select("email, full_name")
     .eq("id", userId)
     .maybeSingle();
-  return data?.email ?? null;
+  return data ?? null;
 }
 
 async function markChannelSent(
   notificationId: string,
-  channel: "email" | "push",
+  channel: "email" | "push" | "chat",
   system: boolean,
 ) {
-  const column = channel === "email" ? "email_sent_at" : "push_sent_at";
+  let column: "email_sent_at" | "push_sent_at" | "chat_sent_at";
+  switch (channel) {
+    case "email":
+      column = "email_sent_at";
+      break;
+    case "push":
+      column = "push_sent_at";
+      break;
+    case "chat":
+      column = "chat_sent_at";
+      break;
+    default: {
+      const _exhaustive: never = channel;
+      return _exhaustive;
+    }
+  }
   const payload = { [column]: new Date().toISOString() };
 
   if (system) {
@@ -282,7 +305,7 @@ async function deliverPush(
 }
 
 /**
- * Create an in-app notification and optionally deliver email / push.
+ * Create an in-app notification and optionally deliver email / push / Chat.
  * Returns the new notification id, or null when skipped/duplicate.
  */
 export async function notifyUser(params: EmitParams): Promise<string | null> {
@@ -296,9 +319,10 @@ export async function notifyUser(params: EmitParams): Promise<string | null> {
   }
 
   const prefs = await loadPreferences(params.userId, system);
+  const recipient = await resolveRecipientProfile(params.userId, system);
 
   if (wantsEmail(prefs, params.eventType)) {
-    const email = await resolveRecipientEmail(params.userId, system);
+    const email = recipient?.email ?? null;
     if (email) {
       const result = await sendNotificationEmail({
         to: email,
@@ -315,6 +339,19 @@ export async function notifyUser(params: EmitParams): Promise<string | null> {
 
   if (wantsPush(prefs, params.eventType)) {
     await deliverPush(params, notificationId, system);
+  }
+
+  if (wantsGoogleChat(prefs, params.eventType)) {
+    const result = await sendGoogleChatToUser({
+      eventType: params.eventType,
+      title: params.title,
+      body: params.body,
+      href: params.href,
+      recipientLabel: recipient?.full_name || recipient?.email || null,
+    });
+    if (result.sent) {
+      await markChannelSent(notificationId, "chat", system);
+    }
   }
 
   return notificationId;

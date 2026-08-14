@@ -16,18 +16,21 @@ export default async function MyTasksPage() {
     profile.roles.includes("hr") ||
     profile.roles.includes("line_manager");
 
-  const [tasks, counters, workspaces, people] = await Promise.all([
-    listTasks({
-      assigneeId: profile.userId,
-      includeCreatedBy: profile.userId,
-    }),
+  const tasksPromise = listTasks({
+    assigneeId: profile.userId,
+    includeCreatedBy: profile.userId,
+  });
+  const [tasks, counters, workspaces, people, checklists] = await Promise.all([
+    tasksPromise,
     getTaskCounters({ userId: profile.userId }),
     listWorkspaces({
       includeHr: profile.roles.includes("admin") || profile.roles.includes("hr"),
     }),
     listAssignablePeopleForProfile(profile),
+    tasksPromise.then((loaded) =>
+      listChecklistsForTasks(loaded.map((task) => task.id)),
+    ),
   ]);
-  const checklists = await listChecklistsForTasks(tasks.map((task) => task.id));
 
   return (
     <div className="space-y-6">

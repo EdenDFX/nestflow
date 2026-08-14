@@ -246,7 +246,7 @@ export function WorkspaceIsland({
         className={cn(
           "relative flex min-w-0 items-center overflow-hidden rounded-full bg-primary text-primary-foreground",
           !prefersReducedMotion &&
-            "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+            "motion-safe:transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
           isFocusExpanded
             ? "h-9 w-full flex-1 justify-between gap-3 px-3"
             : "h-8 w-auto shrink-0 justify-between gap-2 px-2.5",
@@ -256,8 +256,12 @@ export function WorkspaceIsland({
         {isFocusExpanded ? (
           <div
             aria-hidden
-            className="absolute inset-y-0 left-0 bg-black/15 transition-[width] duration-1000 ease-linear"
-            style={{ width: `${progress}%` }}
+            className={cn(
+              "absolute inset-y-0 left-0 w-full origin-left bg-black/15",
+              !prefersReducedMotion &&
+                "motion-safe:transition-transform duration-1000 ease-linear",
+            )}
+            style={{ transform: `scaleX(${progress / 100})` }}
           />
         ) : null}
 
@@ -322,7 +326,7 @@ export function WorkspaceIsland({
         className={cn(
           "flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden sm:gap-2",
           !prefersReducedMotion &&
-            "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+            "motion-safe:transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
           isFocusExpanded
             ? "max-w-0 flex-none scale-95 gap-0 opacity-0"
             : "scale-100 opacity-100",
@@ -351,6 +355,7 @@ export function WorkspaceIsland({
         </IslandChip>
 
         <IslandTicker
+          key={updates.map((item) => item.id).join(":")}
           updates={updates}
           unreadCount={unreadCount}
           reducedMotion={prefersReducedMotion}
@@ -391,11 +396,6 @@ function IslandTicker({
   reducedMotion: boolean;
 }) {
   const [index, setIndex] = useState(0);
-  const updateKey = updates.map((item) => item.id).join(":");
-
-  useEffect(() => {
-    setIndex(0);
-  }, [updateKey]);
 
   useEffect(() => {
     if (reducedMotion || updates.length < 2) {
@@ -405,7 +405,7 @@ function IslandTicker({
       setIndex((current) => (current + 1) % updates.length);
     }, 6000);
     return () => window.clearInterval(timer);
-  }, [reducedMotion, updateKey, updates.length]);
+  }, [reducedMotion, updates.length]);
 
   if (updates.length === 0) {
     return (

@@ -184,21 +184,21 @@ function UsersPanel({
 }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-border/80">
-      <table className="w-full min-w-[720px] text-left text-sm">
-        <thead className="border-b border-border/80 bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
+      <table className="w-full min-w-[680px] text-left text-sm">
+        <thead className="border-b border-border/80 bg-muted/30 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
           <tr>
-            <th className="px-3 py-2 font-medium">Person</th>
-            <th className="px-3 py-2 font-medium">Department</th>
-            <th className="px-3 py-2 font-medium">Roles</th>
-            <th className="px-3 py-2 font-medium">Status</th>
-            <th className="px-3 py-2 font-medium">Open</th>
-            <th className="px-3 py-2 font-medium">Actions</th>
+            <th className="px-4 py-2.5 font-medium">Person</th>
+            <th className="px-3 py-2.5 font-medium">Department</th>
+            <th className="px-3 py-2.5 font-medium">Roles</th>
+            <th className="px-3 py-2.5 font-medium">Status</th>
+            <th className="px-3 py-2.5 text-right font-medium">Open</th>
+            <th className="px-4 py-2.5 text-right font-medium">Actions</th>
           </tr>
         </thead>
         <tbody>
           {users.map((user) => (
             <UserRow
-              key={user.userId}
+              key={`${user.userId}-${user.roles.join(",")}-${user.department ?? ""}-${user.isActive}`}
               user={user}
               departments={departments}
               people={people}
@@ -209,6 +209,13 @@ function UsersPanel({
       </table>
     </div>
   );
+}
+
+function rolesEqual(a: AppRole[], b: AppRole[]) {
+  if (a.length !== b.length) return false;
+  const left = [...a].sort();
+  const right = [...b].sort();
+  return left.every((role, index) => role === right[index]);
 }
 
 function UserRow({
@@ -225,7 +232,7 @@ function UserRow({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [roles, setRoles] = useState<AppRole[]>(user.roles);
-  const [department, setDepartment] = useState(user.department ?? "");
+  const rolesDirty = !rolesEqual(roles, user.roles);
 
   function saveRoles() {
     startTransition(async () => {
@@ -242,11 +249,11 @@ function UserRow({
     });
   }
 
-  function saveDepartment() {
+  function saveDepartment(next: string) {
     startTransition(async () => {
       const result = await setProfileDepartmentAction({
         userId: user.userId,
-        department,
+        department: next,
       });
       if (!result.ok) {
         toast.error(result.error ?? "Could not update department.");
@@ -268,78 +275,82 @@ function UserRow({
   }
 
   return (
-    <tr className="border-b border-border/60 align-top">
-      <td className="px-3 py-3">
-        <p className="font-medium">{user.fullName ?? "Unnamed"}</p>
-        <p className="text-xs text-muted-foreground">
-          {user.nestId ? `${user.nestId} · ` : ""}
-          {user.email}
+    <tr className="border-b border-border/50 last:border-0">
+      <td className="px-4 py-3 align-middle">
+        <p className="font-medium leading-tight">
+          {user.fullName ?? "Unnamed"}
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {user.nestId ? (
+            <span className="font-mono">{user.nestId}</span>
+          ) : (
+            "No Nest ID"
+          )}
+          {user.email ? (
+            <span className="text-muted-foreground/80"> · {user.email}</span>
+          ) : null}
         </p>
       </td>
-      <td className="px-3 py-3">
-        <div className="flex min-w-40 flex-col gap-2">
-          <Select
-            value={department || "__none__"}
-            onValueChange={(value) =>
-              setDepartment(value === "__none__" ? "" : value)
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Department" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__none__">None</SelectItem>
-              {departments.map((dept) => (
-                <SelectItem key={dept.id} value={dept.name}>
-                  {dept.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={pending}
-            onClick={saveDepartment}
-          >
-            Save dept
-          </Button>
-        </div>
-      </td>
-      <td className="px-3 py-3">
-        <div className="flex flex-wrap gap-1">
-          {APP_ROLES.map((role) => (
-            <button
-              key={role}
-              type="button"
-              disabled={pending}
-              onClick={() => toggleRole(role)}
-              className={cn(
-                "rounded-full border px-2 py-0.5 text-[11px]",
-                roles.includes(role)
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground",
-              )}
-            >
-              {roleLabel(role)}
-            </button>
-          ))}
-        </div>
-        <Button
-          type="button"
-          size="sm"
-          className="mt-2"
+      <td className="px-3 py-3 align-middle">
+        <Select
+          value={user.department || "__none__"}
           disabled={pending}
-          onClick={saveRoles}
+          onValueChange={(value) =>
+            saveDepartment(value === "__none__" ? "" : value)
+          }
         >
-          Save roles
-        </Button>
+          <SelectTrigger className="h-8 w-[9.5rem]">
+            <SelectValue placeholder="Department" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">None</SelectItem>
+            {departments.map((dept) => (
+              <SelectItem key={dept.id} value={dept.name}>
+                {dept.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </td>
-      <td className="px-3 py-3">
+      <td className="px-3 py-3 align-middle">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {APP_ROLES.map((role) => {
+            const active = roles.includes(role);
+            return (
+              <button
+                key={role}
+                type="button"
+                disabled={pending}
+                onClick={() => toggleRole(role)}
+                aria-pressed={active}
+                className={cn(
+                  "rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors",
+                  active
+                    ? "border-primary/40 bg-primary/12 text-primary"
+                    : "border-border/80 text-muted-foreground hover:border-foreground/25 hover:text-foreground",
+                )}
+              >
+                {roleLabel(role)}
+              </button>
+            );
+          })}
+          {rolesDirty ? (
+            <Button
+              type="button"
+              size="sm"
+              className="h-7 px-2.5 text-xs"
+              disabled={pending}
+              onClick={saveRoles}
+            >
+              Save
+            </Button>
+          ) : null}
+        </div>
+      </td>
+      <td className="px-3 py-3 align-middle">
         <span
           className={cn(
-            "rounded-full px-2 py-0.5 text-xs",
+            "inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium",
             user.isActive
               ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
               : "bg-muted text-muted-foreground",
@@ -348,8 +359,10 @@ function UserRow({
           {user.isActive ? "Active" : "Inactive"}
         </span>
       </td>
-      <td className="px-3 py-3">{user.openTaskCount}</td>
-      <td className="px-3 py-3">
+      <td className="px-3 py-3 text-right align-middle tabular-nums text-muted-foreground">
+        {user.openTaskCount}
+      </td>
+      <td className="px-4 py-3 text-right align-middle">
         <DeactivateUserButton
           user={user}
           openTasks={openTasks}

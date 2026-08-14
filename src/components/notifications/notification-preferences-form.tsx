@@ -55,6 +55,10 @@ export function NotificationPreferencesForm({
         pushAssignment: prefs.pushAssignment,
         pushMention: prefs.pushMention,
         pushOverdue: prefs.pushOverdue,
+        chatAssignment: prefs.chatAssignment,
+        chatMention: prefs.chatMention,
+        chatDueSoon: prefs.chatDueSoon,
+        chatOverdue: prefs.chatOverdue,
       });
       if (!result.ok) {
         toast.error(result.error ?? "Could not save preferences.");
@@ -225,6 +229,36 @@ export function NotificationPreferencesForm({
               : "No active browser subscriptions"}
           </p>
         </div>
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="font-heading text-lg font-semibold">Google Chat</h2>
+          <p className="text-sm text-muted-foreground">
+            Cards in the NestFlow Chat space when a webhook is configured.
+            Assignment, mention, due soon, and overdue.
+          </p>
+        </div>
+        <PrefRow
+          label="Assignments"
+          checked={prefs.chatAssignment}
+          onCheckedChange={(value) => updatePref("chatAssignment", value)}
+        />
+        <PrefRow
+          label="Mentions"
+          checked={prefs.chatMention}
+          onCheckedChange={(value) => updatePref("chatMention", value)}
+        />
+        <PrefRow
+          label="Due soon"
+          checked={prefs.chatDueSoon}
+          onCheckedChange={(value) => updatePref("chatDueSoon", value)}
+        />
+        <PrefRow
+          label="Overdue"
+          checked={prefs.chatOverdue}
+          onCheckedChange={(value) => updatePref("chatOverdue", value)}
+        />
       </section>
 
       <Button type="button" onClick={save} disabled={pending}>

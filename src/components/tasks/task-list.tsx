@@ -9,8 +9,9 @@ import {
   useReactTable,
   type SortingState,
 } from "@tanstack/react-table";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { BulkReassignBar } from "@/components/tasks/bulk-reassign-bar";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
@@ -24,6 +25,8 @@ import {
 import { cn } from "@/lib/utils";
 
 const columnHelper = createColumnHelper<NestFlowTask>();
+const VIRTUALIZE_AFTER = 40;
+const ROW_ESTIMATE_PX = 49;
 
 export function TaskList({
   tasks,
@@ -129,6 +132,28 @@ export function TaskList({
   const visibleIds = table.getRowModel().rows.map((row) => row.original.id);
   const allVisibleSelected =
     visibleIds.length > 0 && visibleIds.every((id) => selected.includes(id));
+  const rows = table.getRowModel().rows;
+  const parentRef = useRef<HTMLDivElement>(null);
+  const shouldVirtualize = rows.length > VIRTUALIZE_AFTER;
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ROW_ESTIMATE_PX,
+    overscan: 8,
+    enabled: shouldVirtualize,
+  });
+  const virtualRows = shouldVirtualize ? virtualizer.getVirtualItems() : null;
+  const paddingTop = virtualRows?.[0]?.start ?? 0;
+  const lastVirtual = virtualRows?.[virtualRows.length - 1];
+  const paddingBottom = shouldVirtualize
+    ? virtualizer.getTotalSize() - (lastVirtual?.end ?? 0)
+    : 0;
+  const renderedRows = virtualRows
+    ? virtualRows.flatMap((item) => {
+        const row = rows[item.index];
+        return row ? [row] : [];
+      })
+    : rows;
 
   return (
     <div className="space-y-4">
@@ -159,10 +184,16 @@ export function TaskList({
         ) : null}
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-border/80">
+      <div
+        ref={parentRef}
+        className={cn(
+          "overflow-x-auto rounded-xl border border-border/80",
+          shouldVirtualize && "max-h-[70vh] overflow-y-auto",
+        )}
+      >
         <table className="w-full min-w-[720px] text-left text-sm">
           <caption className="sr-only">Task list</caption>
-          <thead className="border-b border-border bg-muted/40">
+          <thead className="sticky top-0 z-10 border-b border-border bg-muted/40">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -191,7 +222,7 @@ export function TaskList({
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.length === 0 ? (
+            {rows.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
@@ -201,21 +232,39 @@ export function TaskList({
                 </td>
               </tr>
             ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className={cn(
-                    "border-b border-border/70 last:border-0",
-                    selected.includes(row.original.id) && "bg-primary/5",
-                  )}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 align-middle">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              <>
+                {paddingTop > 0 ? (
+                  <tr aria-hidden>
+                    <td
+                      colSpan={columns.length}
+                      style={{ height: paddingTop, padding: 0 }}
+                    />
+                  </tr>
+                ) : null}
+                {renderedRows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className={cn(
+                      "border-b border-border/70 last:border-0",
+                      selected.includes(row.original.id) && "bg-primary/5",
+                    )}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-4 py-3 align-middle">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+                {paddingBottom > 0 ? (
+                  <tr aria-hidden>
+                    <td
+                      colSpan={columns.length}
+                      style={{ height: paddingBottom, padding: 0 }}
+                    />
+                  </tr>
+                ) : null}
+              </>
             )}
           </tbody>
         </table>

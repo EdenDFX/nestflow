@@ -55,10 +55,9 @@ export function GradientBars({
                   height: "100%",
                   background: `linear-gradient(to top, ${gradientFrom}, ${gradientTo})`,
                   transform: `scaleY(${initialScale})`,
-                  transition: "transform 0.5s ease-in-out",
-                  animation: `pulse-bar ${animationDuration}s ease-in-out infinite alternate`,
-                  animationDelay: `${index * 0.1}s`,
                   "--initial-scale": String(initialScale),
+                  "--gradient-bar-duration": `${animationDuration}s`,
+                  "--gradient-bar-delay": `${index * 0.1}s`,
                 } as CSSProperties
               }
             />

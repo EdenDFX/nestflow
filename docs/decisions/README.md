@@ -22,6 +22,7 @@ Each ADR uses:
 | [ADR-002](ADR-002-authentication.md) | Authentication approach | Accepted |
 | [ADR-003](ADR-003-role-access-model.md) | Role and access model | Accepted |
 | [ADR-004](ADR-004-cloudflare-r2-attachments.md) | Cloudflare R2 for attachments and heavy storage | Accepted |
+| [ADR-005](ADR-005-google-chat-notifications.md) | Google Chat as a notification channel | Accepted |
 
 ## When to write an ADR
 

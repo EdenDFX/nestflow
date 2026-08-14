@@ -59,7 +59,7 @@ Exact companion neutrals chosen at scaffold (2026-08-05):
 
 | Token | Light | Dark |
 | --- | --- | --- |
-| Background | Warm near-white `oklch(0.975 0.008 75)` | Warm near-black `oklch(0.17 0.012 55)` |
+| Background | Warm near-white `oklch(0.975 0.008 75)` | Pure black `#000000` (DD-009); cards elevate above the stage |
 | Foreground | Warm ink `oklch(0.26 0.02 55)` | Warm near-white `oklch(0.93 0.01 75)` |
 | Primary | `#FF6300` | `#FF6300` |
 | Primary foreground | `#FFFFFF` | `#FFFFFF` |

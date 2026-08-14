@@ -63,6 +63,7 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 - ADR-002: Supabase Auth; Nest ID is identity, not password; invite-only
 - ADR-003: Role + team membership; enforce UI + server + RLS
 - ADR-004: Cloudflare R2 for attachments and heavy storage; Postgres metadata only
+- ADR-005: Google Chat as optional notification channel (space webhook in v1; personal DMs later)
 
 ## Documentation hierarchy
 
@@ -77,7 +78,7 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 
 ## Notifications (v1 intent)
 
-- Email, in-app, web push
+- Email, in-app, web push, optional Google Chat (space webhook; ADR-005)
 - Events: assignment, mention, due soon/overdue, invite
 - User preferences where operationally allowed
 
@@ -96,8 +97,8 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 - Default seeded workspace: General
 - M3 collaboration tables: checklist_items, comments, attachments, activity_events (+ `nf_*` views)
 - Attachments: R2 EU bucket `nestflow-attachments` with signed URLs; set `R2_*` including `R2_ENDPOINT=https://{account_id}.eu.r2.cloudflarestorage.com`. Supabase stores metadata only (`nestflow.attachments` / `nf_attachments`). Setup: `docs/engineering/R2_SETUP.md`, `pnpm r2:setup`.
-- M4 notifications: in-app + Resend + Web Push; prefs on profile; cron `/api/cron/overdue`
-- Notification delivery needs `RESEND_*`, VAPID keys, `CRON_SECRET`, and `SUPABASE_SERVICE_ROLE_KEY` (for overdue scan)
+- M4 notifications: in-app + Resend + Web Push + optional Google Chat space webhook; prefs on profile; cron `/api/cron/overdue`
+- Notification delivery needs `RESEND_*`, VAPID keys, optional `GOOGLE_CHAT_ENABLED` + `GOOGLE_CHAT_WEBHOOK_URL`, `CRON_SECRET`, and `SUPABASE_SERVICE_ROLE_KEY` (for overdue scan)
 - M5 role suites live at `/app/admin`, `/app/team`, `/app/people`
 - Assign `line_manager` / `hr` roles from Admin to unlock those suites (seed currently has admin + staff)
 - Seed teams: Creative (Chide LM), CRM (Kehinde LM), Project (Adira LM)
@@ -120,7 +121,7 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 - Manager assign: task detail assignee picker plus bulk assignees / due date / status on List and Team board (T-074)
 - Deactivate prompts for successor assignees when the account has open work, then locks (T-075)
 - M7.1 still open: Admin org settings (T-071), notification templates gallery (T-072), Admin system health UI (T-073). Invite-only provisioning (T-011) and Playwright (T-004 remainder) remain open.
-- M8+ shipped (except passkeys/MFA T-087): recurring, approvals, dependencies, time tracking, extended reports, gear links, templates + automation
+- M8+ shipped (except passkeys/MFA T-087): recurring, approvals, dependencies, time tracking, extended reports, gear links, templates + automation, Google Chat space webhook (T-088)
 - M8 tables: task_dependencies, time_entries, task_templates, automation_rules (+ task columns for recurrence/approval/gear)
 - Optional `NEXT_PUBLIC_GEAR_APP_URL` for gear deep links
 - Templates/automation UI: People suite → Templates & automation tab

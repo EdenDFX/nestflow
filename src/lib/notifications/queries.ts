@@ -109,6 +109,10 @@ export async function getNotificationPreferences(
     pushAssignment: data.push_assignment,
     pushMention: data.push_mention,
     pushOverdue: data.push_overdue,
+    chatAssignment: Boolean(data.chat_assignment ?? true),
+    chatMention: Boolean(data.chat_mention ?? true),
+    chatDueSoon: Boolean(data.chat_due_soon ?? true),
+    chatOverdue: Boolean(data.chat_overdue ?? true),
   };
 }
 

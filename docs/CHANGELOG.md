@@ -21,12 +21,17 @@ Write entries for people who use the product. Don't list internal refactors or d
 - Role dashboards with status-coloured cards, due timers, and team roster
 - lucide-animated icons (hover motion, reduced-motion respected)
 - M8 task enhancements: recurring rules (spawn next on complete), approvals, dependencies, time tracking, gear deep links
+- Google Chat space webhook cards for assignment, mention, due soon, and overdue (when configured)
 - Admin performance/delivery report extras (pending approvals, recurring open, hours logged, 30-day completion rate)
 - Team performance grid shows logged time per person
 - HR People suite: Templates & automation (task templates + simple automation rules)
 
 ### Changed
 
+- Dark mode app shell uses a pure black stage (`#000000`), matching DD-009
+- Sign-in shows the form immediately instead of a timed word intro
+- Work board keeps the same layout while the page hydrates
+- App navigations reserve heading and panel space instead of appearing empty
 - `/app/board`, `/app/list`, and `/app/calendar` redirect into `/app/work`
 - Planned production URL is `tasks.nestbyeden.app`
 

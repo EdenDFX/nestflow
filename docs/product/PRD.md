@@ -147,8 +147,9 @@ NestFlow solves this by providing:
 | Email | Assignment, mention, due soon, overdue, invite |
 | In-app | Same events plus status changes on watched tasks |
 | Web push | Assignment, mention, overdue (user-permissioned) |
+| Google Chat | Assignment, mention, due soon, overdue (optional; space webhook in v1, ADR-005) |
 
-Users can configure channel preferences where operationally allowed.
+Users can configure channel preferences where operationally allowed. Chat cards link into NestFlow. Chat is not a second task store.
 
 ### 6.4 Interaction and UX quality
 
@@ -181,7 +182,7 @@ Users can configure channel preferences where operationally allowed.
 
 1. Manager (or authorised role) creates a task in a workspace.
 2. Sets priority, due date, assignees, tags.
-3. Assignees receive email, in-app, and optional push notification.
+3. Assignees receive email, in-app, optional push, and optional Google Chat notification.
 4. Task appears in My Tasks and team board.
 
 ### 7.3 Progress a task
@@ -218,6 +219,7 @@ Users can configure channel preferences where operationally allowed.
 - [x] Board, list, calendar, and My Tasks views work on desktop and mobile.
 - [x] Light and dark themes render with primary `#FF6300`.
 - [x] Email and push notifications fire for the agreed event set (when Resend / VAPID are configured).
+- [x] Google Chat cards fire for assignment, mention, due soon, and overdue when a space webhook is configured (ADR-005).
 - [x] Deactivated users cannot authenticate; history is preserved.
 - [x] Audit log captures admin user-management events.
 - [x] Accessibility baseline: keyboard navigation for core flows, labelled controls, visible focus.
@@ -226,7 +228,7 @@ Production DNS, Vercel env, and invite-only provisioning (T-011) remain ops / fo
 
 ## 10. Later versions
 
-Tracked in [ROADMAP.md](ROADMAP.md) as **M8+** and [TASKS.md](TASKS.md) as T-080–T-087.
+Tracked in [ROADMAP.md](ROADMAP.md) as **M8+** and [TASKS.md](TASKS.md) as T-080–T-088.
 
 | Enhancement | Task | Status |
 | --- | --- | --- |
@@ -238,6 +240,7 @@ Tracked in [ROADMAP.md](ROADMAP.md) as **M8+** and [TASKS.md](TASKS.md) as T-080
 | Gear-system deep links | T-085 | Shipped |
 | Advanced automation + templates | T-086 | Shipped |
 | Passkeys / MFA | T-087 | Open |
+| Google Chat notifications | T-088 | Shipped (space webhook; personal DMs later) |
 
 PRD §5 still open under M7.1: Admin org settings (T-071), notification templates gallery (T-072), Admin system health UI (T-073). Search, Mentions, quick update, Admin People, and manager assign are shipped.
 

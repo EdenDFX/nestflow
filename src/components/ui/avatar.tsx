@@ -27,6 +27,8 @@ function Avatar({
 
 function AvatarImage({
   className,
+  width = 32,
+  height = 32,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
   return (
@@ -37,6 +39,8 @@ function AvatarImage({
         className
       )}
       {...props}
+      width={width}
+      height={height}
     />
   )
 }

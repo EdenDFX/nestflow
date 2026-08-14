@@ -33,6 +33,10 @@ export type NotificationPreferences = {
   pushAssignment: boolean;
   pushMention: boolean;
   pushOverdue: boolean;
+  chatAssignment: boolean;
+  chatMention: boolean;
+  chatDueSoon: boolean;
+  chatOverdue: boolean;
 };
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: Omit<
@@ -46,6 +50,10 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: Omit<
   pushAssignment: true,
   pushMention: true,
   pushOverdue: true,
+  chatAssignment: true,
+  chatMention: true,
+  chatDueSoon: true,
+  chatOverdue: true,
 };
 
 export function isNotificationEventType(

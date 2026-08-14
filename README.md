@@ -65,6 +65,6 @@ docs/                  # Product and engineering documentation
 
 ## Notes
 
-- Do not commit `.env.local` or service-role / R2 / VAPID secrets.
+- Do not commit `.env.local` or service-role / R2 / VAPID / Google Chat secrets.
 - Soft launch targets Supabase Free (shared NestByEden project); Pro is deferred.
 - Documentation style: [docs/engineering/DOCS_STYLE.md](docs/engineering/DOCS_STYLE.md).

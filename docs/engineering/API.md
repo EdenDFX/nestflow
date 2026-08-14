@@ -119,7 +119,7 @@ Names below match the exported functions. Roles are the typical callers; server 
 
 | Method | Path | Purpose | Status |
 | --- | --- | --- | --- |
-| `GET` | `/api/health` | Liveness | Shipped |
+| `GET` | `/api/health` | Liveness plus `googleChat` configured/missing | Shipped |
 | `POST` | `/api/cron/overdue` | Overdue / due-soon fan-out (`CRON_SECRET`) | Shipped |
 | `POST` | `/api/webhooks/resend` | Email delivery events | Not shipped |
 | `POST` | `/api/cron/attachment-cleanup` | Hard-delete soft-removed R2 objects | Not shipped |

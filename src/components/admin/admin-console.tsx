@@ -1,9 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
-import { AdminOversight } from "@/components/admin/admin-oversight";
-import { AdminSuite } from "@/components/admin/admin-suite";
 import { Button } from "@/components/ui/button";
 import type {
   AdminReportSnapshot,
@@ -17,6 +16,24 @@ import type {
   TeamMembershipRow,
 } from "@/lib/admin/types";
 import type { NestFlowTask, TaskAssignee } from "@/lib/tasks/types";
+
+const AdminOversight = dynamic(
+  () =>
+    import("@/components/admin/admin-oversight").then((mod) => mod.AdminOversight),
+  {
+    loading: () => (
+      <div className="h-[24rem] rounded-xl bg-muted/40" aria-hidden />
+    ),
+  },
+);
+const AdminSuite = dynamic(
+  () => import("@/components/admin/admin-suite").then((mod) => mod.AdminSuite),
+  {
+    loading: () => (
+      <div className="h-[24rem] rounded-xl bg-muted/40" aria-hidden />
+    ),
+  },
+);
 
 type AdminMode = "work" | "people";
 

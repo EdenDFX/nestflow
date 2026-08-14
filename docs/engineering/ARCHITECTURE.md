@@ -6,11 +6,11 @@ Describes how NestFlow is structured, where data lives, and which boundaries you
 | --- | --- |
 | Status | Accepted |
 | Last updated | 2026-08-14 |
-| Related ADRs | ADR-001, ADR-002, ADR-003, ADR-004 |
+| Related ADRs | ADR-001, ADR-002, ADR-003, ADR-004, ADR-005 |
 
 ## Overview
 
-NestFlow is a Next.js App Router app on Vercel. Supabase provides authentication, Postgres, and Realtime. Task attachments live in private Cloudflare R2. Postgres stores metadata only. Email goes through Resend. Browser push uses the Web Push API.
+NestFlow is a Next.js App Router app on Vercel. Supabase provides authentication, Postgres, and Realtime. Task attachments live in private Cloudflare R2. Postgres stores metadata only. Email goes through Resend. Browser push uses the Web Push API. Optional Google Chat cards use a space incoming webhook (ADR-005).
 
 The gear management system is a separate app. NestFlow can store gear references on tasks. It doesn't own gear inventory.
 
@@ -32,10 +32,10 @@ The gear management system is a separate app. NestFlow can store gear references
 └───────┬──────────────┬───────┘
         │              │
         ▼              ▼
-┌───────────────┐ ┌────────────────┐ ┌─────────────┐ ┌──────────────┐
-│   Supabase    │ │ Cloudflare R2  │ │   Resend    │ │   Sentry     │
-│ Auth          │ │ Private objects│ │  Email      │ │  Monitoring  │
-│ Postgres+RLS  │ │ (attachments)  │ └─────────────┘ └──────────────┘
+┌───────────────┐ ┌────────────────┐ ┌─────────────┐ ┌─────────────┐ ┌──────────────┐
+│   Supabase    │ │ Cloudflare R2  │ │   Resend    │ │ Google Chat │ │   Sentry     │
+│ Auth          │ │ Private objects│ │  Email      │ │  Space hook │ │  Monitoring  │
+│ Postgres+RLS  │ │ (attachments)  │ └─────────────┘ └─────────────┘ └──────────────┘
 │ Realtime      │ └────────────────┘
 └───────────────┘
 ```
@@ -88,7 +88,7 @@ Domain logic lives under `src/lib/<area>/`. Keep `page.tsx` files thin.
 | Access | Roles, team membership, permission checks |
 | Work | Workspaces, tasks, statuses, checklists, tags |
 | Collaboration | Comments, mentions, attachments, activity |
-| Notifications | Event fan-out to in-app, email, push |
+| Notifications | Event fan-out to in-app, email, push, and optional Google Chat |
 | Search | Command palette over visible tasks and people |
 | Admin / Audit | Configuration and security event history |
 | Enhancements | Recurrence, approvals, dependencies, time, templates, automation, gear links |
@@ -100,7 +100,8 @@ Domain logic lives under `src/lib/<area>/`. Keep `page.tsx` files thin.
 3. Privileged admin operations use audited server paths.
 4. Attachments live in private Cloudflare R2 buckets. Access uses short-lived signed URLs after permission checks.
 5. Cron routes require a `CRON_SECRET` bearer token.
-6. Secrets live in Vercel / Supabase / Cloudflare environment configuration only.
+6. The browser never receives Chat webhook URLs or service-account keys.
+7. Secrets live in Vercel / Supabase / Cloudflare environment configuration only.
 
 ## Identity model
 
@@ -122,10 +123,11 @@ Notification service (server)
         │
         ├── write in-app notification row
         ├── enqueue / send Resend email (if enabled)
-        └── send Web Push to active subscriptions (if enabled)
+        ├── send Web Push to active subscriptions (if enabled)
+        └── POST Google Chat card (space webhook if configured)
 ```
 
-Delivery preferences are respected except where policy requires mandatory operational mail (for example, invite messages).
+Delivery preferences are respected except where policy requires mandatory operational mail (for example, invite messages). Chat is not task storage. Cards link into NestFlow. See [ADR-005](../decisions/ADR-005-google-chat-notifications.md).
 
 ## Attachment flow (R2)
 
@@ -163,6 +165,7 @@ See [ADR-004](../decisions/ADR-004-cloudflare-r2-attachments.md).
 - Direct write access to gear inventory tables
 - Shared UI package with the gear system
 - Public marketing site inside this app
+- Two-way Google Chat commands or Chat as a task store
 
 ## Future extension points
 
@@ -170,6 +173,7 @@ See [ADR-004](../decisions/ADR-004-cloudflare-r2-attachments.md).
 - Background job processor if email/push volume requires queues
 - Reporting warehouse export
 - Admin org settings, notification template gallery, and health UI (T-071–T-073)
+- Google Chat personal DMs when Workspace Admin can install the NestFlow Chat app
 
 ## See Also
 
@@ -177,3 +181,5 @@ See [ADR-004](../decisions/ADR-004-cloudflare-r2-attachments.md).
 - [Database](DATABASE.md)
 - [Role matrix](ROLE_MATRIX.md)
 - [Documentation style](DOCS_STYLE.md)
+- [ADR-005](../decisions/ADR-005-google-chat-notifications.md)
+- [Google Chat setup](GOOGLE_CHAT_SETUP.md)

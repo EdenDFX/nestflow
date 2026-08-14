@@ -122,6 +122,7 @@ Never commit:
 - `.env.local`
 - Supabase service role
 - R2 / Resend / VAPID private keys
+- Google Chat webhook URLs / service-account keys
 - `CRON_SECRET`
 
 Only `.env.example` is tracked. Production secrets live in Vercel project settings.

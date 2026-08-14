@@ -118,7 +118,7 @@ function taskPriority(task: OversightTaskRow): TaskPriority {
   return "medium";
 }
 
-function statusRailClass(status: TaskStatus, overdue: boolean) {
+function statusDotClass(status: TaskStatus, overdue: boolean) {
   if (overdue && status !== "completed") return "bg-destructive";
   switch (status) {
     case "completed":
@@ -132,7 +132,29 @@ function statusRailClass(status: TaskStatus, overdue: boolean) {
     case "todo":
       return "bg-info";
     case "backlog":
-      return "bg-muted-foreground/40";
+      return "bg-muted-foreground/50";
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
+function statusDotLabel(status: TaskStatus, overdue: boolean) {
+  if (overdue && status !== "completed") return "Overdue";
+  switch (status) {
+    case "completed":
+      return "Completed";
+    case "blocked":
+      return "Blocked";
+    case "review":
+      return "Review";
+    case "in_progress":
+      return "In progress";
+    case "todo":
+      return "To do";
+    case "backlog":
+      return "Backlog";
     default: {
       const _exhaustive: never = status;
       return _exhaustive;
@@ -518,47 +540,52 @@ function TasksPanel({
                   <Link
                     href={`/app/tasks/${task.id}`}
                     className={cn(
-                      "group relative flex gap-0 overflow-hidden rounded-2xl border border-border/70 bg-card transition-colors",
+                      "group block rounded-2xl border border-border/70 bg-card transition-colors",
                       "hover:border-primary/35 hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     )}
                   >
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "w-1.5 shrink-0",
-                        statusRailClass(status, overdue),
-                      )}
-                    />
-                    <div className="grid min-w-0 flex-1 gap-4 p-4 sm:grid-cols-[minmax(0,1.4fr)_auto] sm:items-start lg:grid-cols-[minmax(0,1.5fr)_minmax(8rem,0.7fr)_minmax(8rem,0.8fr)_minmax(9rem,0.9fr)] lg:gap-5">
-                      <div className="min-w-0 space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <StatusBadge status={status} />
-                          <PriorityBadge priority={taskPriority(task)} />
-                          {overdue ? (
-                            <span className="rounded-full bg-destructive/12 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-destructive uppercase">
-                              Overdue
-                            </span>
-                          ) : null}
-                          {task.workspaceKind === "hr" ? (
-                            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
-                              HR
-                            </span>
-                          ) : null}
+                    <div className="grid min-w-0 gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1.5fr)_auto] sm:items-start lg:grid-cols-[minmax(0,1.6fr)_minmax(7.5rem,0.65fr)_minmax(7.5rem,0.75fr)_minmax(8.5rem,0.85fr)] lg:gap-4">
+                      <div className="min-w-0 space-y-1.5">
+                        <div className="flex min-w-0 items-start gap-2.5">
+                          <span
+                            className={cn(
+                              "mt-1.5 size-2.5 shrink-0 rounded-full ring-2 ring-background",
+                              statusDotClass(status, overdue),
+                            )}
+                            title={statusDotLabel(status, overdue)}
+                            aria-label={statusDotLabel(status, overdue)}
+                          />
+                          <div className="min-w-0 space-y-1.5">
+                            <p className="truncate font-heading text-[15px] font-semibold tracking-tight group-hover:text-primary">
+                              {task.title}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <StatusBadge status={status} />
+                              <PriorityBadge priority={taskPriority(task)} />
+                              {overdue ? (
+                                <span className="rounded-full bg-destructive/12 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-destructive uppercase">
+                                  Overdue
+                                </span>
+                              ) : null}
+                              {task.workspaceKind === "hr" ? (
+                                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
+                                  HR
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {task.workspaceName}
+                            </p>
+                          </div>
                         </div>
-                        <p className="truncate font-heading text-base font-semibold tracking-tight group-hover:text-primary">
-                          {task.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {task.workspaceName}
-                        </p>
                       </div>
 
-                      <div className="min-w-0 space-y-1.5">
+                      <div className="min-w-0 space-y-1">
                         <p className="text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                           Creator
                         </p>
                         <div className="flex items-center gap-2">
-                          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted font-heading text-[11px] font-semibold">
+                          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted font-heading text-[10px] font-semibold">
                             {personInitials(
                               task.createdByName,
                               task.createdByNestId,
@@ -575,7 +602,7 @@ function TasksPanel({
                         </div>
                       </div>
 
-                      <div className="min-w-0 space-y-1.5">
+                      <div className="min-w-0 space-y-1">
                         <p className="text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                           Assignees
                         </p>
@@ -590,7 +617,7 @@ function TasksPanel({
                                 <span
                                   key={name}
                                   title={name}
-                                  className="flex size-7 items-center justify-center rounded-full border border-background bg-muted font-heading text-[10px] font-semibold"
+                                  className="flex size-6 items-center justify-center rounded-full border border-background bg-muted font-heading text-[10px] font-semibold"
                                 >
                                   {personInitials(name)}
                                 </span>
@@ -603,7 +630,7 @@ function TasksPanel({
                         )}
                       </div>
 
-                      <div className="min-w-0 space-y-2">
+                      <div className="min-w-0 space-y-1.5">
                         <div>
                           <p className="text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                             Due
@@ -622,12 +649,12 @@ function TasksPanel({
                             Created {formatWhen(task.createdAt)}
                           </p>
                         </div>
-                        <div className="space-y-1 border-t border-border/60 pt-2">
+                        <div className="space-y-0.5 border-t border-border/60 pt-1.5">
                           <p className="text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                             Latest update
                           </p>
                           <p
-                            className="text-sm leading-snug text-foreground"
+                            className="line-clamp-2 text-sm leading-snug text-foreground"
                             title={formatActivitySummary(task.lastUpdateSummary)}
                           >
                             {formatActivitySummary(task.lastUpdateSummary)}
@@ -936,9 +963,9 @@ function ReportsPanel({ report }: { report: AdminReportSnapshot }) {
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-primary transition-[width]"
+                    className="h-full w-full origin-left rounded-full bg-primary motion-safe:transition-transform"
                     style={{
-                      width: `${Math.round((row.count / maxStatus) * 100)}%`,
+                      transform: `scaleX(${row.count / maxStatus})`,
                     }}
                   />
                 </div>

@@ -151,6 +151,7 @@ M0 Foundations → M1 Auth & shell → M2 Tasks core → M3 Collaboration
 | 6 | Gear-system deep links | T-085 | done | gear_ref / gear_url + optional base URL |
 | 7 | Advanced automation + templates | T-086 | done | People → Templates & automation |
 | 8 | Passkeys / MFA | T-087 | open | Stronger auth after password baseline |
+| 9 | Google Chat notifications | T-088 | done | Space webhook cards (ADR-005). Personal DMs later. |
 
 M8 does not include deep gear inventory, public signup, native apps, or full HRIS (PRD non-goals).
 
@@ -160,7 +161,7 @@ M8 does not include deep gear inventory, public signup, native apps, or full HRI
 | --- | --- | --- |
 | Parent domain DNS access | M0 / M7 | Name.com or current nameserver provider |
 | Supabase project access | M0 | Prefer shared identities, isolated NestFlow schema/tables |
-| Resend NestFlow API key | M4 | Separate key from other products if possible |
+| Google Chat space webhook | T-088 | Optional Chat cards; `GOOGLE_CHAT_*` (ADR-005) |
 | Cloudflare R2 bucket | M3 | Private NestFlow attachments (ADR-004) |
 | Vercel project | M0 | Custom domain attachment |
 | Employee Nest ID source of truth | M1 | Must be unique and stable |

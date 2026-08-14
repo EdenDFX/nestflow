@@ -26,7 +26,7 @@ Writing rules live in [DOCS_STYLE.md](engineering/DOCS_STYLE.md). They follow th
 4. Follow [CODING_RULES.md](engineering/CODING_RULES.md) while you implement.
 5. Record user-visible work in [CHANGELOG.md](CHANGELOG.md) under `[Unreleased]`.
 
-> **Important:** Don't commit `.env.local`, service-role keys, R2 secrets, or VAPID private keys.
+> **Important:** Don't commit `.env.local`, service-role keys, R2 secrets, VAPID private keys, or Google Chat webhook URLs.
 
 ## Topics
 
@@ -44,6 +44,7 @@ Writing rules live in [DOCS_STYLE.md](engineering/DOCS_STYLE.md). They follow th
 - [Architecture](engineering/ARCHITECTURE.md): App structure, data flows, and security boundaries
 - [Git workflow](engineering/GIT_WORKFLOW.md): Branches, Conventional Commits, SemVer, and CI
 - [R2 setup](engineering/R2_SETUP.md): Private attachments on Cloudflare R2
+- [Google Chat setup](engineering/GOOGLE_CHAT_SETUP.md): Optional Chat space webhook cards
 - [Roadmap](product/ROADMAP.md): Milestones and delivery order
 - [Tasks](product/TASKS.md): Implementation backlog
 

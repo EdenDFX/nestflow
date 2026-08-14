@@ -55,7 +55,7 @@ Restore drill date: ________  Operator: ________
 
 ## Secrets / launch env
 
-- [x] Service role / R2 / Resend / VAPID keys never exposed to the browser
+- [x] Service role / R2 / Resend / VAPID / Google Chat webhook never exposed to the browser
 - [ ] Production env vars verified in Vercel (no placeholders)
 - [ ] `NEXT_PUBLIC_APP_URL=https://tasks.nestbyeden.app`
 - [ ] Daily cron configured so Free project stays warm (Hobby allows once per day)

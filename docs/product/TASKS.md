@@ -62,7 +62,7 @@ Last audit: 2026-08-14
 | T-041 | In-app notification centre | done | Bell + `/app/notifications` with read/unread |
 | T-042 | Resend email templates + delivery | done | Assignment/mention/due soon/overdue when Resend configured |
 | T-043 | Web Push subscribe / unsubscribe | done | Permission gated; VAPID + `/sw.js` |
-| T-044 | Notification preferences | done | Profile toggles for email/push channels |
+| T-044 | Notification preferences | done | Profile toggles for email, push, and Chat channels |
 
 ## Role suites
 
@@ -96,8 +96,8 @@ Don't rewrite role suites from scratch. Wire, extend, or tab-compose existing co
 | --- | --- | --- | --- | --- |
 | T-070 | Re-surface full Admin management UI under Overview | done | Keep `AdminOversight`. Re-mount `AdminSuite` (users, teams, departments, permissions, audit, invites) as additional tabs or a sibling route under `/app/admin`. Don't discard either component. | Admin can manage users/teams without losing All tasks / Log / Reports / Roles |
 | T-071 | Admin org settings / branding | todo | Tokens already live in `globals.css` + theme toggle. Add org defaults panel (name display, optional future branding notes); no duplicate token system. | Admin can view (edit if safe) company defaults |
-| T-072 | Admin notification templates overview | todo | Delivery already in `src/lib/notifications/email.ts` + event types. Add read-only Admin gallery of event → channel mappings; do not replace Resend send path. | Admin can see which events email/push/in-app cover |
-| T-073 | Admin system health UI | todo | Keep public `/api/health`. Extend Admin panel to show same probe + env readiness flags (Resend, R2, VAPID, Sentry, cron secret present/absent; no secret values). | Admin sees integrations status beyond raw JSON |
+| T-072 | Admin notification templates overview | todo | Delivery already in `src/lib/notifications/email.ts` + event types. Add read-only Admin gallery of event → channel mappings; do not replace Resend/Chat send paths. | Admin can see which events email/push/in-app/Chat cover |
+| T-073 | Admin system health UI | todo | Keep public `/api/health`. Extend Admin panel to show same probe + env readiness flags (Resend, R2, VAPID, Google Chat, Sentry, cron secret present/absent; no secret values). | Admin sees integrations status beyond raw JSON |
 | T-074 | Manager bulk + single reassign UI | done | Server already accepts `assigneeIds` on `updateTaskAction`. Create dialog assigns on create. Team board filters by assignee. List and Team board bulk bar now apply assignees, due date, and status. | Single and bulk assign / due / status work for managers/HR/admin in scope |
 | T-075 | HR employee status depth | done | People suite and Admin People deactivate now prompt for successor assignees when the account has open work, then lock the account. | Deactivate flow surfaces open tasks and reassigns before lock |
 | T-076 | HR template libraries | deferred | Explicit PRD v1.1. New work only. | Repeatable onboarding/offboarding task sets (M8 T-086) |
@@ -135,6 +135,7 @@ Prioritised after go-live. None of these replace v1 tasks above. Passkeys/MFA re
 | T-085 | Gear-system deep links | done | gear_ref / gear_url on tasks; optional NEXT_PUBLIC_GEAR_APP_URL |
 | T-086 | Advanced automation + templates | done | HR templates tab + automation rules (status/create/complete triggers) |
 | T-087 | Passkeys / MFA | todo | Optional stronger auth after password baseline (roadmap retained) |
+| T-088 | Google Chat notification channel | done | Space webhook; Profile Chat prefs; `/api/health` `googleChat` flag (ADR-005) |
 
 ## Writing new tasks
 

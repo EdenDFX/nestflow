@@ -68,6 +68,10 @@ const preferencesSchema = z.object({
   pushAssignment: z.boolean(),
   pushMention: z.boolean(),
   pushOverdue: z.boolean(),
+  chatAssignment: z.boolean(),
+  chatMention: z.boolean(),
+  chatDueSoon: z.boolean(),
+  chatOverdue: z.boolean(),
 });
 
 export async function updateNotificationPreferencesAction(
@@ -90,6 +94,10 @@ export async function updateNotificationPreferencesAction(
       push_assignment: parsed.data.pushAssignment,
       push_mention: parsed.data.pushMention,
       push_overdue: parsed.data.pushOverdue,
+      chat_assignment: parsed.data.chatAssignment,
+      chat_mention: parsed.data.chatMention,
+      chat_due_soon: parsed.data.chatDueSoon,
+      chat_overdue: parsed.data.chatOverdue,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id" },

@@ -143,7 +143,7 @@ Logical project spaces. v1 may map 1:1 with teams or allow team-scoped workspace
 task_status: backlog | todo | in_progress | blocked | review | completed
 task_priority: low | medium | high | urgent
 app_role: admin | line_manager | hr | staff
-notification_channel: in_app | email | push
+notification_channel: in_app | email | push | chat
 ```
 
 ## 5. Indexing guidance
@@ -251,6 +251,7 @@ Never expose R2 credentials to the browser. Never rely on unguessable public URL
 - RPC: `public.nestflow_emit_notification` (SECURITY DEFINER fan-out; skips self for actor events)
 - Unique partial index on `(user_id, idempotency_key)` for duplicate suppression
 - Cron: `POST /api/cron/overdue` (Bearer `CRON_SECRET`) writes overdue/due-soon via service role
+- Chat preference columns and `chat_sent_at` added later (section 18)
 
 ## 15. M5 schema notes (applied)
 
@@ -275,9 +276,19 @@ Never expose R2 credentials to the browser. Never rely on unguessable public URL
 - `nf_tasks` view includes M8 columns; FORCE RLS + can_view/can_edit task helpers for task-scoped rows
 - Optional env: `NEXT_PUBLIC_GEAR_APP_URL` for gear deep links
 
+## 18. Google Chat channel (applied)
+
+Optional notification channel (ADR-005). Space incoming webhook in v1.
+
+- `nestflow.notification_preferences`: `chat_assignment`, `chat_mention`, `chat_due_soon`, `chat_overdue` (boolean, default true)
+- `nestflow.notifications.chat_sent_at` (timestamptz, nullable)
+- Views `nf_notification_preferences` and `nf_notifications` recreated with `security_invoker = true` to expose the new columns
+- App env: `GOOGLE_CHAT_ENABLED`, `GOOGLE_CHAT_WEBHOOK_URL` (server only). See [GOOGLE_CHAT_SETUP.md](GOOGLE_CHAT_SETUP.md)
+
 ## See Also
 
 - [Architecture](ARCHITECTURE.md)
 - [API](API.md)
 - [ADR-001](../decisions/ADR-001-backend-platform.md)
 - [ADR-004](../decisions/ADR-004-cloudflare-r2-attachments.md)
+- [ADR-005](../decisions/ADR-005-google-chat-notifications.md)

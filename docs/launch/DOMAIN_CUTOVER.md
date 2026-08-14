@@ -28,6 +28,7 @@ Parent domain `nestbyeden.app` is already purchased (Name.com). You don't need a
 | `RESEND_*` | Email notifications |
 | `R2_*` | Attachments (see `docs/engineering/R2_SETUP.md`; enable R2 in Cloudflare first) |
 | `NEXT_PUBLIC_VAPID_*` / `VAPID_*` | Web Push |
+| `GOOGLE_CHAT_ENABLED` / `GOOGLE_CHAT_WEBHOOK_URL` | Google Chat space cards (see `docs/engineering/GOOGLE_CHAT_SETUP.md`) |
 | `NEXT_PUBLIC_SENTRY_DSN` | Error monitoring |
 
 4. Confirm `vercel.json` crons are active (daily overdue scan + health check also help keep Free Supabase warm on Hobby).

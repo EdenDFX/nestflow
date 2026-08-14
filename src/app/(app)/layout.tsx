@@ -1,8 +1,16 @@
+import { Geist_Mono } from "next/font/google";
+
 import { AppShell } from "@/components/layout/app-shell";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { navForRoles } from "@/lib/auth/navigation";
 import { requireActiveProfile } from "@/lib/auth/session";
-import { listNotifications } from "@/lib/notifications/queries";
-import { getTaskCounters } from "@/lib/tasks/queries";
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default async function AuthenticatedLayout({
   children,
@@ -13,24 +21,18 @@ export default async function AuthenticatedLayout({
 }>) {
   const profile = await requireActiveProfile();
   const navItems = navForRoles(profile.roles);
-  const [{ items, unreadCount }, counters] = await Promise.all([
-    listNotifications(12),
-    getTaskCounters({ userId: profile.userId }),
-  ]);
 
   return (
-    <>
+    <TooltipProvider delayDuration={200}>
       <AppShell
         profile={profile}
         navItems={navItems}
-        notifications={items}
-        unreadCount={unreadCount}
-        overdueCount={counters.overdue}
-        blockedCount={counters.blocked}
+        className={geistMono.variable}
       >
         {children}
       </AppShell>
       {pane}
-    </>
+      <Toaster richColors closeButton position="top-right" />
+    </TooltipProvider>
   );
 }

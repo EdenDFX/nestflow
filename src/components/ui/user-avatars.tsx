@@ -154,6 +154,8 @@ export function UserAvatars({
                 <img
                   src={user.image}
                   alt={user.name || "User"}
+                  width={sizePx}
+                  height={sizePx}
                   className="h-full w-full object-cover"
                 />
               ) : (

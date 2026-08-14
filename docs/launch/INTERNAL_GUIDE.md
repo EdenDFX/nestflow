@@ -55,7 +55,7 @@ Blocked tasks need a reason. NestFlow rejects illegal moves.
 ## Notifications
 
 - In-app: bell and Notifications page (All, Unread, Mentions, Assignments)
-- Email / push: when Resend and Web Push are configured; control preferences under Profile
+- Email / push / Google Chat: when Resend, Web Push, and the Chat webhook are configured; control preferences under Profile
 
 ## Attachments
 

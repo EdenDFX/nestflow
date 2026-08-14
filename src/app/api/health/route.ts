@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
+import { isGoogleChatConfigured } from "@/lib/notifications/google-chat";
+
 export const runtime = "nodejs";
 
 /**
@@ -39,6 +41,7 @@ export async function GET() {
       service: "nestflow",
       version: "1.0.0",
       database,
+      googleChat: isGoogleChatConfigured() ? "configured" : "missing",
       tier: "supabase-free",
       elapsedMs: Date.now() - started,
     },
