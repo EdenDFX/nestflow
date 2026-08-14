@@ -1,5 +1,16 @@
 # NestFlow role permission matrix
 
+Capabilities by role, enforced in the UI, server, and RLS.
+
+| Field | Value |
+| --- | --- |
+| Last updated | 2026-08-14 |
+| Related | ADR-003 |
+
+## Overview
+
+Role grants capability. Team membership grants scope. Automated assertions live in `src/lib/security/authz.test.ts`. Run `pnpm test`.
+
 Derived from ADR-003 and enforced in:
 
 - UI navigation (`src/lib/auth/navigation.ts`)
@@ -22,4 +33,8 @@ Derived from ADR-003 and enforced in:
 | View others' team tasks without assignment | Yes | Yes (managed teams) | HR queues only | No |
 | Comment / checklist / status (in scope) | Yes | Yes | Yes | Yes |
 
-Automated assertions live in `src/lib/security/authz.test.ts` (`pnpm test`).
+## See Also
+
+- [ADR-003](../decisions/ADR-003-role-access-model.md)
+- [API](API.md)
+- [Architecture](ARCHITECTURE.md)

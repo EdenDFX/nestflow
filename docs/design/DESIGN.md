@@ -1,12 +1,18 @@
-# NestFlow Design System
+# NestFlow design system
+
+Colour, type, motion, layout, and accessibility for NestFlow UI.
 
 | Field | Value |
 | --- | --- |
-| Status | Draft |
-| Last updated | 2026-08-05 |
+| Status | Current |
+| Last updated | 2026-08-14 |
 | Product | NestFlow |
 | Primary | `#FF6300` |
 | Modes | Light and dark |
+
+## Overview
+
+NestFlow should feel operational, clear, and energetic without becoming noisy. Use brand orange for primary action. Keep status colours distinct from the brand.
 
 ## 1. Design intent
 
@@ -30,7 +36,7 @@ Brand appears in:
 - Active nav / focus accents
 - Key progress indicators
 
-Do not flood the board with orange. Status colours remain distinct from brand primary.
+Don't flood the board with orange. Status colours remain distinct from brand primary.
 
 ## 3. Colour system
 
@@ -118,8 +124,8 @@ Type scale should support:
 ### 7.1 App shell
 
 - Top or side navigation with NestFlow mark
-- Content canvas for Dashboard, My Tasks, Board, List, Calendar
-- Notification bell and user menu in chrome
+- Content canvas for Dashboard, My Tasks, Work (board / list / calendar)
+- Command palette (⌘K), notification bell, and user menu in chrome
 
 ### 7.2 Board
 
@@ -180,12 +186,12 @@ Respect `prefers-reduced-motion`.
 - Contrast AA target for text and essential controls
 - Visible focus rings
 - Keyboard access for core flows
-- Do not convey meaning by colour alone
+- Don't convey meaning by colour alone
 
 ## 13. Iconography
 
-- Do not use icons by default. Prefer text labels for actions and navigation unless density or established patterns clearly need a mark.
-- When an icon is justified, use [lucide-animated](https://lucide-animated.com/) (Lucide + Motion hover) from `src/components/icons/`. Do not mix unrelated icon sets or ad-hoc SVGs for UI chrome.
+- Don't use icons by default. Prefer text labels for actions and navigation unless density or established patterns clearly need a mark.
+- When an icon is justified, use [lucide-animated](https://lucide-animated.com/) (Lucide + Motion hover) from `src/components/icons/`. Don't mix unrelated icon sets or ad-hoc SVGs for UI chrome.
 - Icon-only controls require a visible text alternative via tooltip (and accessible name).
 - No emoji as primary UI iconography.
 
@@ -193,3 +199,9 @@ Respect `prefers-reduced-motion`.
 
 - Prefer SVG for brand marks and non-icon graphics
 - Attachment previews must fail safely
+
+## See Also
+
+- [Design decisions](DESIGN_DECISIONS.md)
+- [Components](../engineering/COMPONENTS.md)
+- [Documentation style](../engineering/DOCS_STYLE.md)

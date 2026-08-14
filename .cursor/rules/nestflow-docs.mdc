@@ -8,10 +8,14 @@ alwaysApply: false
 
 When editing NestFlow docs:
 
-- Update `docs/CHANGELOG.md` only for released, user-visible changes.
+- Follow `docs/engineering/DOCS_STYLE.md` (Apple Style Guide + DocC page shape).
+- Lead with a one-sentence abstract. Use second person, present tense, and active voice.
+- Put how-to steps in numbered, imperative lists. Don't use *please*, *simply*, or *just*.
+- Update `docs/CHANGELOG.md` only for released, user-visible changes (use `[Unreleased]` until tagged).
 - Record significant technical choices as ADRs in `docs/decisions/`.
 - Record significant UX or visual choices in `docs/design/DESIGN_DECISIONS.md`.
 - Keep `docs/memory/OBSIDIAN_MEMORY.md` in sync with approved decisions only.
 - Never store secrets, API keys, passwords, or personal employee data in docs.
 - Prefer precise language. Follow the dash-usage project rule.
 - Cross-link related docs instead of duplicating long explanations.
+- Mark unfinished work as not shipped or ops pending. Don't describe a plan as live behaviour.

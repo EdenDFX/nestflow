@@ -1,5 +1,7 @@
 # ADR-002 — Authentication approach
 
+Use Supabase Auth for sessions. Nest ID is identity, not a password. Access is invite-only.
+
 | Field | Value |
 | --- | --- |
 | Status | Accepted |
@@ -41,6 +43,14 @@ Product rules:
 
 ## Follow-ups
 
-- Define invite email + first-password set flow
-- Decide recovery channel (email-based)
-- Add auth rate limiting and inactive-user hard stop
+- [x] Invite email + first-password set flow (Admin/HR invites)
+- [x] Recovery channel is email-based via Supabase Auth
+- [x] Auth rate limiting and inactive-user hard stop
+- [ ] MFA / passkeys (T-087)
+- [ ] Invite-only provisioning closed against uninvited sign-in (T-011)
+
+## See Also
+
+- [ADR-001](ADR-001-backend-platform.md)
+- [ADR-003](ADR-003-role-access-model.md)
+- [API](../engineering/API.md)

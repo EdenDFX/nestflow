@@ -1,10 +1,17 @@
 # NestFlow git workflow
 
+Branches, commit messages, SemVer, and CI for this repo.
+
 | Field | Value |
 | --- | --- |
 | Default remote | `origin` → `https://github.com/EdenDFX/nestflow.git` |
 | Default branch | `main` (production-ready) |
 | Integration branch | `develop` (optional but recommended) |
+| Last updated | 2026-08-14 |
+
+## Overview
+
+Use short-lived feature branches and pull requests. Record user-visible work in [CHANGELOG.md](../CHANGELOG.md) under `[Unreleased]` until you tag a release.
 
 ## Branch model
 
@@ -129,5 +136,11 @@ git checkout -b feature/calendar-filters
 git add -A
 git commit -m "feat(calendar): filter by assignee"
 git push -u origin HEAD
-# open PR on GitHub
+# Open a pull request on GitHub
 ```
+
+## See Also
+
+- [Changelog](../CHANGELOG.md)
+- [Coding rules](CODING_RULES.md)
+- [Documentation style](DOCS_STYLE.md)

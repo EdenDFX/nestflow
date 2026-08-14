@@ -1,5 +1,7 @@
 # ADR-001 — Backend platform and data isolation
 
+Use Supabase for NestFlow, reuse existing identities, and isolate NestFlow data from the gear system.
+
 | Field | Value |
 | --- | --- |
 | Status | Accepted |
@@ -48,6 +50,12 @@ If stronger isolation later proves necessary, a dedicated Supabase project may b
 
 ## Follow-ups
 
-- Confirm whether NestFlow tables live in a dedicated schema
-- Document R2 object-key conventions and attachment metadata in `DATABASE.md` (see ADR-004)
-- Add role-matrix RLS tests before launch
+- [x] NestFlow tables live in schema `nestflow` with public `nf_*` views
+- [x] R2 object-key conventions and attachment metadata documented in `DATABASE.md` (ADR-004)
+- [x] Role-matrix RLS tests before launch (`pnpm test`)
+
+## See Also
+
+- [ADR-002](ADR-002-authentication.md)
+- [ADR-004](ADR-004-cloudflare-r2-attachments.md)
+- [Database](../engineering/DATABASE.md)

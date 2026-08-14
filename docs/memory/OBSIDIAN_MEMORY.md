@@ -2,11 +2,11 @@
 
 Stable project memory for AI agents and future sessions. Store only approved, durable facts.
 
-**Do not store:** passwords, API keys, service-role keys, connection strings, employee personal data, or transient chat speculation.
+**Don't store:** passwords, API keys, service-role keys, connection strings, employee personal data, or transient chat speculation.
 
 When this file disagrees with an ADR or PRD, the ADR/PRD wins. Update this file after decisions are accepted.
 
-Last reviewed: 2026-08-06
+Last reviewed: 2026-08-14
 
 ## Product
 
@@ -70,7 +70,7 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 2. PRD
 3. Architecture / Database
 4. Design / Components
-5. Coding rules
+5. Coding rules and documentation style
 6. Roadmap
 7. Tasks
 8. This memory file
@@ -85,8 +85,6 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 
 - Exact gear-system production URL and host
 - Employee count / department list
-- Whether HR spaces are private from Line Managers by default
-- Whether Staff can create tasks in v1
 - Formal Nest ID assignment process (currently backfilled from email local-part)
 
 ## Schema decisions (accepted in M1)
@@ -112,10 +110,16 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 - M7 launch pack: `docs/launch/` (internal guide, support, domain cutover); CHANGELOG `1.0.0`; `/api/health`
 - Seed verified: 20 profiles, departments Account/Admin-Projects/Creative GFX/HR, workspaces General + People & HR
 - Remaining ops for go-live: Vercel env + DNS CNAME `tasks` → Vercel, Auth redirect URLs (DOMAIN_CUTOVER.md)
-- M7.1 PRD surface close-out (merge only; do not delete suites): T-070–T-079 in `docs/product/TASKS.md`
-- `AdminOversight` is live `/app/admin`; `AdminSuite` still exists and must be re-wired, not deleted
-- Manager reassign works in `updateTaskAction`; task detail UI still incomplete for assignee picker / bulk
-- Global search, Staff Mentions surface, Admin health/templates/org settings remain open
+- Soft-launch version is `1.0.0`. M7.1 close-out and M8 work sit under `[Unreleased]` in `docs/CHANGELOG.md` until the next tagged release.
+- Role home paths: Admin `/app/admin`, HR `/app/people`, Line Manager `/app`, Staff `/app/my-tasks`
+- Work surface: Staff and Line Managers use `/app/work` (board / list / calendar). `/app/board`, `/app/list`, and `/app/calendar` redirect there. HR keeps Calendar in nav; Admin nav is My Tasks + Overview.
+- Task detail can open as a slide-over pane from work views (`@pane` intercepting route)
+- Command palette (⌘K) searches accessible tasks and people (T-035 / T-079)
+- Mentions inbox: notifications `?filter=mentions` (T-077). My Tasks day plan supports inline status, checklist ticks, and a one-line @mention comment (T-078)
+- `/app/admin` is `AdminConsole`: Work mode (`AdminOversight`) and People mode (`AdminSuite`). Don't delete either suite.
+- Manager assign: task detail assignee picker plus bulk assignees / due date / status on List and Team board (T-074)
+- Deactivate prompts for successor assignees when the account has open work, then locks (T-075)
+- M7.1 still open: Admin org settings (T-071), notification templates gallery (T-072), Admin system health UI (T-073). Invite-only provisioning (T-011) and Playwright (T-004 remainder) remain open.
 - M8+ shipped (except passkeys/MFA T-087): recurring, approvals, dependencies, time tracking, extended reports, gear links, templates + automation
 - M8 tables: task_dependencies, time_entries, task_templates, automation_rules (+ task columns for recurrence/approval/gear)
 - Optional `NEXT_PUBLIC_GEAR_APP_URL` for gear deep links
@@ -125,6 +129,7 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 ## Reading pointers
 
 - Docs index: `docs/README.md`
+- Docs style: `docs/engineering/DOCS_STYLE.md`
 - PRD: `docs/product/PRD.md`
 - Architecture: `docs/engineering/ARCHITECTURE.md`
 - Coding rules: `docs/engineering/CODING_RULES.md`

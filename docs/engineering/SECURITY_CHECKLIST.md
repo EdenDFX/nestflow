@@ -1,8 +1,10 @@
-# NestFlow security and reliability checklist (M6 / M7)
+# NestFlow security and reliability checklist
 
-Last reviewed: 2026-08-06
+Production-readiness checks for M6 / M7 on Supabase Free.
 
-Platform assumption: **Supabase Free** (no Pro upgrade planned). See `BACKUP.md`.
+Last reviewed: 2026-08-14
+
+Platform assumption: **Supabase Free** (no Pro upgrade planned). See [BACKUP.md](BACKUP.md).
 
 ## Access control
 
@@ -42,7 +44,7 @@ Restore drill date: ________  Operator: ________
 - [x] Skip link to main content
 - [x] Board region labelled; list table caption + sort button labels
 - [x] Icon nav buttons expose `aria-label`
-- [ ] Keyboard walkthrough of login → My Tasks → Board → Task detail → Notifications
+- [ ] Keyboard walkthrough of sign-in → My Tasks → Work → Task detail → Notifications
 - [ ] Screen reader spot-check on create task dialog
 
 ## Performance
@@ -57,3 +59,9 @@ Restore drill date: ________  Operator: ________
 - [ ] Production env vars verified in Vercel (no placeholders)
 - [ ] `NEXT_PUBLIC_APP_URL=https://tasks.nestbyeden.app`
 - [ ] Daily cron configured so Free project stays warm (Hobby allows once per day)
+
+## See Also
+
+- [Backup](BACKUP.md)
+- [Domain cutover](../launch/DOMAIN_CUTOVER.md)
+- [Role matrix](ROLE_MATRIX.md)

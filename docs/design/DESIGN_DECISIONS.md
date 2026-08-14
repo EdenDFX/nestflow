@@ -1,6 +1,10 @@
-# NestFlow Design Decisions
+# NestFlow design decisions
 
-Record significant UX and visual choices here. For infrastructure or backend choices, use ADRs in `docs/decisions/`.
+Reasons behind important UX and visual choices. For infrastructure, use ADRs.
+
+## Overview
+
+Record a DD when you choose a lasting visual or interaction pattern. Don't duplicate architecture ADRs here.
 
 ## DD-001 — Product name is NestFlow; Backlog is a status
 
@@ -153,11 +157,11 @@ Icons are easy to overuse and fragment when teams pull from multiple libraries. 
 
 ### Decision
 
-- Do not add icons by default; prefer labelled controls
+- Don't add icons by default; prefer labelled controls
 - When an icon is needed, use [lucide-animated](https://lucide-animated.com/) (Lucide shapes, Motion hover) from `src/components/icons/`
 - Install icons with the shadcn registry `@lucide-animated/{name}`
 - Icon-only controls must have tooltips and accessible names
-- Do not use emoji as UI icons
+- Don't use emoji as UI icons
 - Hover animation must not run when `prefers-reduced-motion: reduce` is set
 
 ### Consequences
@@ -231,3 +235,8 @@ Board, My Tasks, and role pages inherit the shell. Live counts fill the trailing
 ### Decision
 ### Consequences
 ```
+
+## See Also
+
+- [Design](DESIGN.md)
+- [ADR index](../decisions/README.md)

@@ -1,90 +1,72 @@
-# NestFlow Documentation
+# NestFlow documentation
 
-Internal documentation for **NestFlow**, the task-management platform for Nest by Eden.
+Internal documentation for NestFlow, the task-management platform for Nest by Eden.
 
-| Item | Value |
+| Field | Value |
 | --- | --- |
 | Product | NestFlow |
 | Tagline | Plan. Assign. Deliver. |
 | Planned URL | `tasks.nestbyeden.app` |
 | Primary colour | `#FF6300` |
 | Application type | Responsive web application |
+| Soft launch | `1.0.0` (2026-08-06) |
+| Last audited | 2026-08-14 |
 
-## Reading order
+## Overview
 
-1. [PRD](product/PRD.md)
-2. [DESIGN](design/DESIGN.md)
-3. [ARCHITECTURE](engineering/ARCHITECTURE.md)
-4. [Architecture Decision Records](decisions/README.md)
-5. [DATABASE](engineering/DATABASE.md)
-6. [API](engineering/API.md)
-7. [COMPONENTS](engineering/COMPONENTS.md)
-8. [CODING_RULES](engineering/CODING_RULES.md)
-9. [ROADMAP](product/ROADMAP.md)
-10. [TASKS](product/TASKS.md)
-11. [OBSIDIAN_MEMORY](memory/OBSIDIAN_MEMORY.md)
-12. [CHANGELOG](CHANGELOG.md)
+Start here when you join the project, ship a change, or need a contract. Read the style guide before you edit docs. Follow the product documents in the order below if you are new.
 
-## Documentation map
+Writing rules live in [DOCS_STYLE.md](engineering/DOCS_STYLE.md). They follow the Apple Style Guide and DocC page shape: abstract, overview, how-to, reference, See Also.
 
-### Product
+## Get started
 
-| Document | Purpose |
-| --- | --- |
-| [PRD.md](product/PRD.md) | Product purpose, users, requirements, workflows, acceptance criteria |
-| [ROADMAP.md](product/ROADMAP.md) | Releases, milestones, dependencies, delivery order |
-| [TASKS.md](product/TASKS.md) | Actionable implementation backlog |
+1. Read the [PRD](product/PRD.md) for purpose, roles, and v1 scope.
+2. Skim [OBSIDIAN_MEMORY.md](memory/OBSIDIAN_MEMORY.md) for approved facts.
+3. Install and run the app from the [root README](../README.md).
+4. Follow [CODING_RULES.md](engineering/CODING_RULES.md) while you implement.
+5. Record user-visible work in [CHANGELOG.md](CHANGELOG.md) under `[Unreleased]`.
 
-### Engineering
+> **Important:** Don't commit `.env.local`, service-role keys, R2 secrets, or VAPID private keys.
 
-| Document | Purpose |
-| --- | --- |
-| [ARCHITECTURE.md](engineering/ARCHITECTURE.md) | Application structure, services, data flows, security boundaries |
-| [API.md](engineering/API.md) | Server Actions, Route Handlers, webhooks, error contracts |
-| [DATABASE.md](engineering/DATABASE.md) | Tables, relationships, indexes, RLS, migrations |
-| [R2_SETUP.md](engineering/R2_SETUP.md) | Cloudflare R2 attachments + Supabase metadata ops |
-| [ROLE_MATRIX.md](engineering/ROLE_MATRIX.md) | Capability matrix by role |
-| [SECURITY_CHECKLIST.md](engineering/SECURITY_CHECKLIST.md) | M6 production readiness checklist |
-| [BACKUP.md](engineering/BACKUP.md) | Backup / restore verification notes |
-| [COMPONENTS.md](engineering/COMPONENTS.md) | Reusable UI components, variants, states, accessibility |
-| [CODING_RULES.md](engineering/CODING_RULES.md) | Enforceable TypeScript, React, Next.js, testing, security rules |
-| [GIT_WORKFLOW.md](engineering/GIT_WORKFLOW.md) | Branches, Conventional Commits, SemVer, CI/CD |
+## Topics
 
-### Design
+### Essentials
 
-| Document | Purpose |
-| --- | --- |
-| [DESIGN.md](design/DESIGN.md) | Design system, colour, spacing, typography, motion, responsiveness |
-| [DESIGN_DECISIONS.md](design/DESIGN_DECISIONS.md) | Reasons behind important UX and visual choices |
+- [PRD](product/PRD.md): Product purpose, users, workflows, and acceptance
+- [Documentation style](engineering/DOCS_STYLE.md): Voice, page shape, and audit rules
+- [Coding rules](engineering/CODING_RULES.md): Enforceable TypeScript, React, and security rules
+- [Glossary](memory/PROJECT_GLOSSARY.md): Agreed product and domain terms
+- [Memory](memory/OBSIDIAN_MEMORY.md): Durable facts for agents and new sessions
+
+### Guides
+
+- [Design](design/DESIGN.md): Colour, type, motion, and layout
+- [Architecture](engineering/ARCHITECTURE.md): App structure, data flows, and security boundaries
+- [Git workflow](engineering/GIT_WORKFLOW.md): Branches, Conventional Commits, SemVer, and CI
+- [R2 setup](engineering/R2_SETUP.md): Private attachments on Cloudflare R2
+- [Roadmap](product/ROADMAP.md): Milestones and delivery order
+- [Tasks](product/TASKS.md): Implementation backlog
+
+### Reference
+
+- [API](engineering/API.md): Server Actions, Route Handlers, and error codes
+- [Database](engineering/DATABASE.md): Tables, RLS, views, and migrations
+- [Components](engineering/COMPONENTS.md): UI building blocks and states
+- [Role matrix](engineering/ROLE_MATRIX.md): Capabilities by role
+- [Changelog](CHANGELOG.md): User-visible changes by version
 
 ### Decisions
 
-| Document | Purpose |
-| --- | --- |
-| [decisions/](decisions/README.md) | Architecture Decision Records (ADRs) |
-
-### Memory
-
-| Document | Purpose |
-| --- | --- |
-| [OBSIDIAN_MEMORY.md](memory/OBSIDIAN_MEMORY.md) | Stable context for AI agents across sessions |
-| [PROJECT_GLOSSARY.md](memory/PROJECT_GLOSSARY.md) | Agreed meanings of product and domain terms |
-
-### Release notes
-
-| Document | Purpose |
-| --- | --- |
-| [CHANGELOG.md](CHANGELOG.md) | User-visible changes by released version |
+- [ADR index](decisions/README.md): Architecture Decision Records
+- [Design decisions](design/DESIGN_DECISIONS.md): UX and visual choices
 
 ### Launch
 
-| Document | Purpose |
-| --- | --- |
-| [INTERNAL_GUIDE.md](launch/INTERNAL_GUIDE.md) | Short employee training notes |
-| [SUPPORT.md](launch/SUPPORT.md) | Support channel and incident path |
-| [DOMAIN_CUTOVER.md](launch/DOMAIN_CUTOVER.md) | Vercel + DNS + Auth URL cutover |
-| [SECURITY_CHECKLIST.md](engineering/SECURITY_CHECKLIST.md) | Pre-launch checklist (Free tier) |
-| [BACKUP.md](engineering/BACKUP.md) | Free-tier backup / restore notes |
+- [Internal guide](launch/INTERNAL_GUIDE.md): Employee how-to
+- [Support](launch/SUPPORT.md): Support channel and incident path
+- [Domain cutover](launch/DOMAIN_CUTOVER.md): Vercel, DNS, and Auth URLs
+- [Security checklist](engineering/SECURITY_CHECKLIST.md): Production readiness
+- [Backup](engineering/BACKUP.md): Free-tier dump and restore
 
 ## Conflict resolution
 
@@ -94,10 +76,10 @@ When two documents disagree, use this order:
 2. PRD
 3. Architecture and database documentation
 4. Design and component documentation
-5. Coding rules
+5. Coding rules and documentation style
 6. Roadmap
 7. Tasks
-8. AI / vector memory
+8. Memory
 
 Memory summarises approved information. It must never silently override source documents.
 
@@ -110,7 +92,13 @@ Memory summarises approved information. It must never silently override source d
 | Design system | Design + frontend |
 | Database and API contracts | Engineering |
 | Changelog | Release owner |
+| Documentation style | Engineering |
 
 ## Sensitive information
 
-Do not store passwords, API keys, service-role keys, connection strings, or employee personal data in these documents.
+Don't store passwords, API keys, service-role keys, connection strings, or employee personal data in these documents.
+
+## See Also
+
+- [Root README](../README.md)
+- [Apple Style Guide](https://support.apple.com/guide/applestyleguide/welcome/web)

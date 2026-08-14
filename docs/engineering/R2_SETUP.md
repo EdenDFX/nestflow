@@ -1,6 +1,8 @@
 # NestFlow R2 + Supabase attachment setup
 
-NestFlow keeps **file blobs in Cloudflare R2** and **metadata in Supabase Postgres** (ADR-004). There is no Supabase Storage bucket for NestFlow attachments: upload inserts `nestflow.attachments` / `nf_attachments`, then the browser PUTs to a signed R2 URL.
+Keep file blobs in private Cloudflare R2 and metadata in Supabase Postgres (ADR-004).
+
+NestFlow doesn't use a Supabase Storage bucket for attachments. Upload inserts `nestflow.attachments` / `nf_attachments`, then the browser PUTs to a signed R2 URL.
 
 ## Architecture
 
@@ -28,7 +30,7 @@ Env vars (server only):
 | `R2_BUCKET` | `nestflow-attachments` |
 | `R2_ENDPOINT` | `https://{account_id}.r2.cloudflarestorage.com` |
 
-## Current status (2026-08-06)
+## Current status (2026-08-14)
 
 | Layer | Status |
 | --- | --- |
@@ -40,7 +42,7 @@ Env vars (server only):
 | CORS (localhost + production) | Applied via `pnpm r2:setup` |
 | Signed PUT/GET smoke test | Passed |
 
-Set `R2_ENDPOINT` explicitly for EU buckets. Do not use the default non-jurisdiction endpoint for this bucket.
+Set `R2_ENDPOINT` explicitly for EU buckets. Don't use the default non-jurisdiction endpoint for this bucket.
 
 ## Finish setup (manual, ~5 minutes)
 
@@ -99,3 +101,9 @@ No NestFlow buckets on Supabase Storage.
 ## Vercel
 
 Add the same `R2_*` keys on the Vercel project. Never use `NEXT_PUBLIC_*` for R2 secrets.
+
+## See Also
+
+- [ADR-004](../decisions/ADR-004-cloudflare-r2-attachments.md)
+- [Domain cutover](../launch/DOMAIN_CUTOVER.md)
+- [API](API.md)

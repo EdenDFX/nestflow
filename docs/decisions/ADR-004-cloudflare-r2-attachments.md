@@ -1,5 +1,7 @@
 # ADR-004 — Cloudflare R2 for attachments and heavy storage
 
+Store NestFlow file blobs in private Cloudflare R2. Keep metadata in Postgres.
+
 | Field | Value |
 | --- | --- |
 | Status | Accepted |
@@ -51,7 +53,13 @@ This refines ADR-001: NestFlow still uses the shared Supabase project for Auth, 
 
 ## Follow-ups
 
-- Document env vars (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT`) in deployment notes without committing secrets
-- Define max upload size and allowed mime list in `API.md` / coding rules during implementation
-- Add attachment upload and permission tests in Playwright
-- Update `TASKS.md` item for attachments to reference R2
+- [x] Env vars documented in [R2_SETUP.md](../engineering/R2_SETUP.md) and `.env.example` (no secrets in git)
+- [x] Max upload size (25 MB) and allowed types in [API.md](../engineering/API.md)
+- [x] Attachments task references R2 (T-032)
+- [ ] Playwright coverage for attachment upload and permission
+
+## See Also
+
+- [R2 setup](../engineering/R2_SETUP.md)
+- [ADR-001](ADR-001-backend-platform.md)
+- [Database](../engineering/DATABASE.md)

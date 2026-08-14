@@ -1,18 +1,24 @@
-# NestFlow Coding Rules
+# NestFlow coding rules
+
+Enforceable TypeScript, React, Next.js, testing, and security rules for this repo.
 
 | Field | Value |
 | --- | --- |
 | Status | Enforceable baseline |
-| Last updated | 2026-08-05 |
+| Last updated | 2026-08-14 |
 | Stack | Next.js App Router, TypeScript, Tailwind, shadcn/ui, Supabase |
+
+## Overview
+
+Follow these rules in every change. For voice and page shape in docs, see [DOCS_STYLE.md](DOCS_STYLE.md).
 
 ## 1. General
 
 1. Prefer clarity over cleverness.
 2. Keep pull requests focused.
-3. Do not commit secrets (`.env`, service-role keys, private keys).
+3. Don't commit secrets (`.env`, service-role keys, private keys).
 4. Follow dash-usage rules for UI copy, docs, commits, and PR text.
-5. Update docs when behaviour or contracts change.
+5. Update docs when behaviour or contracts change. Follow [DOCS_STYLE.md](DOCS_STYLE.md).
 
 ## 2. TypeScript
 
@@ -47,8 +53,8 @@ switch (status) {
 ## 4. React and Next.js
 
 1. Server Components by default.
-2. Add `"use client"` only for browser interactivity (drag/drop, local UI state, theme toggles, etc.).
-3. Do not fetch secrets or privileged data in Client Components.
+2. Add `"use client"` only for browser interactivity (drag and drop, local UI state, theme toggles, and similar).
+3. Don't fetch secrets or privileged data in Client Components.
 4. Use Server Actions for first-party mutations.
 5. Use Route Handlers for webhooks, cron, and non-UI HTTP.
 6. Keep route `page.tsx` files thin; push logic into features/server modules.
@@ -81,7 +87,7 @@ switch (status) {
 1. Use NestFlow tokens; primary brand colour is `#FF6300`.
 2. Support light and dark mode for every shipped surface.
 3. Prefer existing shadcn/NestFlow components before inventing new primitives.
-4. Do not use icons by default; prefer text labels. When an icon is justified, use lucide-animated from `src/components/icons/`.
+4. Don't use icons by default; prefer text labels. When an icon is justified, use lucide-animated from `src/components/icons/`.
 5. Tooltips for icon-only controls.
 6. Respect reduced-motion preferences for non-essential animation.
 
@@ -103,7 +109,7 @@ Product name is **NestFlow**. “Backlog” is a task status, not the product na
 1. Unit test pure logic (transitions, permissions, schema parsing) with Vitest.
 2. Component tests with React Testing Library for critical interactive pieces.
 3. Playwright for login, assign, comment, complete, and role-denied paths.
-4. Do not rely solely on manual clicking for permission guarantees.
+4. Don't rely solely on manual clicking for permission guarantees.
 
 ## 11. Error handling
 
@@ -127,5 +133,11 @@ Product name is **NestFlow**. “Backlog” is a task status, not the product na
 ## 14. AI-assisted development
 
 1. Read `docs/memory/OBSIDIAN_MEMORY.md` before large changes.
-2. Do not invent statuses, roles, or stack choices that contradict ADRs/PRD.
+2. Don't invent statuses, roles, or stack choices that contradict ADRs/PRD.
 3. Prefer updating source docs over stuffing transient chat details into memory.
+
+## See Also
+
+- [Documentation style](DOCS_STYLE.md)
+- [Architecture](ARCHITECTURE.md)
+- [Git workflow](GIT_WORKFLOW.md)

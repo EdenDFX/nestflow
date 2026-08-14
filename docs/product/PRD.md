@@ -1,11 +1,13 @@
-# NestFlow Product Requirements Document (PRD)
+# NestFlow product requirements
+
+What NestFlow is for, who uses it, and what v1 must do.
 
 | Field | Value |
 | --- | --- |
 | Product | NestFlow |
-| Status | Soft launch 1.0.0 shipped; PRD surface close-out (M7.1) open |
-| Version | 0.1.1 |
-| Last updated | 2026-08-06 |
+| Status | Soft launch `1.0.0` shipped; M7.1 remaining T-071–T-073; M8 shipped except T-087 |
+| Version | 0.1.2 |
+| Last updated | 2026-08-14 |
 | Planned URL | `tasks.nestbyeden.app` |
 | Related gear system | Nest by Eden gear management (`nestbyeden`) |
 
@@ -73,26 +75,24 @@ NestFlow solves this by providing:
 | --- | --- |
 | Login | Unique Nest ID / work email + password; branded NestFlow experience |
 | Dashboard | Overdue, outstanding, completed, and upcoming work |
-| My Tasks | Personal assignment list with filters |
-| Board | Kanban board by status |
-| List | Dense table / list view |
-| Calendar | Due-date calendar |
-| Task detail | Description, checklist, attachments, comments, activity |
-| Notifications centre | In-app notification history |
+| My Tasks | Personal day plan with inline status, checklist, and comment |
+| Work | Board, list, and calendar in one surface (`/app/work`) |
+| Task detail | Description, checklist, attachments, comments, activity; slide-over pane |
+| Notifications centre | In-app history with All, Unread, Mentions, Assignments |
 | Profile / preferences | Theme, notification preferences, security basics |
-| Search | Global search across accessible tasks and people |
+| Search | Command palette (⌘K) across accessible tasks and people |
 
 ### 5.2 Administrator
 
 | Screen | Description |
 | --- | --- |
-| Org settings | Company defaults, branding tokens if needed |
+| Org settings | Company defaults, branding tokens if needed (T-071, not shipped) |
 | User management | Invite, activate, deactivate, assign roles |
 | Departments / teams | Structure organisation units |
 | Permission matrix | Review role capabilities |
 | Audit log | Security and admin event history |
-| Notification templates | Email/push template overview |
-| System health | Basic delivery and integration status |
+| Notification templates | Email/push template overview (T-072, not shipped) |
+| System health | Basic delivery and integration status (T-073, not shipped) |
 
 ### 5.3 Line Manager
 
@@ -109,15 +109,15 @@ NestFlow solves this by providing:
 | --- | --- |
 | People tasks | Onboarding, offboarding, compliance task sets |
 | Employee status | Coordinate with deactivation / reactivation flows |
-| Template libraries | Repeatable HR task templates (v1.1 if needed) |
+| Template libraries | Repeatable HR task templates (shipped in M8) |
 
 ### 5.5 Staff
 
 | Screen | Description |
 | --- | --- |
 | My Tasks | Primary daily workspace |
-| Mentions | Comments and assignments directed at the user |
-| Quick update | Status, checklist, and comment actions |
+| Mentions | Inbox filter for comments directed at the user |
+| Quick update | Status, checklist, and comment actions on My Tasks |
 
 ## 6. Core features (v1)
 
@@ -137,7 +137,7 @@ NestFlow solves this by providing:
 - Statuses: Backlog, To Do, In Progress, Blocked, Review, Completed
 - Priority, due date, description, checklist, attachments, tags
 - Comments, mentions, activity history
-- Views: My Tasks, team board, list, calendar
+- Views: My Tasks, Work (board / list / calendar)
 - Dashboard metrics for overdue, completed, and outstanding tasks
 
 ### 6.3 Notifications
@@ -194,10 +194,11 @@ Users can configure channel preferences where operationally allowed.
 
 ### 7.4 Deactivate an employee
 
-1. Admin or HR deactivates the account.
-2. Open tasks remain visible to managers for reassignment.
-3. Historical comments and authorship remain attributed.
-4. Sign-in is blocked immediately.
+1. Admin or HR starts deactivation.
+2. If the account has open work, choose successor assignees.
+3. NestFlow reassigns those tasks, then locks the account.
+4. Historical comments and authorship stay attributed.
+5. Sign-in is blocked immediately.
 
 ## 8. Success metrics
 
@@ -211,40 +212,42 @@ Users can configure channel preferences where operationally allowed.
 
 ## 9. Acceptance criteria (v1)
 
-- [ ] Users can sign in with Nest ID or work email and password.
-- [ ] Each role can access only permitted screens and data.
-- [ ] Tasks support all v1 fields, statuses, comments, checklists, and attachments.
-- [ ] Board, list, calendar, and My Tasks views work on desktop and mobile.
-- [ ] Light and dark themes render with primary `#FF6300`.
-- [ ] Email and push notifications fire for the agreed event set.
-- [ ] Deactivated users cannot authenticate; history is preserved.
-- [ ] Audit log captures admin user-management events.
-- [ ] Accessibility baseline: keyboard navigation for core flows, labelled controls, visible focus.
+- [x] Users can sign in with Nest ID or work email and password.
+- [x] Each role can access only permitted screens and data.
+- [x] Tasks support all v1 fields, statuses, comments, checklists, and attachments.
+- [x] Board, list, calendar, and My Tasks views work on desktop and mobile.
+- [x] Light and dark themes render with primary `#FF6300`.
+- [x] Email and push notifications fire for the agreed event set (when Resend / VAPID are configured).
+- [x] Deactivated users cannot authenticate; history is preserved.
+- [x] Audit log captures admin user-management events.
+- [x] Accessibility baseline: keyboard navigation for core flows, labelled controls, visible focus.
 
-## 10. Out of scope for later versions
+Production DNS, Vercel env, and invite-only provisioning (T-011) remain ops / follow-up.
 
-Tracked in [ROADMAP.md](ROADMAP.md) as **M8+** and [TASKS.md](TASKS.md) as T-080–T-087:
+## 10. Later versions
 
-| Enhancement | Task | Notes |
+Tracked in [ROADMAP.md](ROADMAP.md) as **M8+** and [TASKS.md](TASKS.md) as T-080–T-087.
+
+| Enhancement | Task | Status |
 | --- | --- | --- |
-| Recurring tasks | T-080 | Schedule-generated instances |
-| Approvals | T-081 | Approve / reject workflow |
-| Task dependencies graph | T-082 | Blocked-by rules |
-| Time tracking | T-083 | Optional logs and totals |
-| Performance / delivery reports | T-084 | Extend Admin + team performance surfaces |
-| Gear-system deep links | T-085 | External references only |
-| Advanced automation + templates | T-086 | Includes HR template libraries (v1.1) |
-| Passkeys / MFA | T-087 | Optional stronger auth |
+| Recurring tasks | T-080 | Shipped |
+| Approvals | T-081 | Shipped |
+| Task dependencies graph | T-082 | Shipped |
+| Time tracking | T-083 | Shipped |
+| Performance / delivery reports | T-084 | Shipped |
+| Gear-system deep links | T-085 | Shipped |
+| Advanced automation + templates | T-086 | Shipped |
+| Passkeys / MFA | T-087 | Open |
 
-PRD §5 surfaces still closing under M7.1 (merge, do not replace): Admin org/settings/health, manager bulk reassign, Staff Mentions / quick update, global search. See TASKS T-070–T-079.
+PRD §5 still open under M7.1: Admin org settings (T-071), notification templates gallery (T-072), Admin system health UI (T-073). Search, Mentions, quick update, Admin People, and manager assign are shipped.
 
 ## 11. Open questions
 
 1. Exact full gear-system production URL and hosting provider.
-2. Whether NestFlow must reuse the existing Supabase project only, or may use a dedicated project if isolation requires it.
-3. Approximate employee count and department list for capacity planning.
-4. Whether HR requires private task spaces invisible to Line Managers by default.
-5. Parent domain TLD confirmed as `nestbyeden.app` (not `.com`).
+2. Approximate employee count and department list for capacity planning.
+3. Formal Nest ID assignment process (currently backfilled from email local-part).
+
+Resolved: NestFlow reuses the shared NestByEden Supabase project (ADR-001). HR workspaces (`kind=hr`) are hidden from Line Managers. Staff can create and update their own or assigned tasks. Parent domain is `nestbyeden.app`.
 
 ## 12. Document history
 
@@ -252,3 +255,10 @@ PRD §5 surfaces still closing under M7.1 (merge, do not replace): Admin org/set
 | --- | --- | --- |
 | 0.1.0 | 2026-08-05 | Initial PRD from planning sessions |
 | 0.1.1 | 2026-08-06 | Status after 1.0.0 soft launch; M7.1 merge plan + M8 task IDs |
+| 0.1.2 | 2026-08-14 | Work surface, shipped M7.1/M8, remaining T-071–T-073 and T-087 |
+
+## See Also
+
+- [Roadmap](ROADMAP.md)
+- [Tasks](TASKS.md)
+- [Role matrix](../engineering/ROLE_MATRIX.md)

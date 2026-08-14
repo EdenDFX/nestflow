@@ -1,16 +1,22 @@
-# NestFlow Database
+# NestFlow database
+
+Tables, views, RLS intent, and applied milestone notes for the `nestflow` schema.
 
 | Field | Value |
 | --- | --- |
-| Status | Draft schema plan |
-| Last updated | 2026-08-05 |
+| Status | Applied through M8 |
+| Last updated | 2026-08-14 |
 | Platform | Supabase Postgres |
 | Related | ADR-001, ADR-002, ADR-003, ADR-004 |
+
+## Overview
+
+Reuse existing Supabase Auth identities. Keep NestFlow data in schema `nestflow` with public `nf_*` views. Use `auth.users.id` as the immutable user key. Store Nest ID as a unique business identifier, never as a password. Enable FORCE RLS on every exposed table. Prefer soft deletion for people and historical task attribution. Ship every production change as a reviewed migration.
 
 ## 1. Principles
 
 1. Reuse existing Supabase Auth identities where possible.
-2. Isolate NestFlow application data in dedicated tables (optionally a dedicated schema such as `nestflow`).
+2. Isolate NestFlow application data in schema `nestflow` with public `nf_*` views.
 3. Use `auth.users.id` as the immutable internal user key.
 4. Store Nest ID as a unique business identifier, never as a password.
 5. Enable RLS on every exposed table.
@@ -35,7 +41,7 @@ profiles ──┬── memberships ── teams/departments
            └── audit_events
 ```
 
-## 3. Core tables (planned)
+## 3. Core tables
 
 ### 3.1 `profiles`
 
@@ -131,7 +137,7 @@ Logical project spaces. v1 may map 1:1 with teams or allow team-scoped workspace
 - `audit_events`
 - `invites`
 
-## 4. Enums (planned)
+## 4. Enums
 
 ```sql
 task_status: backlog | todo | in_progress | blocked | review | completed
@@ -163,19 +169,19 @@ notification_channel: in_app | email | push
 | `audit_events` | Admin (and maybe HR subset) | Server only |
 | `push_subscriptions` | Owner only | Owner only |
 
-Exact SQL policies will be written in migrations and tested per role.
+Exact SQL policies live in migrations and are tested per role.
 
 ## 7. Object storage (Cloudflare R2)
 
 NestFlow stores heavy files in **private Cloudflare R2** buckets. Postgres stores metadata only. See [ADR-004](../decisions/ADR-004-cloudflare-r2-attachments.md).
 
-### 7.1 Planned bucket
+### 7.1 Bucket
 
 | Bucket | Access |
 | --- | --- |
 | `nestflow-attachments` (R2) | Private; short-lived signed URLs issued by NestFlow server |
 
-### 7.2 `attachments` metadata columns (planned)
+### 7.2 `attachments` metadata columns
 
 | Column | Type | Notes |
 | --- | --- | --- |
@@ -190,7 +196,7 @@ NestFlow stores heavy files in **private Cloudflare R2** buckets. Postgres store
 | `deleted_at` | timestamptz null | Soft-delete; R2 hard-delete deferred |
 | `created_at` | timestamptz | |
 
-Object key convention (planned): `tasks/{task_id}/{attachment_id}/{safe_file_name}`.
+Object key convention: `tasks/{task_id}/{attachment_id}/{safe_file_name}`.
 
 Never expose R2 credentials to the browser. Never rely on unguessable public URLs without authz.
 
@@ -213,8 +219,7 @@ Never expose R2 credentials to the browser. Never rely on unguessable public URL
 
 ## 10. Open schema questions
 
-1. Whether multi-role users are common enough to avoid a “primary role” concept in UI.
-2. Whether HR private workspaces need a separate visibility flag in v1.
+1. Whether multi-role users are common enough to avoid a primary-role concept in UI. The app currently uses `primaryRole()` for home path and nav.
 
 ## 11. M1 schema notes (applied)
 
@@ -256,6 +261,12 @@ Never expose R2 credentials to the browser. Never rely on unguessable public URL
 - `can_view_task` hides `kind=hr` workspaces from non-HR/non-admin
 - Task visibility is participant-based: creator or assignee. Team membership alone does not grant access. Line managers see tasks on teams they manage; HR sees `kind=hr` workspace tasks; admin sees all.
 
+## 16. M6–M7 notes (applied)
+
+- FORCE RLS on NestFlow tables
+- Soft launch on shared NestByEden **Supabase Free** (Pro deferred)
+- Health route and overdue cron; no extra schema for launch pack
+
 ## 17. M8 schema notes (applied)
 
 - Task columns: recurrence_*, approval_*, gear_ref, gear_url
@@ -263,3 +274,10 @@ Never expose R2 credentials to the browser. Never rely on unguessable public URL
 - Public views: `nf_task_dependencies`, `nf_time_entries`, `nf_task_templates`, `nf_automation_rules`
 - `nf_tasks` view includes M8 columns; FORCE RLS + can_view/can_edit task helpers for task-scoped rows
 - Optional env: `NEXT_PUBLIC_GEAR_APP_URL` for gear deep links
+
+## See Also
+
+- [Architecture](ARCHITECTURE.md)
+- [API](API.md)
+- [ADR-001](../decisions/ADR-001-backend-platform.md)
+- [ADR-004](../decisions/ADR-004-cloudflare-r2-attachments.md)

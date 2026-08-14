@@ -1,8 +1,13 @@
 # NestFlow production domain cutover
 
-Target host: **`tasks.nestbyeden.app`**
+Attach `tasks.nestbyeden.app` to the Vercel project and point Auth at that host.
 
-Parent domain `nestbyeden.app` is already purchased (Name.com). Subdomain does not need a new registration.
+Parent domain `nestbyeden.app` is already purchased (Name.com). You don't need a new registration for the subdomain.
+
+| Field | Value |
+| --- | --- |
+| Target host | `tasks.nestbyeden.app` |
+| Last updated | 2026-08-14 |
 
 ## 1. Vercel project
 
@@ -50,10 +55,11 @@ In the shared Supabase project Auth settings, allow:
 
 ## 4. Smoke test after cutover
 
-1. `https://tasks.nestbyeden.app/api/health` returns ok.
-2. Login with Nest ID.
-3. Create task, comment, open notifications.
-4. Admin can open `/app/admin`.
+1. Open `https://tasks.nestbyeden.app/api/health` and confirm it returns ok.
+2. Sign in with a Nest ID.
+3. Create a task, add a comment, and open notifications.
+4. Confirm Admin can open `/app/admin`.
+5. Press ⌘K and search for a task.
 
 ## Cutover status
 
@@ -64,3 +70,9 @@ In the shared Supabase project Auth settings, allow:
 | DNS `tasks` record | pending ops |
 | SSL issued | pending ops |
 | Auth redirect URLs updated | pending ops |
+
+## See Also
+
+- [R2 setup](../engineering/R2_SETUP.md)
+- [Backup](../engineering/BACKUP.md)
+- [Support](SUPPORT.md)

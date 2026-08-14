@@ -1,10 +1,12 @@
-# NestFlow Roadmap
+# NestFlow roadmap
+
+Milestone order from foundations through launch and post-launch enhancements.
 
 | Field | Value |
 | --- | --- |
 | Product | NestFlow |
-| Status | Soft launch pack shipped; PRD surface close-out + M8+ backlog open |
-| Last updated | 2026-08-06 |
+| Status | Soft launch `1.0.0` shipped; M7.1 mostly closed (T-071–T-073 open); M8 shipped except passkeys (T-087) |
+| Last updated | 2026-08-14 |
 
 ## Release philosophy
 
@@ -25,8 +27,8 @@ M0 Foundations → M1 Auth & shell → M2 Tasks core → M3 Collaboration
 - [x] Docs set complete and reviewed
 - [x] Next.js + Tailwind + shadcn/ui scaffold
 - [x] Supabase project linkage and schema namespace plan (`nestflow` schema)
-- [ ] Vercel project and `tasks.nestbyeden.app` DNS plan
-- [ ] CI: lint, typecheck, unit test stub, Playwright smoke stub
+- [ ] Vercel project and `tasks.nestbyeden.app` DNS (runbook shipped; cutover ops pending)
+- [x] CI: lint, typecheck, unit tests on GitHub Actions (Playwright still open)
 
 **Exit criteria:** App deploys to a preview URL with design tokens applied.
 
@@ -124,16 +126,16 @@ M0 Foundations → M1 Auth & shell → M2 Tasks core → M3 Collaboration
 
 | Area | Current state | Merge plan |
 | --- | --- | --- |
-| Admin management | `AdminSuite` built; `/app/admin` shows `AdminOversight` only | Tab-compose both under Overview (T-070) |
+| Admin management | Done. `AdminConsole` Work (`AdminOversight`) + People (`AdminSuite`) on `/app/admin` | Keep both; do not delete (T-070) |
 | Admin org / branding | Design tokens only | Lightweight org settings panel (T-071) |
 | Admin notification templates | Shared Resend HTML + prefs | Read-only Admin overview of event → channel (T-072) |
 | Admin system health | `/api/health` only | Admin UI on top of health probe + env readiness (T-073) |
-| Manager assign | Create assign + server `assigneeIds`; detail UI incomplete | Detail assignee picker + bulk reassign on team views (T-074) |
-| HR status | Activate/deactivate + queues + invites live | Deactivate prompts for open work / reassignment (T-075) done |
-| HR templates | Not started | Defer to M8 T-086 (PRD v1.1) |
-| Staff mentions | Notification events only | Dedicated Mentions surface reusing notifications (T-077) |
-| Staff quick update | Full task detail | Compact actions from My Tasks (T-078) |
-| Global search | Local filters only | App-wide command / page with RLS (T-079 / T-035) |
+| Manager assign | Done. Detail picker + bulk assign / due / status on List and Team board | T-074 |
+| HR status | Done. Deactivate prompts for open work / reassignment | T-075 |
+| HR templates | Done in M8 | People → Templates & automation (T-086) |
+| Staff mentions | Done. Inbox filter `?filter=mentions` | T-077 |
+| Staff quick update | Done. My Tasks day plan + inline status, checklist, comment | T-078 |
+| Global search | Done. Command palette (⌘K) over tasks + people | T-079 / T-035 |
 
 **Exit criteria:** PRD §5 surfaces for Admin, Manager, HR, and Staff are usable or explicitly deferred with task IDs; no existing suite code removed.
 
@@ -175,3 +177,9 @@ M8 does not include deep gear inventory, public signup, native apps, or full HRI
 ## Timeline guidance
 
 Exact calendar dates should be set after team capacity is confirmed. Suggested sequencing is sequential through M7, with design polish continuous from M1.
+
+## See Also
+
+- [PRD](PRD.md)
+- [Tasks](TASKS.md)
+- [Changelog](../CHANGELOG.md)

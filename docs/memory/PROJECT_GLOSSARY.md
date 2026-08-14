@@ -1,6 +1,6 @@
-# NestFlow Project Glossary
+# NestFlow project glossary
 
-Agreed meanings for product and engineering terms. Prefer these words in UI copy and docs.
+Agreed meanings for product and engineering terms. Use these words in UI copy and docs.
 
 | Term | Meaning |
 | --- | --- |
@@ -15,6 +15,9 @@ Agreed meanings for product and engineering terms. Prefer these words in UI copy
 | Staff | Standard employee role working assigned tasks |
 | Team / Department | Organisational unit used for membership and scope |
 | Workspace | Project space where tasks live; team-scoped |
+| Work | Staff and Line Manager surface at `/app/work` combining board, list, and calendar |
+| Overview | Admin home at `/app/admin` with Work and People modes |
+| Command palette | Keyboard search (⌘K) over accessible tasks and people |
 | Task | Unit of work with status, priority, assignees, and activity |
 | Backlog | Task status for work not yet scheduled; not the product name |
 | Assignee | User responsible for progressing a task |
@@ -33,5 +36,10 @@ Agreed meanings for product and engineering terms. Prefer these words in UI copy
 ## Naming reminders
 
 - Say “add it to the NestFlow backlog” when speaking casually.
-- Do not brand the product as Backlog.
+- Don't brand the product as Backlog.
 - Prefer “Line Manager” in product copy unless a shorter label is required in dense UI.
+
+## See Also
+
+- [Documentation style](../engineering/DOCS_STYLE.md)
+- [PRD](../product/PRD.md)

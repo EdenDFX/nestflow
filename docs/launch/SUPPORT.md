@@ -1,9 +1,11 @@
 # NestFlow support and incident path
 
+Where employees get help, and how ops handle an outage.
+
 | Field | Value |
 | --- | --- |
-| Last updated | 2026-08-06 |
-| Soft launch | M7 |
+| Last updated | 2026-08-14 |
+| Soft launch | `1.0.0` |
 
 ## Support channel (internal)
 
@@ -38,7 +40,7 @@ Update the concrete chat channel name here once chosen: ________
 4. Check `/api/health` on production.
 5. If Auth is down, coordinate with shared NestByEden Supabase owner (gear system shares Auth).
 6. Post a short status note in the NestFlow chat thread.
-7. After recovery, note cause + fix in CHANGELOG or audit if admin-related.
+7. After recovery, note cause and fix in CHANGELOG or audit if admin-related.
 
 ## Free-tier note
 
@@ -51,3 +53,9 @@ If the Supabase project paused, restore it from the Supabase dashboard. Producti
 | NestFlow Admin | ________ |
 | Infrastructure / Supabase owner | ________ |
 | Vercel project owner | ________ |
+
+## See Also
+
+- [Internal guide](INTERNAL_GUIDE.md)
+- [Domain cutover](DOMAIN_CUTOVER.md)
+- [Security checklist](../engineering/SECURITY_CHECKLIST.md)

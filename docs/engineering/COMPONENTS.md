@@ -1,10 +1,16 @@
-# NestFlow Components
+# NestFlow components
+
+Reusable UI building blocks, variants, and accessibility expectations.
 
 | Field | Value |
 | --- | --- |
-| Status | Draft |
-| Last updated | 2026-08-05 |
+| Status | Current |
+| Last updated | 2026-08-14 |
 | Foundation | shadcn/ui + Tailwind + NestFlow tokens |
+
+## Overview
+
+Prefer existing shadcn and NestFlow components before you invent a new primitive. Update this page when you add a shared domain component.
 
 ## 1. Principles
 
@@ -12,7 +18,7 @@
 2. Prefer composition over one-off page markup.
 3. Every interactive component needs hover, focus, disabled, and loading states where applicable.
 4. Motion is purposeful: entrance, feedback, hierarchy. Not decoration spam.
-5. Do not use icons by default; prefer text labels. When an icon is needed, use lucide-animated from `src/components/icons/`.
+5. Don't use icons by default; prefer text labels. When an icon is needed, use lucide-animated from `src/components/icons/`.
 6. Tooltips explain dense icon-only controls.
 7. Components must support light and dark themes with primary `#FF6300`.
 8. Accessibility is part of the component contract, not a later pass.
@@ -87,7 +93,7 @@ Built from shadcn/ui and customised:
 | Review | Informational |
 | Completed | Success |
 
-Do not rely on colour alone; include text labels.
+Don't rely on colour alone; include text labels.
 
 ## 5. Motion guidelines
 
@@ -125,18 +131,27 @@ Avoid continuous looping animations in productivity surfaces.
 - [ ] Contrast against light and dark backgrounds
 - [ ] Reduced-motion respect where animation is non-essential
 
-## 9. File organisation (planned)
+## 9. File organisation
 
 ```text
 src/components/
-  ui/           # shadcn primitives
-  layout/       # shell, nav
-  tasks/        # board, card, detail
-  notifications/
-  people/
-  forms/
+  ui/              # shadcn primitives
+  layout/          # app shell, nav
+  tasks/           # board, list, calendar, detail, pane, bulk bar
+  admin/           # Overview, Team, People suites
+  workspace/       # dashboards, island
+  notifications/   # bell, inbox, preferences
+  search/          # command palette
+  icons/           # lucide-animated
+  auth/            # sign-in
 ```
 
 ## 10. Contribution rule
 
-Before adding a one-off control to a page, check whether an existing NestFlow component can be extended. Update this document when a new shared domain component is introduced.
+Before you add a one-off control to a page, check whether an existing NestFlow component can be extended. Update this document when you introduce a new shared domain component.
+
+## See Also
+
+- [Design](../design/DESIGN.md)
+- [Design decisions](../design/DESIGN_DECISIONS.md)
+- [Coding rules](CODING_RULES.md)

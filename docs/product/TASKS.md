@@ -1,10 +1,10 @@
-# NestFlow Implementation Tasks
+# NestFlow implementation tasks
 
-Actionable backlog derived from the PRD and roadmap. Use this as the working checklist during build. Mark items complete only when acceptance notes are satisfied.
+Actionable backlog derived from the PRD and roadmap. Mark items complete only when acceptance notes are satisfied.
 
 Status key: `todo` · `in_progress` · `blocked` · `done` · `partial`
 
-**Rule:** Do not delete shipped UI or server actions when closing gaps. Extend or re-wire existing modules; merge into current role surfaces.
+**Rule:** Don't delete shipped UI or server actions when closing gaps. Extend or re-wire existing modules; merge into current role surfaces.
 
 Last audit: 2026-08-14
 
@@ -90,11 +90,11 @@ Last audit: 2026-08-14
 
 ## PRD surface close-out (merge existing work; v1.0.x)
 
-Do not rewrite role suites from scratch. Wire, extend, or tab-compose existing components.
+Don't rewrite role suites from scratch. Wire, extend, or tab-compose existing components.
 
 | ID | Task | Status | Merge with existing | Acceptance |
 | --- | --- | --- | --- | --- |
-| T-070 | Re-surface full Admin management UI under Overview | done | Keep `AdminOversight`. Re-mount `AdminSuite` (users, teams, departments, permissions, audit, invites) as additional tabs or a sibling route under `/app/admin`. Do not discard either component. | Admin can manage users/teams without losing All tasks / Log / Reports / Roles |
+| T-070 | Re-surface full Admin management UI under Overview | done | Keep `AdminOversight`. Re-mount `AdminSuite` (users, teams, departments, permissions, audit, invites) as additional tabs or a sibling route under `/app/admin`. Don't discard either component. | Admin can manage users/teams without losing All tasks / Log / Reports / Roles |
 | T-071 | Admin org settings / branding | todo | Tokens already live in `globals.css` + theme toggle. Add org defaults panel (name display, optional future branding notes); no duplicate token system. | Admin can view (edit if safe) company defaults |
 | T-072 | Admin notification templates overview | todo | Delivery already in `src/lib/notifications/email.ts` + event types. Add read-only Admin gallery of event → channel mappings; do not replace Resend send path. | Admin can see which events email/push/in-app cover |
 | T-073 | Admin system health UI | todo | Keep public `/api/health`. Extend Admin panel to show same probe + env readiness flags (Resend, R2, VAPID, Sentry, cron secret present/absent; no secret values). | Admin sees integrations status beyond raw JSON |
@@ -145,3 +145,9 @@ When adding tasks:
 3. Include clear acceptance criteria.
 4. Keep implementation detail in PRs, not duplicated here.
 5. Prefer merging into existing components over parallel dead UIs.
+
+## See Also
+
+- [PRD](PRD.md)
+- [Roadmap](ROADMAP.md)
+- [Changelog](../CHANGELOG.md)

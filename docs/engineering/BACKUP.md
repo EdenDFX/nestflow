@@ -1,14 +1,16 @@
-# NestFlow backup and restore notes
+# NestFlow backup and restore
+
+How to dump and restore the `nestflow` schema on shared Supabase Free.
 
 | Field | Value |
 | --- | --- |
 | Status | Operational guidance (Supabase Free) |
-| Last updated | 2026-08-06 |
+| Last updated | 2026-08-14 |
 | Related | ADR-001, M6 hardening, M7 launch |
 
 ## Decision
 
-NestFlow runs on the **shared NestByEden Supabase Free** project for the foreseeable future. We are **not** upgrading to Pro for now. Durability relies on manual exports + Free-tier behaviour, not PITR.
+NestFlow runs on the **shared NestByEden Supabase Free** project. Don't upgrade to Pro for durability. Use weekly `pg_dump` plus keep-warm crons. Point-in-time recovery isn't available on Free.
 
 ## What to protect
 
@@ -62,3 +64,8 @@ Soft-deleted attachment metadata does not immediately delete R2 objects.
 
 Primary: NestFlow admin  
 Escalation: Nest by Eden infrastructure owner for the shared Supabase project
+
+## See Also
+
+- [Security checklist](SECURITY_CHECKLIST.md)
+- [Domain cutover](../launch/DOMAIN_CUTOVER.md)

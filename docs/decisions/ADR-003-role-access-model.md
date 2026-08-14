@@ -1,5 +1,7 @@
 # ADR-003 — Role and access model
 
+Grant capability by role and scope by team membership. Enforce in UI, server, and RLS.
+
 | Field | Value |
 | --- | --- |
 | Status | Accepted |
@@ -29,7 +31,7 @@ A user may hold more than one role if required; UI should present the union of c
 
 - Team membership determines default task visibility.
 - Assignees can see tasks assigned to them even across limited cases as policy allows.
-- HR-private workflows may further restrict visibility (final rule to confirm in PRD open questions).
+- HR-private workflows restrict visibility. Workspaces with `kind=hr` are visible to HR and Admin only.
 - Admins can operate globally.
 
 ### Enforcement layers
@@ -62,6 +64,12 @@ Deny by default.
 
 ## Follow-ups
 
-- Publish a permission matrix table in `API.md` or a dedicated appendix once finalised
-- Confirm whether Staff may create tasks in v1 or only update assigned work
-- Confirm HR visibility relative to Line Managers
+- [x] Permission matrix in [ROLE_MATRIX.md](../engineering/ROLE_MATRIX.md)
+- [x] Staff may create and update their own or assigned tasks
+- [x] HR workspaces (`kind=hr`) are hidden from Line Managers
+
+## See Also
+
+- [Role matrix](../engineering/ROLE_MATRIX.md)
+- [PRD](../product/PRD.md)
+- [ADR-002](ADR-002-authentication.md)

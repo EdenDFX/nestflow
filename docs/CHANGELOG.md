@@ -1,14 +1,25 @@
 # Changelog
 
-All notable user-visible changes to NestFlow will be documented in this file.
+User-visible changes to NestFlow, grouped by version.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
+
+Write entries for people who use the product. Don't list internal refactors or documentation-only work. Keep unreleased work under `[Unreleased]` until you tag a version.
 
 ## [Unreleased]
 
 ### Added
 
+- Unified Work surface (`/app/work`) for board, list, and calendar, with a slide-over task pane
+- Command palette (⌘K) over tasks and people the viewer can access
+- Mentions filter on the notification inbox
+- My Tasks day plan with inline status, checklist ticks, and a one-line comment
+- Admin Overview Work / People modes: oversight plus full user, team, department, invite, and audit management
+- Task detail assignee picker; List and Team board bulk bar for assignees, due date, and status
+- Deactivate-user flow that reassigns open work before locking the account
+- Role dashboards with status-coloured cards, due timers, and team roster
+- lucide-animated icons (hover motion, reduced-motion respected)
 - M8 task enhancements: recurring rules (spawn next on complete), approvals, dependencies, time tracking, gear deep links
 - Admin performance/delivery report extras (pending approvals, recurring open, hours logged, 30-day completion rate)
 - Team performance grid shows logged time per person
@@ -16,15 +27,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Nothing yet
-
-### Fixed
-
-- Nothing yet
-
-### Security
-
-- Nothing yet
+- `/app/board`, `/app/list`, and `/app/calendar` redirect into `/app/work`
+- Planned production URL is `tasks.nestbyeden.app`
 
 ## [1.0.0] - 2026-08-06
 
@@ -68,3 +72,8 @@ First internal production launch (roadmap M7). Runs on shared NestByEden **Supab
 
 - `0.x` versions may ship during internal previews.
 - `1.0.0` marks the first internal production launch (roadmap M7).
+
+## See Also
+
+- [Git workflow](engineering/GIT_WORKFLOW.md)
+- [Roadmap](product/ROADMAP.md)

@@ -41,7 +41,7 @@ When documents disagree, prefer this order:
 2. PRD (`docs/product/PRD.md`)
 3. Architecture and database docs
 4. Design and component docs
-5. Coding rules
+5. Coding rules and documentation style (`docs/engineering/CODING_RULES.md`, `docs/engineering/DOCS_STYLE.md`)
 6. Roadmap / Tasks
 7. `docs/memory/OBSIDIAN_MEMORY.md`
 
@@ -50,7 +50,8 @@ Memory summarises approved facts. It must never silently override source documen
 ## Agent behaviour
 
 - Read `docs/memory/OBSIDIAN_MEMORY.md` at the start of substantial work.
+- Follow `docs/engineering/DOCS_STYLE.md` when editing docs (Apple Style Guide + DocC page shape).
 - Prefer Server Components by default; Client Components only for interaction.
 - Never expose the Supabase service-role key or R2 secrets to the browser.
-- Do not invent product names, statuses, or roles outside the docs.
+- Don't invent product names, statuses, or roles outside the docs.
 - Follow `docs/engineering/CODING_RULES.md` for implementation work.

@@ -1,15 +1,18 @@
 # Architecture Decision Records
 
-This folder stores Architecture Decision Records (ADRs) for NestFlow.
+Accepted technical choices that are expensive to reverse.
 
-## Format
+## Overview
 
 Each ADR uses:
 
 - Title and ID (`ADR-00X`)
+- One-sentence abstract
 - Status: Proposed, Accepted, Superseded, Deprecated
 - Context, Decision, Consequences
 - Date
+- Follow-ups (checked when applied)
+- See Also
 
 ## Index
 
@@ -30,4 +33,10 @@ Write an ADR when choosing or changing:
 - Public API strategy
 - Any decision that would be expensive to reverse
 
-Do not write ADRs for routine implementation details already covered by coding rules.
+Don't write ADRs for routine implementation details already covered by coding rules.
+
+## See Also
+
+- [Architecture](../engineering/ARCHITECTURE.md)
+- [Design decisions](../design/DESIGN_DECISIONS.md)
+- [Documentation style](../engineering/DOCS_STYLE.md)
