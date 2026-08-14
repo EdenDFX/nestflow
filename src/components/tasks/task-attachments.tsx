@@ -1,9 +1,12 @@
 "use client";
 
-import { Download, Paperclip, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
+
+import { AttachFileIcon } from "@/components/icons/attach-file";
+import { DeleteIcon } from "@/components/icons/delete";
+import { DownloadIcon } from "@/components/icons/download";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -96,7 +99,7 @@ export function TaskAttachments({
             disabled={uploading || pending || !r2Configured}
             onClick={() => inputRef.current?.click()}
           >
-            <Paperclip className="size-4" />
+            <AttachFileIcon className="inline-flex" />
             {uploading ? "Uploading…" : "Upload"}
           </Button>
         </div>
@@ -148,7 +151,7 @@ export function TaskAttachments({
                     })
                   }
                 >
-                  <Download className="size-3.5" />
+                  <DownloadIcon className="inline-flex" size={14} />
                 </Button>
                 <Button
                   type="button"
@@ -171,7 +174,7 @@ export function TaskAttachments({
                     })
                   }
                 >
-                  <Trash2 className="size-3.5" />
+                  <DeleteIcon className="inline-flex" size={14} />
                 </Button>
               </div>
             </li>

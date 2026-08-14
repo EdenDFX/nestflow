@@ -2,22 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  CalendarDays,
-  ChartColumn,
-  Columns3,
-  LayoutGrid,
-  List,
-  ListTodo,
-  Menu,
-  UserRound,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
+
+import { AlignLeftIcon } from "@/components/icons/align-left";
+import { CalendarDaysIcon } from "@/components/icons/calendar-days";
+import { ChartColumnIncreasingIcon } from "@/components/icons/chart-column-increasing";
+import { ClipboardCheckIcon } from "@/components/icons/clipboard-check";
+import { FolderKanbanIcon } from "@/components/icons/folder-kanban";
+import { LayoutGridIcon } from "@/components/icons/layout-grid";
+import { MenuIcon } from "@/components/icons/menu";
+import { UserIcon } from "@/components/icons/user";
+import { UsersIcon } from "@/components/icons/users";
 
 import { NestFlowMark } from "@/components/auth/nestflow-mark";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { CommandPalette, SearchTrigger } from "@/components/search/command-palette";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -50,15 +49,18 @@ import { primaryRole, roleLabel, type NestFlowProfile } from "@/lib/auth/types";
 import type { NestFlowNotification } from "@/lib/notifications/types";
 import { cn } from "@/lib/utils";
 
-const navIcons: Record<NavIcon, LucideIcon> = {
-  dashboard: LayoutGrid,
-  "my-tasks": ListTodo,
-  board: Columns3,
-  list: List,
-  calendar: CalendarDays,
-  team: Users,
-  people: UserRound,
-  admin: ChartColumn,
+type RailIcon = ComponentType<{ className?: string; size?: number }>;
+
+const navIcons: Record<NavIcon, RailIcon> = {
+  dashboard: LayoutGridIcon,
+  "my-tasks": ClipboardCheckIcon,
+  work: FolderKanbanIcon,
+  board: FolderKanbanIcon,
+  list: AlignLeftIcon,
+  calendar: CalendarDaysIcon,
+  team: UsersIcon,
+  people: UserIcon,
+  admin: ChartColumnIncreasingIcon,
 };
 
 function initials(profile: NestFlowProfile) {
@@ -110,7 +112,7 @@ function IconRail({
                     : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground",
                 )}
               >
-                <Icon className="size-4" />
+                <Icon className="inline-flex" />
                 {active ? (
                   <span className="absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full bg-primary ring-2 ring-background" />
                 ) : null}
@@ -160,7 +162,7 @@ function MobileNavList({
                   : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground",
               )}
             >
-              <Icon className="size-4" />
+              <Icon className="inline-flex" />
             </span>
             <span className="min-w-0 flex-1 truncate">{item.label}</span>
             {active ? (
@@ -181,12 +183,16 @@ export function AppShell({
   navItems,
   notifications,
   unreadCount,
+  overdueCount,
+  blockedCount,
   children,
 }: {
   profile: NestFlowProfile;
   navItems: NavItem[];
   notifications: NestFlowNotification[];
   unreadCount: number;
+  overdueCount: number;
+  blockedCount: number;
   children: React.ReactNode;
 }) {
   const displayRole = roleLabel(primaryRole(profile.roles));
@@ -221,7 +227,7 @@ export function AppShell({
                     size="icon"
                     aria-label="Open navigation"
                   >
-                    <Menu className="size-4" />
+                    <MenuIcon className="inline-flex" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent
@@ -301,9 +307,16 @@ export function AppShell({
               </Sheet>
             </div>
 
-            <WorkspaceIsland profile={profile} />
+            <WorkspaceIsland
+              profile={profile}
+              overdueCount={overdueCount}
+              blockedCount={blockedCount}
+              notifications={notifications}
+              unreadCount={unreadCount}
+            />
 
             <div className="ml-auto flex items-center gap-2">
+              <SearchTrigger />
               <ThemeToggle />
               <NotificationBell
                 items={notifications}
@@ -344,7 +357,7 @@ export function AppShell({
                     <Link href="/app/profile">Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/app/notifications">Notifications</Link>
+                    <Link href="/app/notifications">Inbox</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -369,6 +382,7 @@ export function AppShell({
           {children}
         </main>
       </div>
+      <CommandPalette />
     </div>
   );
 }

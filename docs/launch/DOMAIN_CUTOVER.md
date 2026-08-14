@@ -1,8 +1,8 @@
 # NestFlow production domain cutover
 
-Target host: **`tasks.nestbyeden.com`**
+Target host: **`tasks.nestbyeden.app`**
 
-Parent domain `nestbyeden.com` is already purchased (Name.com). Subdomain does not need a new registration.
+Parent domain `nestbyeden.app` is already purchased (Name.com). Subdomain does not need a new registration.
 
 ## 1. Vercel project
 
@@ -12,7 +12,7 @@ Parent domain `nestbyeden.com` is already purchased (Name.com). Subdomain does n
 
 | Required for soft launch | Notes |
 | --- | --- |
-| `NEXT_PUBLIC_APP_URL` | `https://tasks.nestbyeden.com` |
+| `NEXT_PUBLIC_APP_URL` | `https://tasks.nestbyeden.app` |
 | `NEXT_PUBLIC_SUPABASE_URL` | Shared NestByEden project |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key only |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only; overdue cron + invites |
@@ -39,18 +39,18 @@ Add one of:
 
 Or follow the exact target Vercel shows under Project → Domains.
 
-5. In Vercel → Domains, add `tasks.nestbyeden.com` and wait for SSL certificate.
+5. In Vercel → Domains, add `tasks.nestbyeden.app` and wait for SSL certificate.
 
 ## 3. Supabase Auth URLs
 
 In the shared Supabase project Auth settings, allow:
 
-- Site URL: `https://tasks.nestbyeden.com`
-- Redirect URLs: `https://tasks.nestbyeden.com/**` and local `http://localhost:3000/**`
+- Site URL: `https://tasks.nestbyeden.app`
+- Redirect URLs: `https://tasks.nestbyeden.app/**` and local `http://localhost:3000/**`
 
 ## 4. Smoke test after cutover
 
-1. `https://tasks.nestbyeden.com/api/health` returns ok.
+1. `https://tasks.nestbyeden.app/api/health` returns ok.
 2. Login with Nest ID.
 3. Create task, comment, open notifications.
 4. Admin can open `/app/admin`.

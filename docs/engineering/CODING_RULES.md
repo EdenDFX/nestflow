@@ -81,7 +81,7 @@ switch (status) {
 1. Use NestFlow tokens; primary brand colour is `#FF6300`.
 2. Support light and dark mode for every shipped surface.
 3. Prefer existing shadcn/NestFlow components before inventing new primitives.
-4. Do not use icons by default; prefer text labels. When an icon is justified, use Lucide only.
+4. Do not use icons by default; prefer text labels. When an icon is justified, use lucide-animated from `src/components/icons/`.
 5. Tooltips for icon-only controls.
 6. Respect reduced-motion preferences for non-essential animation.
 

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { TaskDetail } from "@/components/tasks/task-detail";
+import { listAssignablePeopleForProfile } from "@/lib/admin/queries";
 import { requireActiveProfile } from "@/lib/auth/session";
 import { isR2Configured } from "@/lib/storage/r2";
 import { getTaskCollaboration } from "@/lib/tasks/collaboration-queries";
@@ -20,9 +21,10 @@ export default async function TaskDetailPage({
     notFound();
   }
 
-  const [collaboration, m8] = await Promise.all([
+  const [collaboration, m8, people] = await Promise.all([
     getTaskCollaboration(taskId),
     getTaskM8Extras(taskId),
+    listAssignablePeopleForProfile(profile),
   ]);
 
   const canAssign =
@@ -40,6 +42,7 @@ export default async function TaskDetailPage({
       collaboration={collaboration}
       m8={m8}
       r2Configured={isR2Configured()}
+      assignablePeople={people}
     />
   );
 }

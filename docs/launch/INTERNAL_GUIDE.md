@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Audience | Nest by Eden employees |
-| Product URL | `https://tasks.nestbyeden.com` (after DNS cutover) |
+| Product URL | `https://tasks.nestbyeden.app` (after DNS cutover) |
 | Soft launch | M7 |
 | Platform | Supabase Free (shared NestByEden) + Vercel |
 

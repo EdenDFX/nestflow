@@ -36,6 +36,7 @@ function revalidateTask(taskId: string) {
   revalidatePath("/app/my-tasks");
   revalidatePath("/app/board");
   revalidatePath("/app/list");
+  revalidatePath("/app/work");
   revalidatePath("/app/calendar");
 }
 

@@ -12,21 +12,65 @@ import {
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { BulkReassignBar } from "@/components/tasks/bulk-reassign-bar";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
 import { Input } from "@/components/ui/input";
+import { personLabel } from "@/lib/people/label";
 import {
   STATUS_LABELS,
   type NestFlowTask,
+  type TaskAssignee,
 } from "@/lib/tasks/types";
+import { cn } from "@/lib/utils";
 
 const columnHelper = createColumnHelper<NestFlowTask>();
 
-export function TaskList({ tasks }: { tasks: NestFlowTask[] }) {
+export function TaskList({
+  tasks,
+  canAssign = false,
+  people = [],
+}: {
+  tasks: NestFlowTask[];
+  canAssign?: boolean;
+  people?: TaskAssignee[];
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const selectColumn = canAssign
+      ? [
+          columnHelper.display({
+            id: "select",
+            header: () => (
+              <span className="sr-only">Select tasks for bulk reassign</span>
+            ),
+            cell: (info) => {
+              const id = info.row.original.id;
+              const checked = selected.includes(id);
+              return (
+                <input
+                  type="checkbox"
+                  className="size-3.5 accent-primary"
+                  checked={checked}
+                  aria-label={`Select ${info.row.original.title}`}
+                  onChange={() => {
+                    setSelected((current) =>
+                      current.includes(id)
+                        ? current.filter((item) => item !== id)
+                        : [...current, id],
+                    );
+                  }}
+                />
+              );
+            },
+          }),
+        ]
+      : [];
+
+    return [
+      ...selectColumn,
       columnHelper.accessor("title", {
         header: "Task",
         cell: (info) => (
@@ -47,8 +91,7 @@ export function TaskList({ tasks }: { tasks: NestFlowTask[] }) {
         cell: (info) => <PriorityBadge priority={info.getValue()} />,
       }),
       columnHelper.accessor(
-        (row) =>
-          row.assignees.map((a) => a.fullName ?? a.nestId ?? a.email).join(", "),
+        (row) => row.assignees.map((person) => personLabel(person)).join(", "),
         {
           id: "assignees",
           header: "Assignees",
@@ -66,9 +109,8 @@ export function TaskList({ tasks }: { tasks: NestFlowTask[] }) {
             ? new Date(info.getValue() as string).toLocaleDateString()
             : "-",
       }),
-    ],
-    [],
-  );
+    ];
+  }, [canAssign, selected]);
 
   const table = useReactTable({
     data: tasks,
@@ -84,15 +126,38 @@ export function TaskList({ tasks }: { tasks: NestFlowTask[] }) {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
+  const visibleIds = table.getRowModel().rows.map((row) => row.original.id);
+  const allVisibleSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selected.includes(id));
+
   return (
     <div className="space-y-4">
-      <Input
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Filter tasks…"
-        className="max-w-sm"
-        aria-label="Filter tasks"
-      />
+      <div className="flex flex-wrap items-center gap-3">
+        <Input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Filter tasks…"
+          className="max-w-sm"
+          aria-label="Filter tasks"
+        />
+        {canAssign && visibleIds.length > 0 ? (
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              className="size-3.5 accent-primary"
+              checked={allVisibleSelected}
+              onChange={() => {
+                setSelected((current) =>
+                  allVisibleSelected
+                    ? current.filter((id) => !visibleIds.includes(id))
+                    : [...new Set([...current, ...visibleIds])],
+                );
+              }}
+            />
+            Select visible
+          </label>
+        ) : null}
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-border/80">
         <table className="w-full min-w-[720px] text-left text-sm">
@@ -102,7 +167,7 @@ export function TaskList({ tasks }: { tasks: NestFlowTask[] }) {
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th key={header.id} className="px-4 py-3 font-medium" scope="col">
-                    {header.isPlaceholder ? null : (
+                    {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button
                         type="button"
                         className="inline-flex items-center gap-1"
@@ -114,6 +179,11 @@ export function TaskList({ tasks }: { tasks: NestFlowTask[] }) {
                           header.getContext(),
                         )}
                       </button>
+                    ) : (
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )
                     )}
                   </th>
                 ))}
@@ -132,7 +202,13 @@ export function TaskList({ tasks }: { tasks: NestFlowTask[] }) {
               </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-b border-border/70 last:border-0">
+                <tr
+                  key={row.id}
+                  className={cn(
+                    "border-b border-border/70 last:border-0",
+                    selected.includes(row.original.id) && "bg-primary/5",
+                  )}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-4 py-3 align-middle">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -149,6 +225,14 @@ export function TaskList({ tasks }: { tasks: NestFlowTask[] }) {
         Showing {table.getRowModel().rows.length} of {tasks.length} tasks across{" "}
         {Object.keys(STATUS_LABELS).length} statuses.
       </p>
+
+      {canAssign ? (
+        <BulkReassignBar
+          selectedIds={selected}
+          people={people}
+          onClear={() => setSelected([])}
+        />
+      ) : null}
     </div>
   );
 }

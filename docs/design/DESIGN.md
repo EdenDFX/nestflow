@@ -53,8 +53,8 @@ Exact companion neutrals chosen at scaffold (2026-08-05):
 
 | Token | Light | Dark |
 | --- | --- | --- |
-| Background | Warm near-white `oklch(0.985 0.004 75)` | Pure black `#000000` |
-| Foreground | Near-black warm `oklch(0.2 0.02 55)` | Near-white `oklch(0.97 0.01 75)` |
+| Background | Warm near-white `oklch(0.975 0.008 75)` | Warm near-black `oklch(0.17 0.012 55)` |
+| Foreground | Warm ink `oklch(0.26 0.02 55)` | Warm near-white `oklch(0.93 0.01 75)` |
 | Primary | `#FF6300` | `#FF6300` |
 | Primary foreground | `#FFFFFF` | `#FFFFFF` |
 | Ring / sidebar primary | `#FF6300` | `#FF6300` |
@@ -185,7 +185,7 @@ Respect `prefers-reduced-motion`.
 ## 13. Iconography
 
 - Do not use icons by default. Prefer text labels for actions and navigation unless density or established patterns clearly need a mark.
-- When an icon is justified, use only [Lucide](https://lucide.dev) icons (the shadcn/ui standard). Do not mix other icon sets or ad-hoc SVGs for UI chrome.
+- When an icon is justified, use [lucide-animated](https://lucide-animated.com/) (Lucide + Motion hover) from `src/components/icons/`. Do not mix unrelated icon sets or ad-hoc SVGs for UI chrome.
 - Icon-only controls require a visible text alternative via tooltip (and accessible name).
 - No emoji as primary UI iconography.
 

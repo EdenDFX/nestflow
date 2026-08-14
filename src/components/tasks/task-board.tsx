@@ -12,17 +12,6 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import {
-  CheckCircle2,
-  ChevronRight,
-  CircleDashed,
-  ClipboardList,
-  Layers3,
-  ListTodo,
-  OctagonAlert,
-  Plus,
-  SearchCheck,
-} from "lucide-react";
 import Link from "next/link";
 import {
   useMemo,
@@ -33,6 +22,14 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import { BadgeAlertIcon } from "@/components/icons/badge-alert";
+import { ChevronRightIcon } from "@/components/icons/chevron-right";
+import { CircleCheckIcon } from "@/components/icons/circle-check";
+import { CircleDashedIcon } from "@/components/icons/circle-dashed";
+import { ClipboardCheckIcon } from "@/components/icons/clipboard-check";
+import { FileCheckIcon } from "@/components/icons/file-check";
+import { LayersIcon } from "@/components/icons/layers";
+import { PlusIcon } from "@/components/icons/plus";
 import { PriorityBadge } from "@/components/tasks/status-badge";
 import { TaskDueTimer } from "@/components/tasks/task-due-timer";
 import { Button } from "@/components/ui/button";
@@ -69,12 +66,12 @@ function useWideBoardLayout() {
 }
 
 const statusIcon: Record<TaskStatus, ReactNode> = {
-  backlog: <Layers3 className="size-3.5" aria-hidden />,
-  todo: <ListTodo className="size-3.5" aria-hidden />,
-  in_progress: <CircleDashed className="size-3.5" aria-hidden />,
-  blocked: <OctagonAlert className="size-3.5" aria-hidden />,
-  review: <SearchCheck className="size-3.5" aria-hidden />,
-  completed: <CheckCircle2 className="size-3.5" aria-hidden />,
+  backlog: <LayersIcon className="inline-flex" size={14} aria-hidden />,
+  todo: <ClipboardCheckIcon className="inline-flex" size={14} aria-hidden />,
+  in_progress: <CircleDashedIcon className="inline-flex" size={14} aria-hidden />,
+  blocked: <BadgeAlertIcon className="inline-flex" size={14} aria-hidden />,
+  review: <FileCheckIcon className="inline-flex" size={14} aria-hidden />,
+  completed: <CircleCheckIcon className="inline-flex" size={14} aria-hidden />,
 };
 
 function Port({
@@ -96,7 +93,7 @@ function Port({
       )}
     >
       {side === "right" ? (
-        <Plus className="size-2 text-muted-foreground" />
+        <PlusIcon className="inline-flex text-muted-foreground" size={8} />
       ) : null}
     </span>
   );
@@ -178,7 +175,7 @@ function GraphTaskCard({
       <Port side="left" />
       <div className="flex items-start gap-2 p-2.5">
         <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-lg border border-border/80 bg-muted/50 text-muted-foreground">
-          <ClipboardList className="size-3.5" aria-hidden />
+          <ClipboardCheckIcon className="inline-flex" size={14} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
           <Link
@@ -209,9 +206,9 @@ function GraphTaskCard({
           onPointerDown={(event) => event.stopPropagation()}
           onClick={onToggle}
         >
-          <ChevronRight
+          <ChevronRightIcon
             className={cn(
-              "size-4 transition-transform",
+              "inline-flex transition-transform",
               expanded && "rotate-90",
             )}
           />

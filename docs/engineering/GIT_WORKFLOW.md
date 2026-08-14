@@ -18,7 +18,7 @@ main          ← production / release-ready
 
 | Branch | Purpose | Deploys to |
 | --- | --- | --- |
-| `main` | Stable, releasable code | Vercel **Production** (`tasks.nestbyeden.com`) |
+| `main` | Stable, releasable code | Vercel **Production** (`tasks.nestbyeden.app`) |
 | `develop` | Integration of finished work | Vercel **Preview** (optional) |
 | `feature/*` | New work | PR preview |
 | `fix/*` | Bug fixes | PR preview |

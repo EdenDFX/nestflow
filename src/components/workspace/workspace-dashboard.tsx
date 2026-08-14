@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  ChevronDown,
-  Filter,
-  Search,
-} from "lucide-react";
 import { useMemo, useState } from "react";
+
+import { ArrowDownRightIcon } from "@/components/icons/arrow-down-right";
+import { ArrowUpRightIcon } from "@/components/icons/arrow-up-right";
+import { ChevronDownIcon } from "@/components/icons/chevron-down";
+import { SearchIcon } from "@/components/icons/search";
+import { SlidersHorizontalIcon } from "@/components/icons/sliders-horizontal";
 
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { TaskDueTimer } from "@/components/tasks/task-due-timer";
@@ -16,7 +15,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   SteppedCard,
   SteppedCardActionLink,
-  isSteppedCardLightTone,
   type SteppedCardTone,
 } from "@/components/ui/stepped-card";
 import { UserAvatars } from "@/components/ui/user-avatars";
@@ -29,6 +27,7 @@ import {
   type TaskCounters,
   type TaskStatus,
 } from "@/lib/tasks/types";
+import { openCommandPalette } from "@/lib/search/types";
 import { cn } from "@/lib/utils";
 
 const statusFilters = [
@@ -124,17 +123,17 @@ export function WorkspaceDashboard({
     },
     {
       id: "board",
-      title: "Board",
+      title: "Work board",
       subtitle: "Move work across statuses",
       badge: "Board",
-      href: "/app/board",
+      href: "/app/work?view=board",
     },
     {
       id: "list",
-      title: "List view",
-      subtitle: "Sort and filter densely",
+      title: "Work list",
+      subtitle: "Sort, filter, and bulk update",
       badge: "List",
-      href: "/app/list",
+      href: "/app/work?view=list",
     },
     {
       id: "overdue",
@@ -158,7 +157,7 @@ export function WorkspaceDashboard({
     <div className="space-y-8">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-2">
-          <h1 className="font-heading text-4xl font-semibold tracking-tight uppercase sm:text-5xl">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
             Workspace
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -205,67 +204,40 @@ export function WorkspaceDashboard({
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {focusItems.map((item, index) => {
-            const tone = index % 2 === 0 ? "primary" : "ink";
-            const onPrimary = tone === "primary";
-
+          {focusItems.map((item) => {
             return (
               <SteppedCard
                 key={item.id}
-                tone={tone}
+                tone="muted"
                 cornerActions={
                   <SteppedCardActionLink
                     href={item.href}
                     aria-label={`Open ${item.title}`}
                   >
-                    <ArrowUpRight className="size-4" />
+                    <ArrowUpRightIcon className="inline-flex" />
                   </SteppedCardActionLink>
                 }
               >
                 <div className="space-y-4">
-                  <div
-                    className={cn(
-                      "flex size-11 items-center justify-center rounded-full text-sm font-semibold",
-                      onPrimary
-                        ? "bg-[#1c1917]/10 text-[#1c1917]"
-                        : "bg-white/10 text-white",
-                    )}
-                  >
+                  <div className="flex size-11 items-center justify-center rounded-full bg-primary/12 text-sm font-semibold text-primary">
                     {item.badge.slice(0, 1)}
                   </div>
                   <div className="space-y-1.5 pe-2">
                     <h3 className="font-heading text-xl font-semibold tracking-tight">
                       {item.title}
                     </h3>
-                    <p
-                      className={cn(
-                        "text-sm",
-                        onPrimary ? "text-[#1c1917]/70" : "text-white/65",
-                      )}
-                    >
+                    <p className="text-sm text-muted-foreground">
                       {item.subtitle}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between gap-2">
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium",
-                      onPrimary
-                        ? "border-[#1c1917]/15 bg-white/35 text-[#1c1917]"
-                        : "border-white/15 bg-white/10 text-white",
-                    )}
-                  >
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background/70 px-3 py-1.5 text-xs font-medium">
                     {item.badge}
-                    <ChevronDown className="size-3.5 opacity-70" aria-hidden />
+                    <ChevronDownIcon className="inline-flex opacity-70" size={14} aria-hidden />
                   </span>
-                  <span
-                    className={cn(
-                      "text-xs font-medium",
-                      onPrimary ? "text-[#1c1917]/55" : "text-white/50",
-                    )}
-                  >
+                  <span className="text-xs font-medium text-muted-foreground">
                     NestFlow
                   </span>
                 </div>
@@ -299,7 +271,6 @@ export function WorkspaceDashboard({
           ) : (
             visibleTasks.map((task) => {
               const tone = toneForStatus(task.status);
-              const onLight = isSteppedCardLightTone(tone);
               const lead = task.assignees[0];
               const avatarUsers = task.assignees.map((assignee) => ({
                 id: assignee.userId,
@@ -322,7 +293,7 @@ export function WorkspaceDashboard({
                       href={`/app/tasks/${task.id}`}
                       aria-label={`Open ${task.title}`}
                     >
-                      <ArrowUpRight className="size-4" />
+                      <ArrowUpRightIcon className="inline-flex" />
                     </SteppedCardActionLink>
                   }
                 >
@@ -332,27 +303,13 @@ export function WorkspaceDashboard({
                         {lead.avatarUrl ? (
                           <AvatarImage src={lead.avatarUrl} alt="" />
                         ) : null}
-                        <AvatarFallback
-                          className={cn(
-                            "text-xs font-semibold",
-                            onLight
-                              ? "bg-[#1c1917] text-white"
-                              : "bg-white/20 text-white",
-                          )}
-                        >
+                        <AvatarFallback className="bg-foreground/10 text-xs font-semibold text-foreground">
                           {personInitials(lead)}
                         </AvatarFallback>
                       </Avatar>
                     ) : (
                       <Avatar className="size-10 ring-2 ring-black/10 dark:ring-white/10">
-                        <AvatarFallback
-                          className={cn(
-                            "text-xs font-semibold",
-                            onLight
-                              ? "bg-[#1c1917] text-white"
-                              : "bg-white/20 text-white",
-                          )}
-                        >
+                        <AvatarFallback className="bg-foreground/10 text-xs font-semibold text-foreground">
                           NF
                         </AvatarFallback>
                       </Avatar>
@@ -378,28 +335,16 @@ export function WorkspaceDashboard({
                             focusScale={1.18}
                             isOverlapOnly
                             tooltipPlacement="top"
-                            inverted={!onLight}
                           />
                         ) : (
-                          <span
-                            className={cn(
-                              "text-[11px] font-medium",
-                              onLight ? "text-[#1c1917]/60" : "text-white/55",
-                            )}
-                          >
+                          <span className="text-[11px] font-medium text-muted-foreground">
                             Unassigned
                           </span>
                         )}
                         <TaskDueTimer
                           dueAt={task.dueAt}
                           status={task.status}
-                          tone={
-                            onLight
-                              ? tone === "completed"
-                                ? "surface"
-                                : "on-primary"
-                              : "on-ink"
-                          }
+                          tone="surface"
                         />
                       </div>
                     </div>
@@ -408,10 +353,7 @@ export function WorkspaceDashboard({
                   <div className="flex items-center gap-2">
                     <span
                       className={cn(
-                        "inline-flex min-w-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium",
-                        onLight
-                          ? "border-[#1c1917]/15 bg-white/40 text-[#1c1917]"
-                          : "border-white/20 bg-white/10 text-white",
+                        "inline-flex min-w-0 items-center gap-1.5 rounded-full border border-border/80 bg-background/70 px-3 py-1.5 text-xs font-medium",
                         greyed && "border-border/60 bg-background/40",
                       )}
                     >
@@ -420,7 +362,7 @@ export function WorkspaceDashboard({
                           {lead.avatarUrl ? (
                             <AvatarImage src={lead.avatarUrl} alt="" />
                           ) : null}
-                          <AvatarFallback className="bg-black/20 text-[7px]">
+                          <AvatarFallback className="bg-foreground/15 text-[7px]">
                             {personInitials(lead)}
                           </AvatarFallback>
                         </Avatar>
@@ -428,8 +370,9 @@ export function WorkspaceDashboard({
                       <span className="truncate">
                         {STATUS_LABELS[task.status]}
                       </span>
-                      <ChevronDown
-                        className="size-3.5 shrink-0 opacity-70"
+                      <ChevronDownIcon
+                        className="inline-flex shrink-0 opacity-70"
+                        size={14}
                         aria-hidden
                       />
                     </span>
@@ -473,9 +416,9 @@ function StatPill({
         )}
       >
         {trend === "up" ? (
-          <ArrowUpRight className="size-3" />
+          <ArrowUpRightIcon className="inline-flex" size={12} />
         ) : (
-          <ArrowDownRight className="size-3" />
+          <ArrowDownRightIcon className="inline-flex" size={12} />
         )}
       </span>
     </div>
@@ -493,11 +436,16 @@ function FilterRow<T extends string>({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        className="flex size-8 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-accent hover:text-foreground"
+        aria-label="Search tasks and people"
+        onClick={() => openCommandPalette()}
+      >
+        <SearchIcon className="inline-flex" size={14} />
+      </button>
       <span className="flex size-8 items-center justify-center rounded-full border border-border text-muted-foreground">
-        <Search className="size-3.5" />
-      </span>
-      <span className="flex size-8 items-center justify-center rounded-full border border-border text-muted-foreground">
-        <Filter className="size-3.5" />
+        <SlidersHorizontalIcon className="inline-flex" size={14} />
       </span>
       {filters.map((filter) => {
         const isActive = filter === active;

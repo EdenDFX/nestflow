@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { CheckCircle2, CircleDashed } from "lucide-react";
+
+import { CircleCheckIcon } from "@/components/icons/circle-check";
+import { CircleDashedIcon } from "@/components/icons/circle-dashed";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -73,11 +75,11 @@ const toneTextClass: Record<LoadTone, string> = {
 
 function FocusIcon({ status }: { status: string | null | undefined }) {
   if (status === "completed") {
-    return <CheckCircle2 className="size-3.5 shrink-0 text-success" aria-hidden />;
+    return <CircleCheckIcon className="inline-flex shrink-0 text-success" size={14} aria-hidden />;
   }
   if (status === "in_progress") {
     return (
-      <CircleDashed className="size-3.5 shrink-0 text-primary" aria-hidden />
+      <CircleDashedIcon className="inline-flex shrink-0 text-primary" size={14} aria-hidden />
     );
   }
   return (
@@ -112,15 +114,20 @@ function PerformanceCard({
       style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}
     >
       <div className="flex items-start gap-3">
-        <Avatar size="lg" className="bg-muted">
-          <AvatarFallback className="font-heading text-sm font-semibold">
-            {initials(row.fullName, row.nestId ?? row.email)}
-          </AvatarFallback>
-        </Avatar>
+        <Link href={`/app/team?person=${row.userId}`} className="shrink-0">
+          <Avatar size="lg" className="bg-muted">
+            <AvatarFallback className="font-heading text-sm font-semibold">
+              {initials(row.fullName, row.nestId ?? row.email)}
+            </AvatarFallback>
+          </Avatar>
+        </Link>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-heading text-base font-semibold tracking-tight">
+          <Link
+            href={`/app/team?person=${row.userId}`}
+            className="truncate font-heading text-base font-semibold tracking-tight hover:text-primary"
+          >
             {row.fullName ?? "Unnamed"}
-          </p>
+          </Link>
           <p className="truncate text-sm text-muted-foreground">{role}</p>
         </div>
       </div>

@@ -1,24 +1,22 @@
 "use client";
 
-import {
-  Activity,
-  FolderKanban,
-  Pause,
-  Play,
-  RotateCcw,
-  Timer,
-  Users,
-  X,
-} from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState, type ComponentProps } from "react";
 
+import { BadgeAlertIcon } from "@/components/icons/badge-alert";
+import { BanIcon } from "@/components/icons/ban";
+import { CheckIcon } from "@/components/icons/check";
+import { PauseIcon } from "@/components/icons/pause";
+import { PlayIcon } from "@/components/icons/play";
+import { RotateCCWIcon } from "@/components/icons/rotate-ccw";
+import { TimerIcon } from "@/components/icons/timer";
+import { XIcon } from "@/components/icons/x";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { NestFlowProfile } from "@/lib/auth/types";
+import { islandUpdates, type IslandUpdate } from "@/lib/notifications/island-updates";
+import type { NestFlowNotification } from "@/lib/notifications/types";
+import { islandAttention, type IslandAttention } from "@/lib/tasks/island-attention";
 import { cn } from "@/lib/utils";
 
 const POMODORO_SECONDS = 25 * 60;
@@ -29,8 +27,6 @@ type PomodoroState = {
   running: boolean;
   updatedAt: number;
 };
-
-type HealthTone = "healthy" | "watch" | "risk";
 
 function profileInitials(profile: NestFlowProfile) {
   const source = profile.fullName?.trim() || profile.email || profile.nestId || "NF";
@@ -104,23 +100,23 @@ function writePomodoro(state: PomodoroState) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function workspaceHealth(now: Date): { label: string; tone: HealthTone } {
-  const hour = now.getHours();
-  if (hour >= 16) {
-    return { label: "Wrap-up", tone: "watch" };
-  }
-  if (hour < 9) {
-    return { label: "Warm-up", tone: "watch" };
-  }
-  return { label: "On track", tone: "healthy" };
-}
-
 type WorkspaceIslandProps = {
   profile: NestFlowProfile;
+  overdueCount: number;
+  blockedCount: number;
+  notifications: NestFlowNotification[];
+  unreadCount: number;
   className?: string;
 };
 
-export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
+export function WorkspaceIsland({
+  profile,
+  overdueCount,
+  blockedCount,
+  notifications,
+  unreadCount,
+  className,
+}: WorkspaceIslandProps) {
   const [now, setNow] = useState(() => new Date());
   const [pomodoro, setPomodoro] = useState<PomodoroState>(defaultPomodoro);
   const [focusMode, setFocusMode] = useState(false);
@@ -175,8 +171,11 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
     return () => window.clearInterval(timer);
   }, [pomodoro.running]);
 
-  const health = workspaceHealth(now);
-  const projectLabel = profile.department?.trim() || "NestFlow";
+  const attention = islandAttention({
+    overdue: overdueCount,
+    blocked: blockedCount,
+  });
+  const updates = islandUpdates(notifications);
   const youLabel = profile.fullName?.split(" ")[0] ?? profile.nestId ?? "You";
   const progress =
     ((POMODORO_SECONDS - pomodoro.remaining) / POMODORO_SECONDS) * 100;
@@ -234,12 +233,10 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
   return (
     <div
       className={cn(
-        "flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-full border px-1.5 py-1 sm:px-2.5 sm:py-1.5",
-        "border-black/10 bg-[#1c1917] text-white shadow-[0_10px_40px_-24px_rgba(0,0,0,0.35)]",
-        "dark:border-white/10 dark:bg-white dark:text-black dark:shadow-[0_10px_40px_-24px_rgba(0,0,0,0.45)]",
+        "flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden rounded-full border border-border/80 bg-card px-1.5 py-1 text-foreground sm:gap-2 sm:px-2",
         !prefersReducedMotion &&
           "transition-[padding,gap] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        isFocusExpanded && "gap-0 px-1.5 sm:px-2",
+        isFocusExpanded && "gap-0",
         className,
       )}
       role="region"
@@ -247,7 +244,7 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
     >
       <div
         className={cn(
-          "relative flex min-w-0 items-center overflow-hidden rounded-full bg-primary text-white",
+          "relative flex min-w-0 items-center overflow-hidden rounded-full bg-primary text-primary-foreground",
           !prefersReducedMotion &&
             "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
           isFocusExpanded
@@ -265,12 +262,12 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
         ) : null}
 
         <div className="relative z-10 flex min-w-0 items-center gap-2">
-          <Timer className="size-3.5 shrink-0" aria-hidden />
+          <TimerIcon className="inline-flex shrink-0" size={14} aria-hidden />
           <span className="font-mono text-xs font-semibold tabular-nums sm:text-sm">
             {formatClock(pomodoro.remaining)}
           </span>
           {isFocusExpanded ? (
-            <span className="hidden truncate text-xs text-white/80 sm:inline">
+            <span className="hidden truncate text-xs text-primary-foreground/80 sm:inline">
               {pomodoro.running
                 ? "Focus session"
                 : pomodoro.remaining === 0
@@ -294,9 +291,9 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
             }
           >
             {pomodoro.running ? (
-              <Pause className="size-3.5" />
+              <PauseIcon className="inline-flex" size={14} />
             ) : (
-              <Play className="size-3.5" />
+              <PlayIcon className="inline-flex" size={14} />
             )}
           </button>
           {isFocusExpanded ? (
@@ -306,7 +303,7 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
               className="rounded-full p-1 transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
               aria-label="Collapse focus session"
             >
-              <X className="size-3.5" />
+              <XIcon className="inline-flex" size={14} />
             </button>
           ) : (
             <button
@@ -315,7 +312,7 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
               className="hidden rounded-full p-1 transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none sm:inline-flex"
               aria-label="Reset pomodoro"
             >
-              <RotateCcw className="size-3.5" />
+              <RotateCCWIcon className="inline-flex" size={14} />
             </button>
           )}
         </div>
@@ -323,115 +320,168 @@ export function WorkspaceIsland({ profile, className }: WorkspaceIslandProps) {
 
       <div
         className={cn(
-          "flex min-w-0 items-center gap-1 overflow-hidden sm:gap-2",
+          "flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden sm:gap-2",
           !prefersReducedMotion &&
             "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
           isFocusExpanded
             ? "max-w-0 flex-none scale-95 gap-0 opacity-0"
-            : "max-w-[1000px] flex-1 scale-100 opacity-100",
+            : "scale-100 opacity-100",
         )}
         aria-hidden={isFocusExpanded}
       >
-        <IslandChip className="bg-white/8 px-2 text-white/70 sm:px-2.5 dark:bg-black/[0.04] dark:text-black/70">
-          <span className="text-[10px] font-semibold tabular-nums sm:text-xs">
+        <IslandChip>
+          <span className="text-xs font-medium tabular-nums text-muted-foreground">
             <span className="sm:hidden">{formatIslandDate(now, true)}</span>
             <span className="hidden sm:inline">{formatIslandDate(now)}</span>
           </span>
         </IslandChip>
 
-        <IslandChip className="hidden gap-2 bg-white/8 lg:inline-flex dark:bg-black/[0.04]">
-          <Avatar className="size-6 ring-2 ring-[#1c1917] dark:ring-white">
+        <IslandChip className="hidden gap-2 lg:inline-flex">
+          <Avatar className="size-6 ring-2 ring-background">
             {profile.avatarUrl ? (
               <AvatarImage src={profile.avatarUrl} alt="" />
             ) : null}
-            <AvatarFallback className="bg-white/15 text-[10px] text-white dark:bg-black dark:text-white">
+            <AvatarFallback className="bg-muted text-[10px] text-foreground">
               {profileInitials(profile)}
             </AvatarFallback>
           </Avatar>
-          <span className="max-w-[5.5rem] truncate text-xs font-semibold">
+          <span className="max-w-[6rem] truncate text-xs font-medium">
             {youLabel}
           </span>
-          <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-semibold text-primary uppercase dark:bg-primary/15">
-            You
-          </span>
         </IslandChip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="hidden items-center xl:flex">
-              <IslandChip className="gap-1.5 bg-white/8 dark:bg-black/[0.04]">
-                <Users
-                  className="size-3.5 text-white/45 dark:text-black/45"
-                  aria-hidden
-                />
-                <div className="flex -space-x-1.5">
-                  <Avatar className="size-5 ring-2 ring-[#1c1917] dark:ring-white">
-                    {profile.avatarUrl ? (
-                      <AvatarImage src={profile.avatarUrl} alt="" />
-                    ) : null}
-                    <AvatarFallback className="bg-primary text-[9px] text-primary-foreground">
-                      {profileInitials(profile)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="flex size-5 items-center justify-center rounded-full bg-white/10 text-[9px] font-semibold text-white/55 ring-2 ring-[#1c1917] dark:bg-black/10 dark:text-black/55 dark:ring-white">
-                    +
-                  </span>
-                </div>
-                <span className="text-xs font-medium text-white/60 dark:text-black/60">
-                  Team
-                </span>
-              </IslandChip>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            Team presence connects with boards in M2.
-          </TooltipContent>
-        </Tooltip>
-
-        <IslandChip className="hidden min-w-0 flex-1 gap-1.5 bg-white/8 dark:bg-black/[0.04] 2xl:flex">
-          <FolderKanban
-            className="size-3.5 shrink-0 text-white/45 dark:text-black/45"
-            aria-hidden
-          />
-          <span className="truncate text-xs font-semibold">{projectLabel}</span>
-          <span className="shrink-0 text-[10px] font-medium tracking-wide text-white/40 uppercase dark:text-black/40">
-            Project
-          </span>
-        </IslandChip>
+        <IslandTicker
+          updates={updates}
+          unreadCount={unreadCount}
+          reducedMotion={prefersReducedMotion}
+        />
 
         <IslandChip
+          href={attention.href}
           className={cn(
-            "ml-auto gap-1 px-2 sm:gap-1.5 sm:px-2.5",
-            health.tone === "healthy" &&
-              "bg-emerald-500/20 text-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-800",
-            health.tone === "watch" &&
-              "bg-amber-500/20 text-amber-300 dark:bg-amber-500/15 dark:text-amber-800",
-            health.tone === "risk" &&
-              "bg-red-500/20 text-red-300 dark:bg-red-500/15 dark:text-red-800",
+            "ml-auto gap-1",
+            attention.tone === "healthy" &&
+              "bg-emerald-500/12 text-emerald-800 dark:text-emerald-300",
+            attention.tone === "watch" &&
+              "bg-amber-500/12 text-amber-800 dark:text-amber-300",
+            attention.tone === "risk" &&
+              "bg-red-500/12 text-red-800 dark:text-red-300",
           )}
-          aria-label={health.label}
+          aria-label={
+            attention.tone === "healthy"
+              ? "No overdue or blocked work. Open My Tasks."
+              : `Open My Tasks. ${attention.label}.`
+          }
         >
-          <Activity className="size-3.5" aria-hidden />
-          <span className="text-[10px] font-semibold sm:text-xs">{health.label}</span>
+          {attentionIcon(attention.tone)}
+          <span className="text-xs font-medium">{attention.label}</span>
         </IslandChip>
       </div>
     </div>
   );
 }
 
+function IslandTicker({
+  updates,
+  unreadCount,
+  reducedMotion,
+}: {
+  updates: IslandUpdate[];
+  unreadCount: number;
+  reducedMotion: boolean;
+}) {
+  const [index, setIndex] = useState(0);
+  const updateKey = updates.map((item) => item.id).join(":");
+
+  useEffect(() => {
+    setIndex(0);
+  }, [updateKey]);
+
+  useEffect(() => {
+    if (reducedMotion || updates.length < 2) {
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % updates.length);
+    }, 6000);
+    return () => window.clearInterval(timer);
+  }, [reducedMotion, updateKey, updates.length]);
+
+  if (updates.length === 0) {
+    return (
+      <Link
+        href="/app/notifications"
+        className="hidden h-8 min-w-0 flex-1 items-center rounded-full bg-muted/80 px-3 text-xs text-muted-foreground transition-opacity hover:opacity-90 sm:flex"
+      >
+        Inbox is quiet
+      </Link>
+    );
+  }
+
+  const current = updates[index] ?? updates[0]!;
+
+  return (
+    <Link
+      href={current.href}
+      className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-full bg-muted/80 px-3 transition-opacity hover:opacity-90"
+      aria-label={`${unreadCount > 0 ? `${unreadCount} new. ` : ""}${current.kindLabel}: ${current.title}`}
+    >
+      {unreadCount > 0 ? (
+        <span className="shrink-0 text-[10px] font-semibold tabular-nums text-primary">
+          {unreadCount > 9 ? "9+" : unreadCount} new
+        </span>
+      ) : null}
+      <span className="min-w-0 truncate text-xs" aria-live="polite">
+        <span className="text-muted-foreground">{current.kindLabel} · </span>
+        {current.title}
+      </span>
+    </Link>
+  );
+}
+
+function attentionIcon(tone: IslandAttention["tone"]) {
+  switch (tone) {
+    case "risk":
+      return <BadgeAlertIcon className="inline-flex" size={14} aria-hidden />;
+    case "watch":
+      return <BanIcon className="inline-flex" size={14} aria-hidden />;
+    case "healthy":
+      return <CheckIcon className="inline-flex" size={14} aria-hidden />;
+    default: {
+      const _exhaustive: never = tone;
+      return _exhaustive;
+    }
+  }
+}
+
 function IslandChip({
   children,
   className,
+  href,
   ...props
-}: ComponentProps<"div">) {
+}: ComponentProps<"div"> & { href?: string }) {
+  const chipClass = cn(
+    "inline-flex h-8 shrink-0 items-center rounded-full bg-muted/80 px-2.5",
+    href && "transition-opacity hover:opacity-90",
+    className,
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={chipClass}
+        aria-label={
+          typeof props["aria-label"] === "string" ? props["aria-label"] : undefined
+        }
+      >
+        {children}
+      </Link>
+    );
+  }
+
   return (
-    <div
-      className={cn(
-        "inline-flex h-8 shrink-0 items-center rounded-full px-2.5",
-        className,
-      )}
-      {...props}
-    >
+    <div className={chipClass} {...props}>
       {children}
     </div>
   );

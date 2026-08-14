@@ -17,11 +17,13 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { GripHorizontalIcon } from "@/components/icons/grip-horizontal";
+
+import { BulkReassignBar } from "@/components/tasks/bulk-reassign-bar";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -38,6 +40,7 @@ import {
   TASK_STATUSES,
   canTransition,
   type NestFlowTask,
+  type TaskAssignee,
   type TaskStatus,
 } from "@/lib/tasks/types";
 import { cn } from "@/lib/utils";
@@ -70,10 +73,14 @@ function TeamBoardCard({
   task,
   dragging,
   onMove,
+  selected,
+  onToggleSelect,
 }: {
   task: NestFlowTask;
   dragging?: boolean;
   onMove: (taskId: string, status: TaskStatus) => void;
+  selected?: boolean;
+  onToggleSelect?: (taskId: string) => void;
 }) {
   const assignee = task.assignees[0];
   const moves = TASK_STATUSES.filter((status) =>
@@ -90,6 +97,16 @@ function TeamBoardCard({
       )}
     >
       <div className="flex items-start gap-2">
+        {onToggleSelect ? (
+          <input
+            type="checkbox"
+            className="mt-1 size-3.5 accent-primary"
+            checked={Boolean(selected)}
+            aria-label={`Select ${task.title}`}
+            onChange={() => onToggleSelect(task.id)}
+            onPointerDown={(event) => event.stopPropagation()}
+          />
+        ) : null}
         <Link
           href={`/app/tasks/${task.id}`}
           className="min-w-0 flex-1 font-heading text-sm font-semibold leading-snug hover:text-primary"
@@ -110,7 +127,7 @@ function TeamBoardCard({
                   aria-label="Move task"
                   onPointerDown={(event) => event.stopPropagation()}
                 >
-                  <MoreHorizontal className="size-4" />
+                  <GripHorizontalIcon className="inline-flex" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -166,9 +183,13 @@ function TeamBoardCard({
 function SortableTeamCard({
   task,
   onMove,
+  selected,
+  onToggleSelect,
 }: {
   task: NestFlowTask;
   onMove: (taskId: string, status: TaskStatus) => void;
+  selected?: boolean;
+  onToggleSelect?: (taskId: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id, data: { status: task.status } });
@@ -184,7 +205,12 @@ function SortableTeamCard({
       {...attributes}
       {...listeners}
     >
-      <TeamBoardCard task={task} onMove={onMove} />
+      <TeamBoardCard
+        task={task}
+        onMove={onMove}
+        selected={selected}
+        onToggleSelect={onToggleSelect}
+      />
     </div>
   );
 }
@@ -193,10 +219,14 @@ function TeamBoardColumn({
   status,
   tasks,
   onMove,
+  selectedIds,
+  onToggleSelect,
 }: {
   status: TaskStatus;
   tasks: NestFlowTask[];
   onMove: (taskId: string, status: TaskStatus) => void;
+  selectedIds?: string[];
+  onToggleSelect?: (taskId: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -226,7 +256,13 @@ function TeamBoardColumn({
             </p>
           ) : (
             tasks.map((task) => (
-              <SortableTeamCard key={task.id} task={task} onMove={onMove} />
+              <SortableTeamCard
+                key={task.id}
+                task={task}
+                onMove={onMove}
+                selected={selectedIds?.includes(task.id)}
+                onToggleSelect={onToggleSelect}
+              />
             ))
           )}
         </div>
@@ -238,15 +274,30 @@ function TeamBoardColumn({
 export function TeamTaskBoard({
   initialTasks,
   roster,
+  people = [],
+  canAssign = false,
+  initialAssigneeId,
 }: {
   initialTasks: NestFlowTask[];
   roster: WorkloadRow[];
+  people?: TaskAssignee[];
+  canAssign?: boolean;
+  initialAssigneeId?: string;
 }) {
   const [tasks, setTasks] = useState(initialTasks);
   const [prevInitialTasks, setPrevInitialTasks] = useState(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [assigneeFilter, setAssigneeFilter] = useState<string | "all">("all");
+  const [assigneeFilter, setAssigneeFilter] = useState<string | "all">(
+    initialAssigneeId ?? "all",
+  );
+  const [selected, setSelected] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
+  const [prevAssigneeId, setPrevAssigneeId] = useState(initialAssigneeId);
+
+  if (initialAssigneeId && initialAssigneeId !== prevAssigneeId) {
+    setPrevAssigneeId(initialAssigneeId);
+    setAssigneeFilter(initialAssigneeId);
+  }
 
   if (initialTasks !== prevInitialTasks) {
     setPrevInitialTasks(initialTasks);
@@ -421,6 +472,18 @@ export function TeamTaskBoard({
               status={status}
               tasks={columns[status]}
               onMove={moveTask}
+              selectedIds={canAssign ? selected : undefined}
+              onToggleSelect={
+                canAssign
+                  ? (taskId) => {
+                      setSelected((current) =>
+                        current.includes(taskId)
+                          ? current.filter((id) => id !== taskId)
+                          : [...current, taskId],
+                      );
+                    }
+                  : undefined
+              }
             />
           ))}
         </div>
@@ -430,6 +493,13 @@ export function TeamTaskBoard({
           ) : null}
         </DragOverlay>
       </DndContext>
+      {canAssign ? (
+        <BulkReassignBar
+          selectedIds={selected}
+          people={people}
+          onClear={() => setSelected([])}
+        />
+      ) : null}
     </div>
   );
 }

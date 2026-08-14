@@ -1,9 +1,16 @@
+import { redirect } from "next/navigation";
+
 import { TaskCalendar } from "@/components/tasks/task-calendar";
 import { requireActiveProfile } from "@/lib/auth/session";
+import { canAccessWorkViews } from "@/lib/auth/navigation";
 import { listTasks } from "@/lib/tasks/queries";
 
 export default async function CalendarPage() {
-  await requireActiveProfile();
+  const profile = await requireActiveProfile();
+  if (canAccessWorkViews(profile.roles)) {
+    redirect("/app/work?view=calendar");
+  }
+
   const tasks = await listTasks();
   const dated = tasks.filter((task) => task.dueAt);
 
@@ -14,8 +21,8 @@ export default async function CalendarPage() {
           Calendar
         </h1>
         <p className="text-sm text-muted-foreground sm:text-base">
-          {dated.length} task{dated.length === 1 ? "" : "s"} with due dates across your
-          accessible workspaces.
+          {dated.length} task{dated.length === 1 ? "" : "s"} with due dates.
+          Drag a task onto another day to reschedule.
         </p>
       </div>
       <TaskCalendar tasks={tasks} />

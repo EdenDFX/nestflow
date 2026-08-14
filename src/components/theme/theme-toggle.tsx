@@ -1,8 +1,10 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@wrksz/themes/client";
 import { useEffect, useState } from "react";
+
+import { MoonIcon } from "@/components/icons/moon";
+import { SunIcon } from "@/components/icons/sun";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,15 +40,15 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
           aria-label="Toggle color theme"
           onClick={() => setTheme(isDark ? "light" : "dark")}
         >
-          <Sun
+          <SunIcon
             className={cn(
-              "size-4 transition-all",
+              "inline-flex transition-all",
               isDark ? "scale-0 -rotate-90" : "scale-100 rotate-0",
             )}
           />
-          <Moon
+          <MoonIcon
             className={cn(
-              "absolute size-4 transition-all",
+              "absolute inline-flex transition-all",
               isDark ? "scale-100 rotate-0" : "scale-0 rotate-90",
             )}
           />

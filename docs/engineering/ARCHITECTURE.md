@@ -117,8 +117,8 @@ Delivery preferences are respected except where policy requires mandatory operat
 | --- | --- |
 | Local | Developer machines with local or branch Supabase |
 | Preview | Vercel preview deployments per PR |
-| Staging | Optional `tasks-staging.nestbyeden.com` |
-| Production | `tasks.nestbyeden.com` |
+| Staging | Optional `tasks-staging.nestbyeden.app` |
+| Production | `tasks.nestbyeden.app` |
 
 ## 10. Observability
 

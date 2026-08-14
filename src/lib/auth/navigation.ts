@@ -4,6 +4,7 @@ import { primaryRole } from "@/lib/auth/types";
 export type NavIcon =
   | "dashboard"
   | "my-tasks"
+  | "work"
   | "board"
   | "list"
   | "calendar"
@@ -22,22 +23,16 @@ const baseNav: NavItem[] = [
   { href: "/app", label: "Dashboard", icon: "dashboard" },
   { href: "/app/my-tasks", label: "My Tasks", icon: "my-tasks" },
   {
-    href: "/app/board",
-    label: "Board",
-    icon: "board",
-    roles: ["staff", "line_manager"],
-  },
-  {
-    href: "/app/list",
-    label: "List",
-    icon: "list",
+    href: "/app/work",
+    label: "Work",
+    icon: "work",
     roles: ["staff", "line_manager"],
   },
   {
     href: "/app/calendar",
     label: "Calendar",
     icon: "calendar",
-    roles: ["staff", "line_manager", "hr"],
+    roles: ["hr"],
   },
 ];
 
@@ -63,9 +58,11 @@ const roleNav: NavItem[] = [
 ];
 
 export function navForRoles(roles: AppRole[]): NavItem[] {
-  // Administrators work from Overview only (task lists and boards are for other roles).
   if (primaryRole(roles) === "admin") {
-    return [{ href: "/app/admin", label: "Overview", icon: "admin" }];
+    return [
+      { href: "/app/my-tasks", label: "My Tasks", icon: "my-tasks" },
+      { href: "/app/admin", label: "Overview", icon: "admin" },
+    ];
   }
 
   const allowed = new Set(roles);
@@ -92,7 +89,7 @@ export function homePathForRoles(roles: AppRole[]): string {
     case "line_manager":
       return "/app";
     case "staff":
-      return "/app";
+      return "/app/my-tasks";
     default: {
       const _exhaustive: never = role;
       return _exhaustive;

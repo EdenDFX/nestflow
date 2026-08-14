@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, TriangleAlert } from "lucide-react";
+
+import { ArrowRightIcon } from "@/components/icons/arrow-right";
+import { BadgeAlertIcon } from "@/components/icons/badge-alert";
 
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { StatusBadge } from "@/components/tasks/status-badge";
@@ -108,7 +110,7 @@ export function LineManagerDashboard({
               className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted"
             >
               Open team suite
-              <ArrowRight className="size-3.5" />
+              <ArrowRightIcon className="inline-flex" size={14} />
             </Link>
           </div>
         </div>
@@ -169,19 +171,24 @@ export function LineManagerDashboard({
                         className="border-b border-border/50 last:border-0"
                       >
                         <td className="px-5 py-3">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium">
-                              {row.fullName ?? "Unnamed"}
+                          <Link
+                            href={`/app/team?person=${row.userId}`}
+                            className="block hover:text-primary"
+                          >
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">
+                                {row.fullName ?? "Unnamed"}
+                              </p>
+                              {row.isManager ? (
+                                <span className="rounded bg-foreground px-1.5 py-0.5 text-[10px] font-semibold text-background">
+                                  LM
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="font-mono text-[11px] text-muted-foreground">
+                              {row.nestId ?? row.email}
                             </p>
-                            {row.isManager ? (
-                              <span className="rounded bg-foreground px-1.5 py-0.5 text-[10px] font-semibold text-background">
-                                LM
-                              </span>
-                            ) : null}
-                          </div>
-                          <p className="font-mono text-[11px] text-muted-foreground">
-                            {row.nestId ?? row.email}
-                          </p>
+                          </Link>
                         </td>
                         <td className="px-3 py-3 tabular-nums">{row.openCount}</td>
                         <td
@@ -212,7 +219,7 @@ export function LineManagerDashboard({
         <section className="rounded-2xl border border-border/80 bg-[#141210] text-white dark:bg-[#0a0908]">
           <header className="flex items-start gap-3 border-b border-white/10 px-5 py-4">
             <span className="mt-0.5 flex size-8 items-center justify-center rounded-full bg-warning/20 text-warning">
-              <TriangleAlert className="size-4" />
+              <BadgeAlertIcon className="inline-flex" />
             </span>
             <div>
               <h2 className="font-heading text-lg font-semibold">Attention</h2>
@@ -264,7 +271,7 @@ export function LineManagerDashboard({
               className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
             >
               Manage blocked queue
-              <ArrowRight className="size-3.5" />
+              <ArrowRightIcon className="inline-flex" size={14} />
             </Link>
           </div>
         </section>

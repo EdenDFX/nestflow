@@ -5,17 +5,15 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { DeactivateUserButton } from "@/components/admin/deactivate-user-button";
+import { TeamRosterPanel } from "@/components/admin/team-roster-panel";
+import { TemplatesAutomationPanel } from "@/components/admin/templates-automation-panel";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  createInviteAction,
-  setProfileStatusAction,
-} from "@/lib/admin/actions";
-import { TeamRosterPanel } from "@/components/admin/team-roster-panel";
-import { TemplatesAutomationPanel } from "@/components/admin/templates-automation-panel";
+import { createInviteAction } from "@/lib/admin/actions";
 import type {
   DirectoryUser,
   Invite,
@@ -41,6 +39,7 @@ export function PeopleSuite({
   memberships = [],
   templates = [],
   automationRules = [],
+  openByUser = {},
 }: {
   hrTasks: NestFlowTask[];
   employees: DirectoryUser[];
@@ -53,6 +52,7 @@ export function PeopleSuite({
   memberships?: TeamMembershipRow[];
   templates?: TaskTemplate[];
   automationRules?: AutomationRule[];
+  openByUser?: Record<string, NestFlowTask[]>;
 }) {
   const [tab, setTab] = useState<PeopleTab>("queues");
   const [query, setQuery] = useState("");
@@ -176,6 +176,8 @@ export function PeopleSuite({
                     key={user.userId}
                     user={user}
                     canManageStatus={canManageStatus}
+                    openTasks={openByUser[user.userId] ?? []}
+                    people={people}
                   />
                 ))}
               </tbody>
@@ -208,13 +210,14 @@ export function PeopleSuite({
 function EmployeeStatusRow({
   user,
   canManageStatus,
+  openTasks,
+  people,
 }: {
   user: DirectoryUser;
   canManageStatus: boolean;
+  openTasks: NestFlowTask[];
+  people: TaskAssignee[];
 }) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
   return (
     <tr className="border-b border-border/60">
       <td className="px-3 py-2.5">
@@ -240,30 +243,11 @@ function EmployeeStatusRow({
       <td className="px-3 py-2.5">{user.openTaskCount}</td>
       <td className="px-3 py-2.5">
         {canManageStatus ? (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={pending}
-            onClick={() => {
-              startTransition(async () => {
-                const result = await setProfileStatusAction({
-                  userId: user.userId,
-                  status: user.isActive ? "Inactive" : "Active",
-                });
-                if (!result.ok) {
-                  toast.error(result.error ?? "Could not update status.");
-                  return;
-                }
-                toast.success(
-                  user.isActive ? "Employee deactivated." : "Employee activated.",
-                );
-                router.refresh();
-              });
-            }}
-          >
-            {user.isActive ? "Deactivate" : "Activate"}
-          </Button>
+          <DeactivateUserButton
+            user={user}
+            openTasks={openTasks}
+            people={people}
+          />
         ) : (
           "-"
         )}

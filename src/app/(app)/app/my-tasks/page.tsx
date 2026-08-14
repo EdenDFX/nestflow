@@ -1,7 +1,8 @@
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
-import { TaskList } from "@/components/tasks/task-list";
+import { MyTasksPlan } from "@/components/tasks/my-tasks-plan";
 import { listAssignablePeopleForProfile } from "@/lib/admin/queries";
 import { requireActiveProfile } from "@/lib/auth/session";
+import { listChecklistsForTasks } from "@/lib/tasks/collaboration-queries";
 import {
   getTaskCounters,
   listTasks,
@@ -26,6 +27,7 @@ export default async function MyTasksPage() {
     }),
     listAssignablePeopleForProfile(profile),
   ]);
+  const checklists = await listChecklistsForTasks(tasks.map((task) => task.id));
 
   return (
     <div className="space-y-6">
@@ -36,7 +38,8 @@ export default async function MyTasksPage() {
           </h1>
           <p className="text-muted-foreground">
             {counters.open} open · {counters.overdue} overdue ·{" "}
-            {counters.completed} completed
+            {counters.completed} completed. Grouped like a daily plan: overdue,
+            today, upcoming, later.
           </p>
         </div>
         <TaskCreateDialog
@@ -46,7 +49,7 @@ export default async function MyTasksPage() {
           defaultAssigneeId={profile.userId}
         />
       </div>
-      <TaskList tasks={tasks} />
+      <MyTasksPlan tasks={tasks} checklists={checklists} people={people} />
     </div>
   );
 }

@@ -1,9 +1,12 @@
 "use client";
 
-import { Check, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+
+import { CheckIcon } from "@/components/icons/check";
+import { DeleteIcon } from "@/components/icons/delete";
+import { PlusIcon } from "@/components/icons/plus";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,7 +85,7 @@ export function TaskChecklist({
               )}
               aria-label={item.isDone ? "Mark incomplete" : "Mark complete"}
             >
-              {item.isDone ? <Check className="size-3.5" /> : null}
+              {item.isDone ? <CheckIcon className="inline-flex" size={14} /> : null}
             </button>
             <span
               className={cn(
@@ -113,7 +116,7 @@ export function TaskChecklist({
               }
               aria-label="Remove checklist item"
             >
-              <Trash2 className="size-3.5" />
+              <DeleteIcon className="inline-flex" size={14} />
             </Button>
           </li>
         ))}
@@ -127,7 +130,7 @@ export function TaskChecklist({
           disabled={pending}
         />
         <Button type="submit" disabled={pending || !title.trim()}>
-          <Plus className="size-4" />
+          <PlusIcon className="inline-flex" />
           Add
         </Button>
       </form>

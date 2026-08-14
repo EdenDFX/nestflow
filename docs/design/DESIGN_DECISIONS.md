@@ -139,27 +139,30 @@ PermissionGate and nav configuration drive differences; do not fork themes per r
 
 ---
 
-## DD-007 — Sparse Lucide-only iconography
+## DD-007 — Sparse Lucide iconography (animated)
 
 | Field | Value |
 | --- | --- |
 | Status | Accepted |
 | Date | 2026-08-05 |
+| Updated | 2026-08-14 |
 
 ### Context
 
-Icons are easy to overuse and fragment when teams pull from multiple libraries. NestFlow should stay text-forward and visually consistent with shadcn/ui.
+Icons are easy to overuse and fragment when teams pull from multiple libraries. NestFlow should stay text-forward and visually consistent with shadcn/ui. Hover motion is already an approved stack choice (Motion for React).
 
 ### Decision
 
 - Do not add icons by default; prefer labelled controls
-- When an icon is needed, use Lucide only
+- When an icon is needed, use [lucide-animated](https://lucide-animated.com/) (Lucide shapes, Motion hover) from `src/components/icons/`
+- Install icons with the shadcn registry `@lucide-animated/{name}`
 - Icon-only controls must have tooltips and accessible names
 - Do not use emoji as UI icons
+- Hover animation must not run when `prefers-reduced-motion: reduce` is set
 
 ### Consequences
 
-Coding rules and component docs treat Lucide as the sole icon source. New icon packs or custom icon fonts require a design decision update.
+Coding rules and component docs treat lucide-animated as the icon source. Static `lucide-react` is only for a glyph that does not exist in the animated set. New unrelated icon packs still need a design decision update.
 
 ---
 
@@ -206,11 +209,11 @@ Authenticated NestFlow needs operational workspace chrome that matches the orang
 - Focus and recent-task cards use a stepped blob surface (`SteppedCard`): large radii, top-right notch for circular actions, primary / ink tones with dark outline buttons
 - Live task data fills those cards (M2+); older static preview scaffolding is retired
 - Shell follows document light/dark theme via CSS tokens (no forced local `.dark` lock)
-- Header `WorkspaceIsland` is a dynamic status strip: pomodoro timer, live date, assignee avatar with You tag, team preview, project (department), and time-of-day health. Narrow viewports show a compact set (pomodoro, short date, health); You / team / project chips appear from `lg` / `xl` / `2xl`.
+- Header `WorkspaceIsland` is a theme-matched status strip: pomodoro, date, person, a live inbox ticker (unread first, then latest update), and a personal work pulse that opens My Tasks.
 
 ### Consequences
 
-Board, My Tasks, and role pages inherit the shell. Live counts and cards replace placeholders in M2. Island team/project/health wire to real board data in later milestones; pomodoro persists locally for now.
+Board, My Tasks, and role pages inherit the shell. Live counts fill the trailing pulse. Pomodoro persists locally. Team presence stays off the island until it is real.
 
 ---
 

@@ -2,7 +2,12 @@
 
 import { useTheme } from "@wrksz/themes/client"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
-import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+
+import { BadgeAlertIcon } from "@/components/icons/badge-alert"
+import { BanIcon } from "@/components/icons/ban"
+import { CircleCheckIcon } from "@/components/icons/circle-check"
+import { CircleHelpIcon } from "@/components/icons/circle-help"
+import { LoaderCircleIcon } from "@/components/icons/loader-circle"
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
@@ -13,19 +18,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       icons={{
         success: (
-          <CircleCheckIcon className="size-4" />
+          <CircleCheckIcon className="inline-flex" />
         ),
         info: (
-          <InfoIcon className="size-4" />
+          <CircleHelpIcon className="inline-flex" />
         ),
         warning: (
-          <TriangleAlertIcon className="size-4" />
+          <BadgeAlertIcon className="inline-flex" />
         ),
         error: (
-          <OctagonXIcon className="size-4" />
+          <BanIcon className="inline-flex" />
         ),
         loading: (
-          <Loader2Icon className="size-4 animate-spin" />
+          <LoaderCircleIcon className="inline-flex animate-spin" />
         ),
       }}
       style={

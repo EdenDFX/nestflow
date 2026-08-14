@@ -1,7 +1,8 @@
 "use client";
 
-import { Bell } from "lucide-react";
 import Link from "next/link";
+
+import { BellIcon } from "@/components/icons/bell";
 
 import {
   MarkAllReadButton,
@@ -38,7 +39,7 @@ export function NotificationBell({
               : "Notifications"
           }
         >
-          <Bell className="size-4" />
+          <BellIcon className="inline-flex" />
           {unreadCount > 0 ? (
             <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
               {unreadCount > 9 ? "9+" : unreadCount}
@@ -48,7 +49,7 @@ export function NotificationBell({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between px-3 py-2">
-          <DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
+          <DropdownMenuLabel className="p-0">Inbox</DropdownMenuLabel>
           <MarkAllReadButton disabled={unreadCount === 0} />
         </div>
         <DropdownMenuSeparator className="m-0" />
@@ -58,7 +59,7 @@ export function NotificationBell({
         <DropdownMenuSeparator className="m-0" />
         <div className="p-2">
           <Button asChild variant="ghost" className="w-full justify-center">
-            <Link href="/app/notifications">View all</Link>
+            <Link href="/app/notifications">Open inbox</Link>
           </Button>
         </div>
       </DropdownMenuContent>

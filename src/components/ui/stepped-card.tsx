@@ -20,26 +20,23 @@ export type SteppedCardTone =
   | "completed";
 
 const toneClassName: Record<SteppedCardTone, string> = {
-  primary: "bg-primary text-[#1c1917] [--nf-step-cut:var(--background)]",
-  ink: "bg-[#1c1917] text-white [--nf-step-cut:var(--background)] dark:bg-[#0c0a09]",
+  primary:
+    "bg-primary/12 text-foreground [--nf-step-cut:var(--background)] dark:bg-primary/18",
+  ink: "bg-foreground/[0.06] text-foreground [--nf-step-cut:var(--background)] dark:bg-white/[0.06]",
   muted:
     "border border-border/80 bg-card text-card-foreground [--nf-step-cut:var(--background)]",
-  // Status surfaces for task cards
-  todo: "bg-emerald-500 text-white [--nf-step-cut:var(--background)]",
-  blocked: "bg-red-600 text-white [--nf-step-cut:var(--background)]",
-  review: "bg-amber-400 text-[#1c1917] [--nf-step-cut:var(--background)]",
+  todo: "bg-emerald-500/12 text-emerald-950 [--nf-step-cut:var(--background)] dark:bg-emerald-500/15 dark:text-emerald-100",
+  blocked:
+    "bg-red-500/12 text-red-950 [--nf-step-cut:var(--background)] dark:bg-red-500/15 dark:text-red-100",
+  review:
+    "bg-amber-400/18 text-amber-950 [--nf-step-cut:var(--background)] dark:bg-amber-400/15 dark:text-amber-100",
   completed:
-    "border border-border/70 bg-muted/70 text-muted-foreground opacity-80 [--nf-step-cut:var(--background)]",
+    "border border-border/70 bg-muted/70 text-muted-foreground opacity-90 [--nf-step-cut:var(--background)]",
 };
 
-/** True when the tone uses a lightish face (dark text). */
-export function isSteppedCardLightTone(tone: SteppedCardTone): boolean {
-  return (
-    tone === "primary" ||
-    tone === "muted" ||
-    tone === "review" ||
-    tone === "completed"
-  );
+/** True when the tone uses a lightish face (dark text in light mode). */
+export function isSteppedCardLightTone(_tone: SteppedCardTone): boolean {
+  return true;
 }
 
 export function SteppedCard({

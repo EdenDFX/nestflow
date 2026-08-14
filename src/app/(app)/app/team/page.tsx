@@ -6,8 +6,13 @@ import {
 } from "@/lib/admin/queries";
 import { listWorkspaces } from "@/lib/tasks/queries";
 
-export default async function TeamPage() {
+export default async function TeamPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ person?: string }>;
+}) {
   const profile = await requireRoles(["admin", "line_manager"]);
+  const params = await searchParams;
   const canAssign =
     profile.roles.includes("admin") ||
     profile.roles.includes("line_manager") ||
@@ -34,6 +39,7 @@ export default async function TeamPage() {
       defaultAssigneeId={profile.userId}
       managedTeams={managedTeams}
       isOrgWide={isOrgWide}
+      initialPersonId={params.person}
     />
   );
 }

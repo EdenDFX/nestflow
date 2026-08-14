@@ -111,7 +111,7 @@ export function TaskDueTimer({
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums tracking-tight",
         alert &&
-          "bg-red-600 text-white shadow-sm ring-1 ring-red-500/40 dark:bg-red-500",
+          "bg-red-500/15 text-red-800 ring-1 ring-red-500/20 dark:text-red-200",
         !alert &&
           urgent &&
           "bg-amber-500/20 text-amber-900 ring-1 ring-amber-500/30 dark:text-amber-200",
@@ -134,7 +134,7 @@ export function TaskDueTimer({
         aria-hidden
         className={cn(
           "size-1.5 shrink-0 rounded-full",
-          alert ? "bg-white animate-pulse" : urgent ? "bg-amber-600" : "bg-current opacity-50",
+          alert ? "bg-red-600 dark:bg-red-400 animate-pulse" : urgent ? "bg-amber-600" : "bg-current opacity-50",
         )}
       />
       {blocked ? (overdue ? `Blocked · ${label}` : "Blocked") : label}

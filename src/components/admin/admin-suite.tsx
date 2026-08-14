@@ -5,6 +5,8 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { DeactivateUserButton } from "@/components/admin/deactivate-user-button";
+import { TeamRosterPanel } from "@/components/admin/team-roster-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,10 +23,8 @@ import {
   deleteDepartmentAction,
   revokeInviteAction,
   setProfileDepartmentAction,
-  setProfileStatusAction,
   setUserRolesAction,
 } from "@/lib/admin/actions";
-import { TeamRosterPanel } from "@/components/admin/team-roster-panel";
 import { PERMISSION_MATRIX } from "@/lib/admin/types";
 import type {
   AuditEvent,
@@ -34,6 +34,7 @@ import type {
   NestFlowTeam,
   TeamMembershipRow,
 } from "@/lib/admin/types";
+import type { NestFlowTask, TaskAssignee } from "@/lib/tasks/types";
 import { APP_ROLES, roleLabel, type AppRole } from "@/lib/auth/types";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +53,9 @@ export function AdminSuite({
   auditEvents,
   teams,
   memberships,
+  people = [],
+  openByUser = {},
+  embedded = false,
 }: {
   users: DirectoryUser[];
   departments: Department[];
@@ -59,6 +63,9 @@ export function AdminSuite({
   auditEvents: AuditEvent[];
   teams: NestFlowTeam[];
   memberships: TeamMembershipRow[];
+  people?: TaskAssignee[];
+  openByUser?: Record<string, NestFlowTask[]>;
+  embedded?: boolean;
 }) {
   const [tab, setTab] = useState<AdminTab>("users");
   const [query, setQuery] = useState("");
@@ -85,14 +92,25 @@ export function AdminSuite({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight">
-          Admin
-        </h1>
-        <p className="text-muted-foreground">
-          Users, teams, departments, permissions, invites, and audit history.
-        </p>
-      </div>
+      {embedded ? (
+        <div className="space-y-1">
+          <h2 className="font-heading text-xl font-semibold tracking-tight">
+            People
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Users, teams, departments, permissions, invites, and audit history.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight">
+            Admin
+          </h1>
+          <p className="text-muted-foreground">
+            Users, teams, departments, permissions, invites, and audit history.
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2">
         {(
@@ -129,7 +147,12 @@ export function AdminSuite({
       ) : null}
 
       {tab === "users" ? (
-        <UsersPanel users={filteredUsers} departments={departments} />
+        <UsersPanel
+          users={filteredUsers}
+          departments={departments}
+          people={people}
+          openByUser={openByUser}
+        />
       ) : null}
       {tab === "teams" ? (
         <TeamRosterPanel
@@ -151,9 +174,13 @@ export function AdminSuite({
 function UsersPanel({
   users,
   departments,
+  people,
+  openByUser,
 }: {
   users: DirectoryUser[];
   departments: Department[];
+  people: TaskAssignee[];
+  openByUser: Record<string, NestFlowTask[]>;
 }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-border/80">
@@ -170,7 +197,13 @@ function UsersPanel({
         </thead>
         <tbody>
           {users.map((user) => (
-            <UserRow key={user.userId} user={user} departments={departments} />
+            <UserRow
+              key={user.userId}
+              user={user}
+              departments={departments}
+              people={people}
+              openTasks={openByUser[user.userId] ?? []}
+            />
           ))}
         </tbody>
       </table>
@@ -181,9 +214,13 @@ function UsersPanel({
 function UserRow({
   user,
   departments,
+  people,
+  openTasks,
 }: {
   user: DirectoryUser;
   departments: Department[];
+  people: TaskAssignee[];
+  openTasks: NestFlowTask[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -216,21 +253,6 @@ function UserRow({
         return;
       }
       toast.success("Department updated.");
-      router.refresh();
-    });
-  }
-
-  function toggleStatus() {
-    startTransition(async () => {
-      const result = await setProfileStatusAction({
-        userId: user.userId,
-        status: user.isActive ? "Inactive" : "Active",
-      });
-      if (!result.ok) {
-        toast.error(result.error ?? "Could not update status.");
-        return;
-      }
-      toast.success(user.isActive ? "User deactivated." : "User activated.");
       router.refresh();
     });
   }
@@ -328,15 +350,11 @@ function UserRow({
       </td>
       <td className="px-3 py-3">{user.openTaskCount}</td>
       <td className="px-3 py-3">
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={pending}
-          onClick={toggleStatus}
-        >
-          {user.isActive ? "Deactivate" : "Activate"}
-        </Button>
+        <DeactivateUserButton
+          user={user}
+          openTasks={openTasks}
+          people={people}
+        />
       </td>
     </tr>
   );

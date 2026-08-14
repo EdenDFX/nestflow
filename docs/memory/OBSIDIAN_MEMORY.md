@@ -12,8 +12,8 @@ Last reviewed: 2026-08-06
 
 - Name: NestFlow
 - Tagline: Plan. Assign. Deliver.
-- Planned URL: `tasks.nestbyeden.com`
-- Parent domain assumed: `nestbyeden.com` (purchased via Name.com)
+- Planned URL: `tasks.nestbyeden.app`
+- Parent domain: `nestbyeden.app` (purchased via Name.com)
 - Separate from gear management system; optional gear links later
 - “Backlog” is a task status, not the product name
 
@@ -22,7 +22,7 @@ Last reviewed: 2026-08-06
 - Primary colour: `#FF6300`
 - Modes: light and dark
 - Board-first productivity UI with tooltips, hover states, selective motion
-- Icons: sparse by default; Lucide only when justified (DD-007)
+- Icons: sparse by default; lucide-animated (Lucide + Motion hover) when justified (DD-007)
 - Responsive web app
 - Custom branded login using Nest ID or work email
 

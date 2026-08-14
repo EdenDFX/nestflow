@@ -16,6 +16,7 @@ import { getDeliveryReportExtras, sumTimeMinutesByUser } from "@/lib/tasks/m8-qu
 import type { NestFlowTask, TaskAssignee } from "@/lib/tasks/types";
 import { STATUS_LABELS, type TaskStatus } from "@/lib/tasks/types";
 import { listAssignablePeople, listTasks } from "@/lib/tasks/queries";
+import { groupOpenTasksByAssignee } from "@/lib/tasks/open-by-assignee";
 
 type ProfileRow = {
   id: string;
@@ -476,6 +477,7 @@ export async function getHrSuiteData(): Promise<{
   hrTasks: NestFlowTask[];
   employees: DirectoryUser[];
   invites: Invite[];
+  openByUser: Record<string, NestFlowTask[]>;
 }> {
   const supabase = await createClient();
   const { data: hrWorkspaces, error } = await supabase
@@ -496,7 +498,12 @@ export async function getHrSuiteData(): Promise<{
     (task) => !task.archivedAt && hrIds.has(task.workspaceId),
   );
 
-  return { hrTasks, employees, invites };
+  return {
+    hrTasks,
+    employees,
+    invites,
+    openByUser: groupOpenTasksByAssignee(allTasks),
+  };
 }
 
 export async function listWorkspacesDetailed() {
@@ -780,5 +787,38 @@ export async function getAdminOversightData(): Promise<{
   };
 
   return { tasks: oversightTasks, log, report, users };
+}
+
+export async function getAdminSuiteData(): Promise<{
+  users: DirectoryUser[];
+  departments: Department[];
+  invites: Invite[];
+  auditEvents: AuditEvent[];
+  teams: NestFlowTeam[];
+  memberships: TeamMembershipRow[];
+  people: TaskAssignee[];
+  openByUser: Record<string, NestFlowTask[]>;
+}> {
+  const [users, departments, invites, auditEvents, roster, people, tasks] =
+    await Promise.all([
+      listDirectoryUsers(),
+      listDepartments(),
+      listInvites(),
+      listAuditEvents(120),
+      listTeamsWithRoster(),
+      listAssignablePeople(),
+      listTasks(),
+    ]);
+
+  return {
+    users,
+    departments,
+    invites,
+    auditEvents,
+    teams: roster.teams,
+    memberships: roster.memberships,
+    people,
+    openByUser: groupOpenTasksByAssignee(tasks),
+  };
 }
 

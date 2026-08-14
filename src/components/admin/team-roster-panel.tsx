@@ -11,10 +11,13 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { GripVertical, UserRound, Users } from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+
+import { GripVerticalIcon } from "@/components/icons/grip-vertical";
+import { UserIcon } from "@/components/icons/user";
+import { UsersIcon } from "@/components/icons/users";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -145,7 +148,7 @@ function DraggablePersonCard({
         {...listeners}
         {...attributes}
       >
-        <GripVertical className="size-4" aria-hidden />
+        <GripVerticalIcon className="inline-flex" aria-hidden />
       </button>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -167,7 +170,7 @@ function DraggablePersonCard({
 function PersonOverlayCard({ person }: { person: DragPerson }) {
   return (
     <div className="flex w-60 items-center gap-2 rounded-lg border border-primary/40 bg-card px-2.5 py-2 shadow-lg ring-1 ring-primary/20">
-      <GripVertical className="size-4 shrink-0 text-primary" aria-hidden />
+      <GripVerticalIcon className="inline-flex shrink-0 text-primary" aria-hidden />
       <div className="min-w-0">
         <p className="truncate text-sm font-medium">{personLabel(person)}</p>
         <p className="truncate font-mono text-[11px] text-muted-foreground">
@@ -206,7 +209,7 @@ function TeamDropZone({
     >
       <div className="border-b border-border/80 px-4 py-3">
         <div className="flex items-center gap-2">
-          <Users className="size-4 text-muted-foreground" aria-hidden />
+          <UsersIcon className="inline-flex text-muted-foreground" aria-hidden />
           <h3 className="font-heading text-base font-semibold">{team.name}</h3>
         </div>
         <p className="mt-0.5 text-xs text-muted-foreground">
@@ -563,7 +566,7 @@ export function TeamRosterPanel({
         <div className="grid gap-4 xl:grid-cols-[minmax(220px,280px)_1fr]">
           <section className="rounded-2xl border border-border/80 bg-muted/20 p-3">
             <div className="mb-3 flex items-center gap-2 px-1">
-              <UserRound className="size-4 text-muted-foreground" aria-hidden />
+              <UserIcon className="inline-flex text-muted-foreground" aria-hidden />
               <div>
                 <h3 className="font-heading text-sm font-semibold">
                   Ready to assign

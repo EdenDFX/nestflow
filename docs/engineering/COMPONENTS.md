@@ -12,7 +12,7 @@
 2. Prefer composition over one-off page markup.
 3. Every interactive component needs hover, focus, disabled, and loading states where applicable.
 4. Motion is purposeful: entrance, feedback, hierarchy. Not decoration spam.
-5. Do not use icons by default; prefer text labels. When an icon is needed, use Lucide only.
+5. Do not use icons by default; prefer text labels. When an icon is needed, use lucide-animated from `src/components/icons/`.
 6. Tooltips explain dense icon-only controls.
 7. Components must support light and dark themes with primary `#FF6300`.
 8. Accessibility is part of the component contract, not a later pass.
@@ -54,16 +54,24 @@ Built from shadcn/ui and customised:
 | `TaskColumn` | Single status column | overflow, count |
 | `TaskCard` | Compact task summary | hover elevation/motion, blocked emphasis |
 | `TaskList` | Table/list presentation | sorted, filtered, selectable |
-| `TaskCalendar` | Due-date month/week | dense day cells |
+| `TaskCalendar` | Due-date month/week | dense day cells, drag to reschedule |
 | `TaskDetail` | Full task workspace | editing, saving |
 | `StatusBadge` | Status colour mapping | all six statuses |
 | `PriorityBadge` | Priority mapping | four priorities |
-| `AssigneePicker` | Multi-select people | search, empty |
+| `AssigneePicker` | Multi-select people | search, empty, chips |
+| `CommandPalette` | Global search (⌘K) | tasks + people |
+| `TaskPane` | Slide-over task detail | intercepting `/app/tasks/[id]` |
+| `MyTasksPlan` | Today / Upcoming / Later grouping | overdue, completed collapsed, inline status / checklist / comment |
+| `WorkViewSwitcher` | Board / List / Calendar on `/app/work` | active tab |
+| `MentionField` | @NestID autocomplete while typing | empty query, keyboard |
+| `DeactivateUserButton` | Lock account after reassigning open work | no open work, successor required |
+| `NotificationInbox` | Actionable inbox | mentions, assignments, comment, complete |
 | `ChecklistEditor` | Add/toggle/remove items | progress |
 | `CommentThread` | Comments + mentions | pending, failed send |
 | `ActivityFeed` | Historical events | grouped by day |
 | `AttachmentList` | Upload/list/remove via R2 signed URLs | uploading, error |
 | `NotificationBell` | Unread indicator | zero / n |
+| `WorkspaceIsland` | Header status strip | pomodoro, inbox ticker, work pulse |
 | `NotificationPanel` | In-app list | read/unread |
 | `EmptyState` | No data guidance | with CTA |
 | `PermissionGate` | Conditional render by capability | hidden vs disabled policy |

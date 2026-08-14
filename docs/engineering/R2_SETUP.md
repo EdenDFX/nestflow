@@ -78,7 +78,7 @@ pnpm r2:setup
 This uses S3 credentials to:
 
 1. Head (or create) bucket `nestflow-attachments`
-2. Set CORS for `http://localhost:3000` and `https://tasks.nestbyeden.com` (`GET`, `PUT`, `HEAD`, header `Content-Type`)
+2. Set CORS for `http://localhost:3000` and `https://tasks.nestbyeden.app` (`GET`, `PUT`, `HEAD`, header `Content-Type`)
 
 Or set the same CORS in the dashboard: bucket → **Settings** → **CORS policy**.
 

@@ -55,23 +55,36 @@ describe("rolesAllow capability matrix", () => {
 });
 
 describe("nav work views", () => {
-  it("excludes Board and List for HR and admin-only", async () => {
+  it("excludes Board, List, and Work for HR and admin-only", async () => {
     const { navForRoles, canAccessWorkViews } = await import(
       "@/lib/auth/navigation"
     );
     const hrNav = navForRoles(["hr"]);
     expect(hrNav.some((item) => item.href === "/app/board")).toBe(false);
     expect(hrNav.some((item) => item.href === "/app/list")).toBe(false);
+    expect(hrNav.some((item) => item.href === "/app/work")).toBe(false);
     expect(canAccessWorkViews(["hr"])).toBe(false);
     expect(canAccessWorkViews(["admin"])).toBe(false);
     expect(canAccessWorkViews(["staff"])).toBe(true);
     expect(canAccessWorkViews(["line_manager"])).toBe(true);
   });
 
-  it("gives administrators a focused overview nav", async () => {
+  it("gives staff and line managers a single Work workspace", async () => {
+    const { navForRoles } = await import("@/lib/auth/navigation");
+    const staffNav = navForRoles(["staff"]);
+    expect(staffNav.some((item) => item.href === "/app/work")).toBe(true);
+    expect(staffNav.some((item) => item.href === "/app/board")).toBe(false);
+    expect(staffNav.some((item) => item.href === "/app/list")).toBe(false);
+    expect(staffNav.some((item) => item.href === "/app/calendar")).toBe(false);
+  });
+
+  it("gives administrators My Tasks plus Overview", async () => {
     const { navForRoles } = await import("@/lib/auth/navigation");
     const adminNav = navForRoles(["admin"]);
-    expect(adminNav.map((item) => item.href)).toEqual(["/app/admin"]);
+    expect(adminNav.map((item) => item.href)).toEqual([
+      "/app/my-tasks",
+      "/app/admin",
+    ]);
   });
 });
 

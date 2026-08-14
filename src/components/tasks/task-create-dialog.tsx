@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { AssigneePicker } from "@/components/tasks/assignee-picker";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -75,14 +76,6 @@ export function TaskCreateDialog({
     setBlockedReason("");
     setAssigneeIds(defaultAssigneeId ? [defaultAssigneeId] : []);
     setTagsInput("");
-  }
-
-  function toggleAssignee(userId: string) {
-    setAssigneeIds((current) =>
-      current.includes(userId)
-        ? current.filter((id) => id !== userId)
-        : [...current, userId],
-    );
   }
 
   function onSubmit(event: React.FormEvent) {
@@ -240,26 +233,12 @@ export function TaskCreateDialog({
           {canAssign ? (
             <div className="space-y-2">
               <Label>Assignees</Label>
-              <div className="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-border p-3">
-                {people.map((person) => {
-                  const checked = assigneeIds.includes(person.userId);
-                  return (
-                    <label
-                      key={person.userId}
-                      className="flex cursor-pointer items-center gap-2 text-sm"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleAssignee(person.userId)}
-                      />
-                      <span>
-                        {person.fullName ?? person.nestId ?? person.email}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
+              <AssigneePicker
+                people={people}
+                value={assigneeIds}
+                onChange={setAssigneeIds}
+                disabled={pending}
+              />
             </div>
           ) : null}
 

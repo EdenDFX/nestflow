@@ -6,7 +6,7 @@ Internal documentation for **NestFlow**, the task-management platform for Nest b
 | --- | --- |
 | Product | NestFlow |
 | Tagline | Plan. Assign. Deliver. |
-| Planned URL | `tasks.nestbyeden.com` |
+| Planned URL | `tasks.nestbyeden.app` |
 | Primary colour | `#FF6300` |
 | Application type | Responsive web application |
 

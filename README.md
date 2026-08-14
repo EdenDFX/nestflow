@@ -7,7 +7,7 @@ Internal task management for Nest by Eden.
 | Item | Value |
 | --- | --- |
 | Repo | https://github.com/EdenDFX/nestflow |
-| URL (planned) | `tasks.nestbyeden.com` |
+| URL (planned) | `tasks.nestbyeden.app` |
 | Version | `1.0.0` |
 | Primary colour | `#FF6300` |
 | Stack | Next.js, Tailwind, shadcn/ui, Supabase (Free), Cloudflare R2 |

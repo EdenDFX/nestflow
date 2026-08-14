@@ -10,6 +10,7 @@ import {
   type TaskPriority,
   type TaskStatus,
 } from "@/lib/tasks/types";
+import type { TaskInboxSummary } from "@/lib/notifications/inbox";
 
 type TaskRow = {
   id: string;
@@ -226,6 +227,32 @@ export async function listTasks(options?: {
   }
 
   return tasks;
+}
+
+export async function listTaskInboxSummaries(
+  ids: string[],
+): Promise<Record<string, TaskInboxSummary>> {
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (unique.length === 0) return {};
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("nf_tasks")
+    .select("id, title, status")
+    .in("id", unique);
+
+  if (error) throw new Error(error.message);
+
+  const map: Record<string, TaskInboxSummary> = {};
+  for (const row of data ?? []) {
+    if (!isTaskStatus(row.status as string)) continue;
+    map[row.id as string] = {
+      id: row.id as string,
+      title: row.title as string,
+      status: row.status as TaskStatus,
+    };
+  }
+  return map;
 }
 
 export async function getTaskById(taskId: string): Promise<NestFlowTask | null> {

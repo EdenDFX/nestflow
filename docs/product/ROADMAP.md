@@ -25,7 +25,7 @@ M0 Foundations → M1 Auth & shell → M2 Tasks core → M3 Collaboration
 - [x] Docs set complete and reviewed
 - [x] Next.js + Tailwind + shadcn/ui scaffold
 - [x] Supabase project linkage and schema namespace plan (`nestflow` schema)
-- [ ] Vercel project and `tasks.nestbyeden.com` DNS plan
+- [ ] Vercel project and `tasks.nestbyeden.app` DNS plan
 - [ ] CI: lint, typecheck, unit test stub, Playwright smoke stub
 
 **Exit criteria:** App deploys to a preview URL with design tokens applied.
@@ -107,7 +107,7 @@ M0 Foundations → M1 Auth & shell → M2 Tasks core → M3 Collaboration
 
 **Goal:** Soft launch to internal employees.
 
-- [x] Production domain cutover runbook (`tasks.nestbyeden.com`) + `/api/health`
+- [x] Production domain cutover runbook (`tasks.nestbyeden.app`) + `/api/health`
 - [x] Seed departments and initial users verified (20 profiles, 4 departments, General + People & HR)
 - [x] Training notes / short internal guide
 - [x] Support channel and incident path defined
@@ -129,7 +129,7 @@ M0 Foundations → M1 Auth & shell → M2 Tasks core → M3 Collaboration
 | Admin notification templates | Shared Resend HTML + prefs | Read-only Admin overview of event → channel (T-072) |
 | Admin system health | `/api/health` only | Admin UI on top of health probe + env readiness (T-073) |
 | Manager assign | Create assign + server `assigneeIds`; detail UI incomplete | Detail assignee picker + bulk reassign on team views (T-074) |
-| HR status | Activate/deactivate + queues + invites live | Deactivate prompts for open work / reassignment (T-075) |
+| HR status | Activate/deactivate + queues + invites live | Deactivate prompts for open work / reassignment (T-075) done |
 | HR templates | Not started | Defer to M8 T-086 (PRD v1.1) |
 | Staff mentions | Notification events only | Dedicated Mentions surface reusing notifications (T-077) |
 | Staff quick update | Full task detail | Compact actions from My Tasks (T-078) |

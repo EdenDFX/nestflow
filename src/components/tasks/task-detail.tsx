@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { AssigneePicker } from "@/components/tasks/assignee-picker";
 import { TaskActivity } from "@/components/tasks/task-activity";
 import { TaskAttachments } from "@/components/tasks/task-attachments";
 import { TaskChecklist } from "@/components/tasks/task-checklist";
@@ -13,6 +14,7 @@ import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { personLabel } from "@/lib/people/label";
 import {
   Select,
   SelectContent,
@@ -35,6 +37,7 @@ import {
   TASK_STATUSES,
   canTransition,
   type NestFlowTask,
+  type TaskAssignee,
   type TaskPriority,
   type TaskStatus,
 } from "@/lib/tasks/types";
@@ -46,6 +49,8 @@ export function TaskDetail({
   collaboration,
   m8,
   r2Configured,
+  assignablePeople = [],
+  variant = "page",
 }: {
   task: NestFlowTask;
   canAssign: boolean;
@@ -53,6 +58,8 @@ export function TaskDetail({
   collaboration: TaskCollaboration;
   m8: TaskM8Extras;
   r2Configured: boolean;
+  assignablePeople?: TaskAssignee[];
+  variant?: "page" | "pane";
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -64,6 +71,10 @@ export function TaskDetail({
     task.dueAt ? task.dueAt.slice(0, 10) : "",
   );
   const [blockedReason, setBlockedReason] = useState(task.blockedReason ?? "");
+  const [assigneeIds, setAssigneeIds] = useState(
+    task.assignees.map((person) => person.userId),
+  );
+  const pane = variant === "pane";
 
   function saveDetails() {
     startTransition(async () => {
@@ -73,6 +84,7 @@ export function TaskDetail({
         description,
         priority,
         dueAt: dueAt || null,
+        ...(canAssign ? { assigneeIds } : {}),
       });
       if (!result.ok) {
         toast.error(result.error ?? "Could not save task.");
@@ -113,13 +125,23 @@ export function TaskDetail({
         return;
       }
       toast.success("Task archived.");
-      router.push("/app/my-tasks");
+      if (pane) {
+        router.back();
+      } else {
+        router.push("/app/my-tasks");
+      }
       router.refresh();
     });
   }
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+    <div
+      className={
+        pane
+          ? "grid gap-8"
+          : "mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]"
+      }
+    >
       <div className="space-y-8">
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -129,7 +151,11 @@ export function TaskDetail({
           <Input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            className="h-auto border-0 bg-transparent px-0 font-heading text-3xl font-semibold tracking-tight shadow-none focus-visible:ring-0"
+            className={
+              pane
+                ? "h-auto border-0 bg-transparent px-0 font-heading text-xl font-semibold tracking-tight shadow-none focus-visible:ring-0"
+                : "h-auto border-0 bg-transparent px-0 font-heading text-3xl font-semibold tracking-tight shadow-none focus-visible:ring-0"
+            }
           />
         </div>
 
@@ -202,19 +228,22 @@ export function TaskDetail({
 
         <div className="space-y-2">
           <Label>Assignees</Label>
-          <p className="text-sm text-muted-foreground">
-            {task.assignees.length > 0
-              ? task.assignees
-                  .map(
-                    (person) =>
-                      person.fullName ?? person.nestId ?? person.email,
-                  )
-                  .join(", ")
-              : "Unassigned"}
-            {!canAssign
-              ? " (managers, HR, and admins can reassign)"
-              : " — reassignment UI expands in M5"}
-          </p>
+          {canAssign ? (
+            <AssigneePicker
+              people={assignablePeople}
+              value={assigneeIds}
+              onChange={setAssigneeIds}
+              disabled={pending}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {task.assignees.length > 0
+                ? task.assignees.map((person) => personLabel(person)).join(", ")
+                : "Unassigned"}
+              {" "}
+              (managers, HR, and admins can reassign)
+            </p>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-3">
@@ -232,7 +261,11 @@ export function TaskDetail({
         </div>
 
         <TaskChecklist taskId={task.id} items={collaboration.checklist} />
-        <TaskComments taskId={task.id} comments={collaboration.comments} />
+        <TaskComments
+          taskId={task.id}
+          comments={collaboration.comments}
+          people={assignablePeople}
+        />
         <TaskM8Panel
           task={task}
           extras={m8}

@@ -28,6 +28,7 @@ export function TeamSuite({
   defaultAssigneeId,
   managedTeams,
   isOrgWide,
+  initialPersonId,
 }: {
   tasks: NestFlowTask[];
   blocked: NestFlowTask[];
@@ -38,8 +39,16 @@ export function TeamSuite({
   defaultAssigneeId?: string;
   managedTeams: ManagedTeamSummary[];
   isOrgWide: boolean;
+  initialPersonId?: string | null;
 }) {
-  const [tab, setTab] = useState<TeamTab>("performance");
+  const [tab, setTab] = useState<TeamTab>(
+    initialPersonId ? "board" : "performance",
+  );
+  const [personKey, setPersonKey] = useState(initialPersonId ?? null);
+  if (initialPersonId && initialPersonId !== personKey) {
+    setPersonKey(initialPersonId);
+    setTab("board");
+  }
   const teamLabel = isOrgWide
     ? "Organisation"
     : managedTeams.length > 0
@@ -122,7 +131,13 @@ export function TeamSuite({
       ) : null}
 
       {tab === "board" ? (
-        <TeamTaskBoard initialTasks={tasks} roster={workload} />
+        <TeamTaskBoard
+          initialTasks={tasks}
+          roster={workload}
+          people={people}
+          canAssign={canAssign}
+          initialAssigneeId={initialPersonId ?? undefined}
+        />
       ) : null}
 
       {tab === "blocked" ? (

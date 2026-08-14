@@ -19,7 +19,7 @@ export default async function PeopleTasksPage() {
     profile.roles.includes("line_manager");
 
   const [
-    { hrTasks, employees, invites },
+    { hrTasks, employees, invites, openByUser },
     workspaces,
     people,
     roster,
@@ -49,6 +49,7 @@ export default async function PeopleTasksPage() {
       memberships={roster.memberships}
       templates={templates}
       automationRules={automationRules}
+      openByUser={openByUser}
     />
   );
 }

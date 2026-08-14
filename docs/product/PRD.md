@@ -6,7 +6,7 @@
 | Status | Soft launch 1.0.0 shipped; PRD surface close-out (M7.1) open |
 | Version | 0.1.1 |
 | Last updated | 2026-08-06 |
-| Planned URL | `tasks.nestbyeden.com` |
+| Planned URL | `tasks.nestbyeden.app` |
 | Related gear system | Nest by Eden gear management (`nestbyeden`) |
 
 ## 1. Purpose
@@ -244,7 +244,7 @@ PRD §5 surfaces still closing under M7.1 (merge, do not replace): Admin org/set
 2. Whether NestFlow must reuse the existing Supabase project only, or may use a dedicated project if isolation requires it.
 3. Approximate employee count and department list for capacity planning.
 4. Whether HR requires private task spaces invisible to Line Managers by default.
-5. Final confirmation of parent domain TLD (`nestbyeden.com` assumed).
+5. Parent domain TLD confirmed as `nestbyeden.app` (not `.com`).
 
 ## 12. Document history
 

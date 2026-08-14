@@ -134,3 +134,37 @@ export async function getTaskCollaboration(
 
   return { checklist, comments, attachments, activity };
 }
+
+export async function listChecklistsForTasks(
+  taskIds: string[],
+): Promise<Record<string, ChecklistItem[]>> {
+  const uniqueIds = [...new Set(taskIds.filter(Boolean))];
+  if (uniqueIds.length === 0) return {};
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("nf_checklist_items")
+    .select("*")
+    .in("task_id", uniqueIds)
+    .order("position", { ascending: true });
+
+  if (error) throw new Error(error.message);
+
+  const map: Record<string, ChecklistItem[]> = {};
+  for (const row of data ?? []) {
+    const taskId = row.task_id as string;
+    const list = map[taskId] ?? [];
+    list.push({
+      id: row.id,
+      taskId,
+      title: row.title,
+      isDone: row.is_done,
+      position: row.position,
+      createdBy: row.created_by,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    });
+    map[taskId] = list;
+  }
+  return map;
+}

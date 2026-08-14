@@ -25,7 +25,7 @@ const endpoint =
 
 const corsRules = [
   {
-    AllowedOrigins: ["http://localhost:3000", "https://tasks.nestbyeden.com"],
+    AllowedOrigins: ["http://localhost:3000", "https://tasks.nestbyeden.app"],
     AllowedMethods: ["GET", "PUT", "HEAD"],
     AllowedHeaders: ["Content-Type"],
     MaxAgeSeconds: 3600,

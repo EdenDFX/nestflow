@@ -4,17 +4,20 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { MentionField } from "@/components/tasks/mention-field";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { addCommentAction } from "@/lib/tasks/collaboration-actions";
 import type { TaskComment } from "@/lib/tasks/collaboration-types";
+import type { TaskAssignee } from "@/lib/tasks/types";
 
 export function TaskComments({
   taskId,
   comments,
+  people = [],
 }: {
   taskId: string;
   comments: TaskComment[];
+  people?: TaskAssignee[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -72,11 +75,12 @@ export function TaskComments({
       </div>
 
       <form onSubmit={submit} className="space-y-2">
-        <Textarea
+        <MentionField
+          people={people}
           value={body}
-          onChange={(event) => setBody(event.target.value)}
+          onChange={setBody}
           rows={3}
-          placeholder="Write a comment. Use @GFX2 to mention someone."
+          placeholder="Write a comment. Type @ to mention a Nest ID."
           disabled={pending}
         />
         <Button type="submit" disabled={pending || !body.trim()}>

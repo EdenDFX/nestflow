@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
+
+import { ArrowRightIcon } from "@/components/icons/arrow-right";
+import { ArrowUpRightIcon } from "@/components/icons/arrow-up-right";
+import { ChevronDownIcon } from "@/components/icons/chevron-down";
 
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
@@ -139,7 +142,7 @@ export function HrDashboard({
     <div className="space-y-8">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-2">
-          <h1 className="font-heading text-4xl font-semibold tracking-tight uppercase sm:text-5xl">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
             People
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -161,7 +164,7 @@ export function HrDashboard({
             className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted"
           >
             Open people suite
-            <ArrowRight className="size-3.5" />
+            <ArrowRightIcon className="inline-flex" size={14} />
           </Link>
           <div className="flex flex-wrap gap-2">
             <StatPill label="Active" value={String(activeCount)} />
@@ -188,67 +191,40 @@ export function HrDashboard({
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {focusItems.map((item, index) => {
-            const tone = index % 2 === 0 ? "primary" : "ink";
-            const onPrimary = tone === "primary";
-
+          {focusItems.map((item) => {
             return (
               <SteppedCard
                 key={item.id}
-                tone={tone}
+                tone="muted"
                 cornerActions={
                   <SteppedCardActionLink
                     href={item.href}
                     aria-label={`Open ${item.title}`}
                   >
-                    <ArrowUpRight className="size-4" />
+                    <ArrowUpRightIcon className="inline-flex" />
                   </SteppedCardActionLink>
                 }
               >
                 <div className="space-y-4">
-                  <div
-                    className={cn(
-                      "flex size-11 items-center justify-center rounded-full text-sm font-semibold",
-                      onPrimary
-                        ? "bg-[#1c1917]/10 text-[#1c1917]"
-                        : "bg-white/10 text-white",
-                    )}
-                  >
+                  <div className="flex size-11 items-center justify-center rounded-full bg-primary/12 text-sm font-semibold text-primary">
                     {item.badge.slice(0, 1)}
                   </div>
                   <div className="space-y-1.5 pe-2">
                     <h3 className="font-heading text-xl font-semibold tracking-tight">
                       {item.title}
                     </h3>
-                    <p
-                      className={cn(
-                        "text-sm",
-                        onPrimary ? "text-[#1c1917]/70" : "text-white/65",
-                      )}
-                    >
+                    <p className="text-sm text-muted-foreground">
                       {item.subtitle}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between gap-2">
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium",
-                      onPrimary
-                        ? "border-[#1c1917]/15 bg-white/35 text-[#1c1917]"
-                        : "border-white/15 bg-white/10 text-white",
-                    )}
-                  >
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background/70 px-3 py-1.5 text-xs font-medium">
                     {item.badge}
-                    <ChevronDown className="size-3.5 opacity-70" aria-hidden />
+                    <ChevronDownIcon className="inline-flex opacity-70" size={14} aria-hidden />
                   </span>
-                  <span
-                    className={cn(
-                      "text-xs font-medium",
-                      onPrimary ? "text-[#1c1917]/55" : "text-white/50",
-                    )}
-                  >
+                  <span className="text-xs font-medium text-muted-foreground">
                     NestFlow
                   </span>
                 </div>
@@ -358,7 +334,7 @@ export function HrDashboard({
               className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
             >
               Manage invites
-              <ArrowRight className="size-3.5" />
+              <ArrowRightIcon className="inline-flex" size={14} />
             </Link>
           </div>
         </section>
@@ -465,7 +441,7 @@ export function HrDashboard({
               className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
             >
               Fix coverage
-              <ArrowRight className="size-3.5" />
+              <ArrowRightIcon className="inline-flex" size={14} />
             </Link>
           </div>
         </section>

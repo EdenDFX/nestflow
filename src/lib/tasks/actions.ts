@@ -208,7 +208,11 @@ function revalidateTaskPaths(taskId?: string) {
   revalidatePath("/app/my-tasks");
   revalidatePath("/app/board");
   revalidatePath("/app/list");
+  revalidatePath("/app/work");
   revalidatePath("/app/calendar");
+  revalidatePath("/app/team");
+  revalidatePath("/app/admin");
+  revalidatePath("/app/notifications");
   if (taskId) {
     revalidatePath(`/app/tasks/${taskId}`);
   }
@@ -683,4 +687,98 @@ export async function archiveTaskAction(taskId: string): Promise<ActionResult> {
 
   revalidateTaskPaths(taskId);
   return { ok: true, taskId };
+}
+
+const bulkReassignSchema = z.object({
+  taskIds: z.array(pgUuid).min(1).max(50),
+  assigneeIds: z.array(pgUuid).max(20),
+});
+
+export async function reassignTasksAction(
+  input: z.infer<typeof bulkReassignSchema>,
+): Promise<ActionResult> {
+  const profile = await requireActiveProfile();
+  const parsed = bulkReassignSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      error: parsed.error.issues[0]?.message ?? "Invalid reassignment.",
+    };
+  }
+
+  if (!canAssign(profile.roles)) {
+    return {
+      ok: false,
+      code: "FORBIDDEN",
+      error: "Only managers, HR, or admins can reassign tasks.",
+    };
+  }
+
+  const scopeError = await assertAssigneesInScope(
+    profile,
+    parsed.data.assigneeIds,
+  );
+  if (scopeError) return scopeError;
+
+  const supabase = await createClient();
+
+  for (const taskId of parsed.data.taskIds) {
+    const { data: existingAssignees } = await supabase
+      .from("nf_task_assignees")
+      .select("user_id")
+      .eq("task_id", taskId);
+    const previous = new Set(
+      (existingAssignees ?? []).map((row) => row.user_id as string),
+    );
+
+    await supabase.from("nf_task_assignees").delete().eq("task_id", taskId);
+
+    if (parsed.data.assigneeIds.length > 0) {
+      const { error: assignError } = await supabase
+        .from("nf_task_assignees")
+        .insert(
+          parsed.data.assigneeIds.map((userId) => ({
+            task_id: taskId,
+            user_id: userId,
+            assigned_by: profile.userId,
+          })),
+        );
+      if (assignError) {
+        return { ok: false, code: "INTERNAL", error: assignError.message };
+      }
+    }
+
+    await recordActivity({
+      taskId,
+      actorId: profile.userId,
+      eventType: "task_updated",
+      summary: "Reassigned task",
+    });
+
+    const newlyAssigned = parsed.data.assigneeIds.filter(
+      (id) => !previous.has(id) && id !== profile.userId,
+    );
+    if (newlyAssigned.length > 0) {
+      const { data: taskRow } = await supabase
+        .from("nf_tasks")
+        .select("title")
+        .eq("id", taskId)
+        .maybeSingle();
+
+      await notifyMany(newlyAssigned, {
+        eventType: "task_assigned",
+        title: "You were assigned a task",
+        body: taskRow?.title ?? "A task was assigned to you",
+        taskId,
+        href: `/app/tasks/${taskId}`,
+        metadata: { assignedBy: profile.userId },
+        idempotencyKey: `bulk-reassign:${taskId}:${newlyAssigned.sort().join(",")}:${Date.now()}`,
+      });
+    }
+  }
+
+  revalidateTaskPaths();
+  return { ok: true };
 }
