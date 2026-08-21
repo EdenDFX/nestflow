@@ -5,6 +5,7 @@ export const NOTIFICATION_EVENT_TYPES = [
   "task_overdue",
   "task_status_changed",
   "invite",
+  "performance_digest",
 ] as const;
 
 export type NotificationEventType = (typeof NOTIFICATION_EVENT_TYPES)[number];
@@ -30,9 +31,11 @@ export type NotificationPreferences = {
   emailMention: boolean;
   emailDueSoon: boolean;
   emailOverdue: boolean;
+  emailPerformanceDigest: boolean;
   pushAssignment: boolean;
   pushMention: boolean;
   pushOverdue: boolean;
+  pushPerformanceDigest: boolean;
   chatAssignment: boolean;
   chatMention: boolean;
   chatDueSoon: boolean;
@@ -47,9 +50,11 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: Omit<
   emailMention: true,
   emailDueSoon: true,
   emailOverdue: true,
+  emailPerformanceDigest: true,
   pushAssignment: true,
   pushMention: true,
   pushOverdue: true,
+  pushPerformanceDigest: true,
   chatAssignment: true,
   chatMention: true,
   chatDueSoon: true,
@@ -76,6 +81,8 @@ export function eventLabel(type: NotificationEventType): string {
       return "Status";
     case "invite":
       return "Invite";
+    case "performance_digest":
+      return "Performance report";
     default: {
       const _exhaustive: never = type;
       return _exhaustive;

@@ -58,9 +58,10 @@ Domain logic lives under `src/lib/<area>/`. Keep `page.tsx` files thin.
 | --- | --- | --- |
 | `/login` | Everyone | Nest ID or email sign-in |
 | `/app` | Line Manager (home), others | Dashboard |
-| `/app/my-tasks` | Everyone | Personal day plan |
+| `/app/my-tasks` | Staff, Line Manager, HR | Personal day plan (Admin redirects to Overview) |
 | `/app/work` | Staff, Line Manager | Board, list, and calendar |
 | `/app/team` | Line Manager | Team board, workload, blocked |
+| `/app/reports` | Admin, Line Manager, HR | Period staff performance (charts + detail; Admin department-scoped by default) |
 | `/app/people` | HR | HR queues, templates, automation |
 | `/app/admin` | Admin | Overview: Work (`AdminOversight`) and People (`AdminSuite`) |
 | `/app/notifications` | Everyone | Inbox, including mentions |
@@ -75,7 +76,7 @@ Domain logic lives under `src/lib/<area>/`. Keep `page.tsx` files thin.
 | Default UI | React Server Components |
 | Interactive UI | Client Components only when required |
 | Mutations | Server Actions with Zod validation |
-| HTTP endpoints | Route Handlers (`/api/health`, `/api/cron/overdue`) |
+| HTTP endpoints | Route Handlers (`/api/health`, `/api/cron/overdue`, `/api/cron/performance-reports`) |
 | Auth session | Supabase Auth cookies / server client |
 | Authorisation | Server permission checks + Postgres RLS |
 | Live updates | Supabase Realtime subscriptions where useful |
@@ -89,6 +90,7 @@ Domain logic lives under `src/lib/<area>/`. Keep `page.tsx` files thin.
 | Work | Workspaces, tasks, statuses, checklists, tags |
 | Collaboration | Comments, mentions, attachments, activity |
 | Notifications | Event fan-out to in-app, email, push, and optional Google Chat |
+| Reports | Period aggregates for staff performance digests and `/app/reports` |
 | Search | Command palette over visible tasks and people |
 | Admin / Audit | Configuration and security event history |
 | Enhancements | Recurrence, approvals, dependencies, time, templates, automation, gear links |
@@ -171,7 +173,7 @@ See [ADR-004](../decisions/ADR-004-cloudflare-r2-attachments.md).
 
 - Passkeys / MFA (T-087)
 - Background job processor if email/push volume requires queues
-- Reporting warehouse export
+- Reporting warehouse export (beyond in-app period reports)
 - Admin org settings, notification template gallery, and health UI (T-071–T-073)
 - Google Chat personal DMs when Workspace Admin can install the NestFlow Chat app
 

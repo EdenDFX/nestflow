@@ -136,6 +136,7 @@ Prioritised after go-live. None of these replace v1 tasks above. Passkeys/MFA re
 | T-086 | Advanced automation + templates | done | HR templates tab + automation rules (status/create/complete triggers) |
 | T-087 | Passkeys / MFA | todo | Optional stronger auth after password baseline (roadmap retained) |
 | T-088 | Google Chat notification channel | done | Space webhook; Profile Chat prefs; `/api/health` `googleChat` flag (ADR-005) |
+| T-089 | Staff period reports + digests | done | `/app/reports` charts; daily/weekly/monthly digests (in-app, email, push) for LM/HR/Admin |
 
 ## Writing new tasks
 

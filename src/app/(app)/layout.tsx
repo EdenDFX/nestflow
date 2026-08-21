@@ -3,7 +3,7 @@ import { Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/layout/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { navForRoles } from "@/lib/auth/navigation";
+import { homePathForRoles, navForRoles } from "@/lib/auth/navigation";
 import { requireActiveProfile } from "@/lib/auth/session";
 
 const geistMono = Geist_Mono({
@@ -21,12 +21,14 @@ export default async function AuthenticatedLayout({
 }>) {
   const profile = await requireActiveProfile();
   const navItems = navForRoles(profile.roles);
+  const homeHref = homePathForRoles(profile.roles);
 
   return (
     <TooltipProvider delayDuration={200}>
       <AppShell
         profile={profile}
         navItems={navItems}
+        homeHref={homeHref}
         className={geistMono.variable}
       >
         {children}

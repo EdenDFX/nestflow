@@ -25,15 +25,20 @@ Write entries for people who use the product. Don't list internal refactors or d
 - Admin performance/delivery report extras (pending approvals, recurring open, hours logged, 30-day completion rate)
 - Team performance grid shows logged time per person
 - HR People suite: Templates & automation (task templates + simple automation rules)
+- Staff performance reports (`/app/reports`) with daily, weekly, and monthly charts for Line Managers, HR, and Admin
+- Scheduled performance digests (in-app, email, web push) via `/api/cron/performance-reports`
 
 ### Changed
 
+- Admin navigation is Overview + Reports only (My Tasks removed; `/app/my-tasks` redirects admins home)
+- Admin Reports requires a department selection before listing staff (All departments remains available)
 - Dark mode app shell uses a pure black stage (`#000000`), matching DD-009
 - Sign-in shows the form immediately instead of a timed word intro
 - Work board keeps the same layout while the page hydrates
 - App navigations reserve heading and panel space instead of appearing empty
 - `/app/board`, `/app/list`, and `/app/calendar` redirect into `/app/work`
 - Planned production URL is `tasks.nestbyeden.app`
+- Icon rail uses distinct Overview / Reports icons, primary active state, and role home logo link
 
 ## [1.0.0] - 2026-08-06
 

@@ -13,6 +13,7 @@ import { TimerIcon } from "@/components/icons/timer";
 import { XIcon } from "@/components/icons/x";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { homePathForRoles } from "@/lib/auth/navigation";
 import type { NestFlowProfile } from "@/lib/auth/types";
 import { islandUpdates, type IslandUpdate } from "@/lib/notifications/island-updates";
 import type { NestFlowNotification } from "@/lib/notifications/types";
@@ -171,10 +172,13 @@ export function WorkspaceIsland({
     return () => window.clearInterval(timer);
   }, [pomodoro.running]);
 
-  const attention = islandAttention({
-    overdue: overdueCount,
-    blocked: blockedCount,
-  });
+  const attention = islandAttention(
+    {
+      overdue: overdueCount,
+      blocked: blockedCount,
+    },
+    { href: homePathForRoles(profile.roles) },
+  );
   const updates = islandUpdates(notifications);
   const youLabel = profile.fullName?.split(" ")[0] ?? profile.nestId ?? "You";
   const progress =

@@ -10,7 +10,8 @@ export type NavIcon =
   | "calendar"
   | "team"
   | "people"
-  | "admin";
+  | "admin"
+  | "reports";
 
 export type NavItem = {
   href: string;
@@ -44,6 +45,12 @@ const roleNav: NavItem[] = [
     icon: "team",
   },
   {
+    href: "/app/reports",
+    label: "Reports",
+    roles: ["line_manager", "hr", "admin"],
+    icon: "reports",
+  },
+  {
     href: "/app/people",
     label: "People tasks",
     roles: ["hr"],
@@ -60,8 +67,8 @@ const roleNav: NavItem[] = [
 export function navForRoles(roles: AppRole[]): NavItem[] {
   if (primaryRole(roles) === "admin") {
     return [
-      { href: "/app/my-tasks", label: "My Tasks", icon: "my-tasks" },
       { href: "/app/admin", label: "Overview", icon: "admin" },
+      { href: "/app/reports", label: "Reports", icon: "reports" },
     ];
   }
 

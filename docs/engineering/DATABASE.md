@@ -246,11 +246,12 @@ Never expose R2 credentials to the browser. Never rely on unguessable public URL
 ## 14. M4 schema notes (applied)
 
 - Tables: `nestflow.notifications`, `notification_preferences`, `push_subscriptions`
-- Enum: `notification_event_type` (assignment, mention, due soon, overdue, status, invite)
+- Enum: `notification_event_type` (assignment, mention, due soon, overdue, status, invite, performance_digest)
 - Public views: `nf_notifications`, `nf_notification_preferences`, `nf_push_subscriptions`
 - RPC: `public.nestflow_emit_notification` (SECURITY DEFINER fan-out; skips self for actor events)
 - Unique partial index on `(user_id, idempotency_key)` for duplicate suppression
 - Cron: `POST /api/cron/overdue` (Bearer `CRON_SECRET`) writes overdue/due-soon via service role
+- Cron: `POST /api/cron/performance-reports` (Bearer `CRON_SECRET`) sends daily/weekly/monthly digests
 - Chat preference columns and `chat_sent_at` added later (section 18)
 
 ## 15. M5 schema notes (applied)
@@ -284,6 +285,13 @@ Optional notification channel (ADR-005). Space incoming webhook in v1.
 - `nestflow.notifications.chat_sent_at` (timestamptz, nullable)
 - Views `nf_notification_preferences` and `nf_notifications` recreated with `security_invoker = true` to expose the new columns
 - App env: `GOOGLE_CHAT_ENABLED`, `GOOGLE_CHAT_WEBHOOK_URL` (server only). See [GOOGLE_CHAT_SETUP.md](GOOGLE_CHAT_SETUP.md)
+
+## 19. Performance digests (applied)
+
+- Enum value `performance_digest` on `nestflow.notification_event_type`
+- Prefs: `email_performance_digest`, `push_performance_digest` (default true) on `notification_preferences` + `nf_notification_preferences`
+- In-app surface: `/app/reports` (Admin, Line Manager, HR)
+- Cron: `POST /api/cron/performance-reports` daily at 07:00 UTC; sends weekly on Lagos Monday and monthly on Lagos day 1
 
 ## See Also
 

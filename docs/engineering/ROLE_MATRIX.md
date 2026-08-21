@@ -26,6 +26,7 @@ Derived from ADR-003 and enforced in:
 | Assign / reassign tasks | Yes (any) | Yes (roster) | Yes (self, admin, line managers only) | No |
 | Board / List views | No | Yes | No | Yes |
 | Team board / workload / blocked | No (see Overview reports) | Yes | No | No |
+| Staff period reports (`/app/reports`) | Yes (department-scoped by default; All optional) | Yes (managed teams) | Yes (org-wide) | No |
 | Admin Overview (all tasks, log, reports) | Yes | No | No | No |
 | People suite | Optional (if also HR) | No | Yes | No |
 | HR people workspaces (`kind=hr`) | Yes | No | Yes | No |

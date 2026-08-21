@@ -152,6 +152,7 @@ M0 Foundations → M1 Auth & shell → M2 Tasks core → M3 Collaboration
 | 7 | Advanced automation + templates | T-086 | done | People → Templates & automation |
 | 8 | Passkeys / MFA | T-087 | open | Stronger auth after password baseline |
 | 9 | Google Chat notifications | T-088 | done | Space webhook cards (ADR-005). Personal DMs later. |
+| 10 | Staff period reports + digests | T-089 | done | Daily/weekly/monthly charts + digests for LM/HR/Admin |
 
 M8 does not include deep gear inventory, public signup, native apps, or full HRIS (PRD non-goals).
 

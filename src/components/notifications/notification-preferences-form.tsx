@@ -52,9 +52,11 @@ export function NotificationPreferencesForm({
         emailMention: prefs.emailMention,
         emailDueSoon: prefs.emailDueSoon,
         emailOverdue: prefs.emailOverdue,
+        emailPerformanceDigest: prefs.emailPerformanceDigest,
         pushAssignment: prefs.pushAssignment,
         pushMention: prefs.pushMention,
         pushOverdue: prefs.pushOverdue,
+        pushPerformanceDigest: prefs.pushPerformanceDigest,
         chatAssignment: prefs.chatAssignment,
         chatMention: prefs.chatMention,
         chatDueSoon: prefs.chatDueSoon,
@@ -181,14 +183,21 @@ export function NotificationPreferencesForm({
           checked={prefs.emailOverdue}
           onCheckedChange={(value) => updatePref("emailOverdue", value)}
         />
+        <PrefRow
+          label="Performance reports"
+          checked={prefs.emailPerformanceDigest}
+          onCheckedChange={(value) =>
+            updatePref("emailPerformanceDigest", value)
+          }
+        />
       </section>
 
       <section className="space-y-4">
         <div>
           <h2 className="font-heading text-lg font-semibold">Web push</h2>
           <p className="text-sm text-muted-foreground">
-            Browser alerts for assignment, mention, and overdue. Requires VAPID
-            keys and permission.
+            Browser alerts for assignment, mention, overdue, and performance
+            digests. Requires VAPID keys and permission.
           </p>
         </div>
         <PrefRow
@@ -205,6 +214,13 @@ export function NotificationPreferencesForm({
           label="Overdue"
           checked={prefs.pushOverdue}
           onCheckedChange={(value) => updatePref("pushOverdue", value)}
+        />
+        <PrefRow
+          label="Performance reports"
+          checked={prefs.pushPerformanceDigest}
+          onCheckedChange={(value) =>
+            updatePref("pushPerformanceDigest", value)
+          }
         />
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button

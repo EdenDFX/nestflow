@@ -78,12 +78,12 @@ describe("nav work views", () => {
     expect(staffNav.some((item) => item.href === "/app/calendar")).toBe(false);
   });
 
-  it("gives administrators My Tasks plus Overview", async () => {
+  it("gives administrators Overview and Reports only", async () => {
     const { navForRoles } = await import("@/lib/auth/navigation");
     const adminNav = navForRoles(["admin"]);
     expect(adminNav.map((item) => item.href)).toEqual([
-      "/app/my-tasks",
       "/app/admin",
+      "/app/reports",
     ]);
   });
 });

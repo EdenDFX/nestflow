@@ -41,9 +41,11 @@ function mapPreferences(
     emailMention: Boolean(data.email_mention ?? true),
     emailDueSoon: Boolean(data.email_due_soon ?? true),
     emailOverdue: Boolean(data.email_overdue ?? true),
+    emailPerformanceDigest: Boolean(data.email_performance_digest ?? true),
     pushAssignment: Boolean(data.push_assignment ?? true),
     pushMention: Boolean(data.push_mention ?? true),
     pushOverdue: Boolean(data.push_overdue ?? true),
+    pushPerformanceDigest: Boolean(data.push_performance_digest ?? true),
     chatAssignment: Boolean(data.chat_assignment ?? true),
     chatMention: Boolean(data.chat_mention ?? true),
     chatDueSoon: Boolean(data.chat_due_soon ?? true),
@@ -64,6 +66,8 @@ function wantsEmail(
       return prefs.emailDueSoon;
     case "task_overdue":
       return prefs.emailOverdue;
+    case "performance_digest":
+      return prefs.emailPerformanceDigest;
     case "task_status_changed":
       return false;
     case "invite":
@@ -86,6 +90,8 @@ function wantsPush(
       return prefs.pushMention;
     case "task_overdue":
       return prefs.pushOverdue;
+    case "performance_digest":
+      return prefs.pushPerformanceDigest;
     case "task_due_soon":
     case "task_status_changed":
     case "invite":

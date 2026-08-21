@@ -113,7 +113,7 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 - Remaining ops for go-live: Vercel env + DNS CNAME `tasks` → Vercel, Auth redirect URLs (DOMAIN_CUTOVER.md)
 - Soft-launch version is `1.0.0`. M7.1 close-out and M8 work sit under `[Unreleased]` in `docs/CHANGELOG.md` until the next tagged release.
 - Role home paths: Admin `/app/admin`, HR `/app/people`, Line Manager `/app`, Staff `/app/my-tasks`
-- Work surface: Staff and Line Managers use `/app/work` (board / list / calendar). `/app/board`, `/app/list`, and `/app/calendar` redirect there. HR keeps Calendar in nav; Admin nav is My Tasks + Overview.
+- Work surface: Staff and Line Managers use `/app/work` (board / list / calendar). `/app/board`, `/app/list`, and `/app/calendar` redirect there. HR keeps Calendar in nav; Admin nav is Overview + Reports (department-scoped by default).
 - Task detail can open as a slide-over pane from work views (`@pane` intercepting route)
 - Command palette (⌘K) searches accessible tasks and people (T-035 / T-079)
 - Mentions inbox: notifications `?filter=mentions` (T-077). My Tasks day plan supports inline status, checklist ticks, and a one-line @mention comment (T-078)

@@ -104,6 +104,7 @@ describe("wantsGoogleChat", () => {
       task_overdue: true,
       task_status_changed: false,
       invite: false,
+      performance_digest: false,
     };
 
     for (const eventType of NOTIFICATION_EVENT_TYPES) {

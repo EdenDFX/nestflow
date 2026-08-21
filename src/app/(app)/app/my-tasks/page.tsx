@@ -1,7 +1,11 @@
+import { redirect } from "next/navigation";
+
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { MyTasksPlan } from "@/components/tasks/my-tasks-plan";
 import { listAssignablePeopleForProfile } from "@/lib/admin/queries";
+import { homePathForRoles } from "@/lib/auth/navigation";
 import { requireActiveProfile } from "@/lib/auth/session";
+import { primaryRole } from "@/lib/auth/types";
 import { listChecklistsForTasks } from "@/lib/tasks/collaboration-queries";
 import {
   getTaskCounters,
@@ -11,6 +15,9 @@ import {
 
 export default async function MyTasksPage() {
   const profile = await requireActiveProfile();
+  if (primaryRole(profile.roles) === "admin") {
+    redirect(homePathForRoles(profile.roles));
+  }
   const canAssign =
     profile.roles.includes("admin") ||
     profile.roles.includes("hr") ||

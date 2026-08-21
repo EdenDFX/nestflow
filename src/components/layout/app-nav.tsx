@@ -9,6 +9,7 @@ import { CalendarDaysIcon } from "@/components/icons/calendar-days";
 import { ChartColumnIncreasingIcon } from "@/components/icons/chart-column-increasing";
 import { ClipboardCheckIcon } from "@/components/icons/clipboard-check";
 import { FolderKanbanIcon } from "@/components/icons/folder-kanban";
+import { LayersIcon } from "@/components/icons/layers";
 import { LayoutGridIcon } from "@/components/icons/layout-grid";
 import { MenuIcon } from "@/components/icons/menu";
 import { UserIcon } from "@/components/icons/user";
@@ -48,7 +49,8 @@ const navIcons: Record<NavIcon, RailIcon> = {
   calendar: CalendarDaysIcon,
   team: UsersIcon,
   people: UserIcon,
-  admin: ChartColumnIncreasingIcon,
+  admin: LayersIcon,
+  reports: ChartColumnIncreasingIcon,
 };
 
 function isActivePath(pathname: string, href: string) {
@@ -68,7 +70,12 @@ export function AppNavRail({
   const pathname = usePathname();
 
   return (
-    <nav className={cn("flex flex-col items-center gap-2", className)}>
+    <nav
+      className={cn(
+        "flex w-full flex-col items-center gap-1.5 px-2",
+        className,
+      )}
+    >
       {items.map((item) => {
         const active = isActivePath(pathname, item.href);
         const Icon = navIcons[item.icon];
@@ -81,19 +88,18 @@ export function AppNavRail({
                 aria-label={item.label}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative flex size-11 items-center justify-center rounded-full transition-colors",
+                  "relative flex size-11 items-center justify-center rounded-2xl transition-[color,background-color,box-shadow] duration-200",
                   active
-                    ? "bg-foreground text-background"
-                    : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground",
+                    ? "bg-primary text-primary-foreground shadow-[0_10px_24px_-14px_rgba(255,99,0,0.95)]"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
-                <Icon className="inline-flex" />
-                {active ? (
-                  <span className="absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full bg-primary ring-2 ring-background" />
-                ) : null}
+                <Icon className="inline-flex" size={18} />
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">{item.label}</TooltipContent>
+            <TooltipContent side="right" sideOffset={10}>
+              {item.label}
+            </TooltipContent>
           </Tooltip>
         );
       })}
@@ -123,21 +129,21 @@ function MobileNavList({
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors",
+              "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
               active
-                ? "bg-primary text-primary-foreground shadow-[0_8px_20px_-10px_rgba(255,99,0,0.7)]"
+                ? "bg-primary text-primary-foreground shadow-[0_10px_24px_-12px_rgba(255,99,0,0.85)]"
                 : "text-foreground hover:bg-muted",
             )}
           >
             <span
               className={cn(
-                "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
+                "flex size-9 shrink-0 items-center justify-center rounded-xl transition-colors",
                 active
-                  ? "bg-white/20 text-primary-foreground"
+                  ? "bg-white/15 text-primary-foreground"
                   : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground",
               )}
             >
-              <Icon className="inline-flex" />
+              <Icon className="inline-flex" size={18} />
             </span>
             <span className="min-w-0 flex-1 truncate">{item.label}</span>
             {active ? (
@@ -156,9 +162,11 @@ function MobileNavList({
 export function AppMobileNav({
   profile,
   navItems,
+  homeHref,
 }: {
   profile: NestFlowProfile;
   navItems: NavItem[];
+  homeHref: string;
 }) {
   const [open, setOpen] = useState(false);
   const displayRole = roleLabel(primaryRole(profile.roles));
@@ -178,7 +186,7 @@ export function AppMobileNav({
           <SheetHeader className="border-b border-border/80 px-5 py-5 text-left">
             <div className="flex items-center gap-3 pr-8">
               <Link
-                href="/app"
+                href={homeHref}
                 aria-label="NestFlow home"
                 onClick={() => setOpen(false)}
               >

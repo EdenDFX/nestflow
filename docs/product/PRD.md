@@ -241,6 +241,7 @@ Tracked in [ROADMAP.md](ROADMAP.md) as **M8+** and [TASKS.md](TASKS.md) as T-080
 | Advanced automation + templates | T-086 | Shipped |
 | Passkeys / MFA | T-087 | Open |
 | Google Chat notifications | T-088 | Shipped (space webhook; personal DMs later) |
+| Staff period reports + digests | T-089 | Shipped (`/app/reports` + scheduled digests) |
 
 PRD §5 still open under M7.1: Admin org settings (T-071), notification templates gallery (T-072), Admin system health UI (T-073). Search, Mentions, quick update, Admin People, and manager assign are shipped.
 

@@ -42,7 +42,7 @@ export async function sendNotificationEmail(params: {
           NestFlow
         </p>
         <h1 style="font-size: 20px; margin: 8px 0 12px;">${escapeHtml(params.title)}</h1>
-        <p style="margin: 0 0 16px;">${escapeHtml(params.body)}</p>
+        <p style="margin: 0 0 16px; white-space: pre-line;">${escapeHtml(params.body)}</p>
         <p>
           <a href="${escapeHtml(link)}" style="color: #FF6300;">Open in NestFlow</a>
         </p>

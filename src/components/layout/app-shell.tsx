@@ -20,11 +20,13 @@ import { cn } from "@/lib/utils";
 export function AppShell({
   profile,
   navItems,
+  homeHref,
   className,
   children,
 }: {
   profile: NestFlowProfile;
   navItems: NavItem[];
+  homeHref: string;
   className?: string;
   children: React.ReactNode;
 }) {
@@ -42,19 +44,30 @@ export function AppShell({
         Skip to main content
       </a>
       <aside
-        className="hidden h-full w-[76px] shrink-0 flex-col items-center gap-6 border-r border-border/80 bg-background py-5 lg:flex"
+        className="hidden h-full w-[84px] shrink-0 flex-col items-center border-r border-border/70 bg-background/95 py-4 lg:flex"
         aria-label="Primary"
       >
-        <Link href="/app" aria-label="NestFlow home">
-          <NestFlowMark size="sm" className="rounded-full" />
-        </Link>
-        <AppNavRail items={navItems} className="flex-1" />
+        <div className="flex w-full flex-col items-center gap-5 px-2">
+          <Link
+            href={homeHref}
+            aria-label="NestFlow home"
+            className="rounded-2xl ring-offset-background transition-transform hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+          >
+            <NestFlowMark size="sm" className="rounded-2xl" />
+          </Link>
+          <div className="h-px w-8 bg-border/80" aria-hidden />
+          <AppNavRail items={navItems} className="flex-1" />
+        </div>
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="z-40 shrink-0 border-b border-border/80 bg-background/90 backdrop-blur-md">
           <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
-            <AppMobileNav profile={profile} navItems={navItems} />
+            <AppMobileNav
+              profile={profile}
+              navItems={navItems}
+              homeHref={homeHref}
+            />
 
             <Suspense fallback={<HeaderIslandFallback />}>
               <HeaderIsland profile={profile} />

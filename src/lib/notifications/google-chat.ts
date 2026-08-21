@@ -94,6 +94,7 @@ export function wantsGoogleChat(
       return prefs.chatOverdue;
     case "task_status_changed":
     case "invite":
+    case "performance_digest":
       return false;
     default: {
       const _exhaustive: never = eventType;
