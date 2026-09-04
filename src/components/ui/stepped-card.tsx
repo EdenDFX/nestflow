@@ -36,7 +36,8 @@ const toneClassName: Record<SteppedCardTone, string> = {
 };
 
 /** True when the tone uses a lightish face (dark text in light mode). */
-export function isSteppedCardLightTone(_tone: SteppedCardTone): boolean {
+export function isSteppedCardLightTone(tone: SteppedCardTone): boolean {
+  void tone;
   return true;
 }
 

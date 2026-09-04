@@ -66,9 +66,6 @@ export function HrDashboard({
   invites,
   teams,
   memberships,
-  workspaces: _workspaces,
-  people: _people,
-  canAssign: _canAssign,
   discussionThreads = [],
   unreadMentionCount = 0,
 }: HrDashboardProps) {

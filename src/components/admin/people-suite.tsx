@@ -32,7 +32,6 @@ export function PeopleSuite({
   invites,
   workspaces,
   people,
-  canAssign,
   canManageStatus,
   teams = [],
   memberships = [],
@@ -55,10 +54,6 @@ export function PeopleSuite({
 }) {
   const [tab, setTab] = useState<PeopleTab>("queues");
   const [query, setQuery] = useState("");
-  const hrWorkspaceIds = useMemo(
-    () => new Set(workspaces.filter((w) => w.kind === "hr").map((w) => w.id)),
-    [workspaces],
-  );
 
   const filteredEmployees = useMemo(() => {
     const q = query.trim().toLowerCase();

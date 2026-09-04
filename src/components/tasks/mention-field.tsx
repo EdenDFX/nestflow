@@ -43,10 +43,11 @@ export function MentionField({
 }) {
   const [highlight, setHighlight] = useState(0);
   const [people, setPeople] = useState(initialPeople);
-
-  useEffect(() => {
+  const [peopleSource, setPeopleSource] = useState(initialPeople);
+  if (initialPeople !== peopleSource) {
+    setPeopleSource(initialPeople);
     setPeople(initialPeople);
-  }, [initialPeople]);
+  }
 
   useEffect(() => {
     let cancelled = false;

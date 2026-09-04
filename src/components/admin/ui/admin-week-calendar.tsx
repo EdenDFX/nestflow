@@ -2,7 +2,7 @@
 
 import { format, isSameDay } from "date-fns";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { AdminWeekTaskBlock } from "@/components/admin/ui/admin-week-task-block";
 import { useMediaQuery } from "@/lib/hooks/use-media-query";
@@ -48,27 +48,38 @@ export function AdminWeekCalendar({
     [weekAnchor],
   );
 
-  const [selectedDay, setSelectedDay] = useState(() => new Date());
+  const weekStartKey = format(days[0] ?? new Date(), "yyyy-MM-dd");
+  const defaultDay = days.find((day) => isToday(day)) ?? days[0] ?? new Date();
+  const [selectedDay, setSelectedDay] = useState(defaultDay);
   const [dayDirection, setDayDirection] = useState(0);
+  const [syncedWeekKey, setSyncedWeekKey] = useState(weekStartKey);
+  if (weekStartKey !== syncedWeekKey) {
+    setSyncedWeekKey(weekStartKey);
+    setSelectedDay(defaultDay);
+  }
 
-  useEffect(() => {
-    const todayInWeek = days.find((day) => isToday(day));
-    setSelectedDay(todayInWeek ?? days[0] ?? new Date());
-  }, [days]);
-
-  useEffect(() => {
-    if (!focusedTaskIds || focusedTaskIds.size === 0) return;
+  const focusedDay = useMemo(() => {
+    if (!focusedTaskIds || focusedTaskIds.size === 0) return null;
     for (const day of days) {
       const key = format(day, "yyyy-MM-dd");
       const dayTasks = tasks.filter(
         (task) => taskCalendarDayKey(task) === key,
       );
       if (dayTasks.some((task) => focusedTaskIds.has(task.id))) {
-        setSelectedDay(day);
-        return;
+        return day;
       }
     }
+    return null;
   }, [focusedTaskIds, days, tasks]);
+
+  const [syncedFocusKey, setSyncedFocusKey] = useState<string | null>(null);
+  const focusKey = focusedDay ? format(focusedDay, "yyyy-MM-dd") : null;
+  if (focusKey && focusKey !== syncedFocusKey) {
+    setSyncedFocusKey(focusKey);
+    setSelectedDay(focusedDay!);
+  } else if (!focusKey && syncedFocusKey) {
+    setSyncedFocusKey(null);
+  }
 
   const tasksInWeek = useMemo(() => {
     return tasks.filter((task) => {

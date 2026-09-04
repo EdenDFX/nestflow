@@ -27,7 +27,7 @@ import {
   subMonths,
 } from "date-fns";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { ChevronLeftIcon } from "@/components/icons/chevron-left";
@@ -90,13 +90,14 @@ export function TaskCalendar({
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDay, setSelectedDay] = useState(() => new Date());
   const [tasks, setTasks] = useState(initialTasks);
+  const [tasksSource, setTasksSource] = useState(initialTasks);
+  if (initialTasks !== tasksSource) {
+    setTasksSource(initialTasks);
+    setTasks(initialTasks);
+  }
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [openNote, setOpenNote] = useState<PersonalNote | null>(null);
-
-  useEffect(() => {
-    setTasks(initialTasks);
-  }, [initialTasks]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),

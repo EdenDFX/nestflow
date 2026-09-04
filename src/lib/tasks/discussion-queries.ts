@@ -3,7 +3,6 @@ import { listNotifications } from "@/lib/notifications/queries";
 import type { DiscussionThread } from "@/lib/tasks/discussion-shared";
 import {
   isTaskStatus,
-  type TaskStatus,
 } from "@/lib/tasks/types";
 
 export type { DiscussionThread } from "@/lib/tasks/discussion-shared";

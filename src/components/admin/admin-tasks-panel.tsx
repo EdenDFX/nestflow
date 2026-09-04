@@ -73,8 +73,9 @@ export function AdminTasksPanel({
 
   const hasActiveFilters = statusFilter !== "all" || query.trim().length > 0;
 
-  useEffect(() => {
-    if (focusToken <= 0) return;
+  const [handledFocusToken, setHandledFocusToken] = useState(0);
+  if (focusToken > 0 && focusToken !== handledFocusToken) {
+    setHandledFocusToken(focusToken);
 
     const focusTask = pickCalendarFocusTask(tasks, statusFilter);
     const matchingIds = new Set(
@@ -98,6 +99,10 @@ export function AdminTasksPanel({
         scrollToCalendarTarget(null);
       }, 80);
     }
+  }
+
+  useEffect(() => {
+    if (focusToken <= 0) return;
 
     const clear = window.setTimeout(() => {
       setFocusedTaskIds(new Set());
@@ -106,7 +111,7 @@ export function AdminTasksPanel({
     return () => {
       window.clearTimeout(clear);
     };
-  }, [focusToken, statusFilter, tasks]);
+  }, [focusToken]);
 
   useEffect(() => {
     if (focusToken <= 0 || !pendingScrollId) return;

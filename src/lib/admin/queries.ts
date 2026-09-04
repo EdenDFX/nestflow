@@ -253,10 +253,11 @@ export async function listAssignablePeopleForProfile(profile: {
 }
 
 /** @mention autocomplete: all active profiles visible via RLS (not assignment-scoped). */
-export async function listMentionablePeopleForProfile(_profile: {
+export async function listMentionablePeopleForProfile(profile: {
   userId: string;
   roles: AppRole[];
 }): Promise<TaskAssignee[]> {
+  void profile;
   return listAssignablePeople();
 }
 
