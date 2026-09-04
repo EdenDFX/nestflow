@@ -18,7 +18,9 @@ import {
 } from "@/lib/storage/r2";
 import { createClient } from "@/lib/supabase/server";
 import { recordActivity } from "@/lib/tasks/activity";
+import { isAdminTaskOversightOnly } from "@/lib/tasks/interaction-mode";
 import { parseMentions } from "@/lib/tasks/collaboration-types";
+import type { AppRole } from "@/lib/auth/types";
 
 export type CollabActionResult = {
   ok: boolean;
@@ -29,6 +31,18 @@ export type CollabActionResult = {
   attachmentId?: string;
   objectKey?: string;
 };
+
+/** Oversight-only admins may comment but not mutate checklist or attachments. */
+function blockOversightAdminMutation(roles: AppRole[]): CollabActionResult | null {
+  if (isAdminTaskOversightOnly(roles)) {
+    return {
+      ok: false,
+      code: "FORBIDDEN",
+      error: "Administrators have view-only task access. You can still post comments.",
+    };
+  }
+  return null;
+}
 
 function revalidateTask(taskId: string) {
   revalidatePath(`/app/tasks/${taskId}`);
@@ -46,6 +60,9 @@ export async function addChecklistItemAction(input: {
   title: string;
 }): Promise<CollabActionResult> {
   const profile = await requireActiveProfile();
+  const blocked = blockOversightAdminMutation(profile.roles);
+  if (blocked) return blocked;
+
   const parsed = z
     .object({
       taskId: z.string().uuid(),
@@ -95,6 +112,9 @@ export async function toggleChecklistItemAction(input: {
   isDone: boolean;
 }): Promise<CollabActionResult> {
   const profile = await requireActiveProfile();
+  const blocked = blockOversightAdminMutation(profile.roles);
+  if (blocked) return blocked;
+
   const parsed = z
     .object({
       itemId: z.string().uuid(),
@@ -139,6 +159,9 @@ export async function removeChecklistItemAction(input: {
   taskId: string;
 }): Promise<CollabActionResult> {
   const profile = await requireActiveProfile();
+  const blocked = blockOversightAdminMutation(profile.roles);
+  if (blocked) return blocked;
+
   const parsed = z
     .object({
       itemId: z.string().uuid(),
@@ -245,6 +268,8 @@ export async function createAttachmentUploadUrlAction(input: {
   sizeBytes: number;
 }): Promise<CollabActionResult> {
   const profile = await requireActiveProfile();
+  const blocked = blockOversightAdminMutation(profile.roles);
+  if (blocked) return blocked;
 
   if (!isR2Configured()) {
     return {
@@ -374,6 +399,9 @@ export async function removeAttachmentAction(input: {
   taskId: string;
 }): Promise<CollabActionResult> {
   const profile = await requireActiveProfile();
+  const blocked = blockOversightAdminMutation(profile.roles);
+  if (blocked) return blocked;
+
   const parsed = z
     .object({
       attachmentId: z.string().uuid(),

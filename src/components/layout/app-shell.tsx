@@ -2,11 +2,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { NestFlowMark } from "@/components/auth/nestflow-mark";
+import { HeaderBellFallback, HeaderIslandFallback } from "@/components/layout/app-header-fallbacks";
 import {
   HeaderBell,
-  HeaderBellFallback,
   HeaderIsland,
-  HeaderIslandFallback,
 } from "@/components/layout/app-header-metrics";
 import { AppMobileNav, AppNavRail } from "@/components/layout/app-nav";
 import { AppUserMenu } from "@/components/layout/app-user-menu";

@@ -1,0 +1,854 @@
+/* NestFlow admin dashboard — standalone visual system (Tasky-inspired). */
+
+.admin-dashboard-main {
+  padding: 0;
+}
+
+.admin-dashboard {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.admin-dashboard__header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "brand tools"
+    "tabs tabs";
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 65%, transparent);
+  background: color-mix(in oklab, var(--background) 92%, transparent);
+  padding: 0.75rem 1rem;
+  backdrop-filter: blur(10px);
+  transition:
+    padding 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    gap 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard__header {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas: "brand tabs tools";
+    gap: 1rem;
+    padding: 1rem 1.75rem;
+  }
+}
+
+.admin-dashboard__brand {
+  grid-area: brand;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.admin-dashboard__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border-radius: 9999px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.admin-dashboard__wordmark {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  transition: font-size 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard__wordmark {
+    font-size: 1.35rem;
+  }
+}
+
+.admin-dashboard__route-links {
+  display: none;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+@media (min-width: 900px) {
+  .admin-dashboard__route-links {
+    display: flex;
+  }
+}
+
+.admin-dashboard__route-link {
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.admin-dashboard__route-link:hover {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--muted) 55%, transparent);
+}
+
+.admin-dashboard__route-link.is-active {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--muted) 70%, transparent);
+}
+
+.admin-dashboard__tabs {
+  grid-area: tabs;
+  justify-self: stretch;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard__tabs {
+    justify-self: center;
+  }
+}
+
+.admin-dashboard__tools {
+  grid-area: tools;
+  display: flex;
+  justify-self: end;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard__tools {
+    gap: 0.35rem;
+  }
+}
+
+.admin-dashboard__body {
+  flex: 1;
+  padding: 1.25rem 1.25rem 2rem;
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard__body {
+    padding: 1.5rem 1.75rem 2.5rem;
+  }
+}
+
+.admin-dashboard__canvas {
+  display: grid;
+  gap: 1.25rem;
+  align-items: start;
+  transition: gap 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard__canvas {
+    gap: 1.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-dashboard__canvas {
+    grid-template-columns: minmax(14rem, 16.5rem) minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
+.admin-dashboard__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .admin-dashboard__sidebar {
+    position: sticky;
+    top: 5.5rem;
+  }
+}
+
+.admin-dashboard__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 420px) {
+  .admin-dashboard__metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .admin-dashboard__metrics {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-dashboard__metrics {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.55rem;
+  }
+}
+
+.admin-dashboard__eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.admin-dashboard__title {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.admin-dashboard__subtitle {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.admin-dashboard__summary {
+  border-radius: 1.75rem;
+  background: color-mix(in oklab, var(--primary) 8%, var(--background));
+  padding: 1rem 1.15rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+
+.admin-dashboard__metric {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+  border: 0;
+  border-radius: 1.25rem;
+  padding: 0.8rem 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    filter 0.2s ease,
+    outline-color 0.2s ease,
+    border-radius 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    padding 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .admin-dashboard__metric {
+    padding: 0.75rem 0.7rem;
+  }
+
+  .admin-dashboard__metric-label {
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-dashboard__metric {
+    flex-direction: row;
+    align-items: center;
+    border-radius: 1.35rem;
+    padding: 0.9rem 1.15rem;
+  }
+}
+
+.admin-dashboard__metric:hover {
+  filter: brightness(0.98);
+}
+
+.admin-dashboard__metric.is-active {
+  outline: 2px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  outline-offset: 2px;
+}
+
+.admin-dashboard__metric-value {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(1.35rem, 3.8vw, 1.85rem);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-dashboard__metric-label {
+  max-width: 100%;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 1024px) {
+  .admin-dashboard__metric-label {
+    max-width: 46%;
+    text-align: right;
+    font-size: 0.875rem;
+    overflow-wrap: normal;
+  }
+}
+
+.admin-dashboard__metric--primary {
+  background: color-mix(in oklab, var(--primary) 14%, var(--background));
+  color: var(--primary);
+}
+
+.admin-dashboard__metric--destructive {
+  background: color-mix(in oklab, var(--destructive) 12%, var(--background));
+  color: var(--destructive);
+}
+
+.admin-dashboard__metric--warning {
+  background: color-mix(in oklab, var(--warning) 14%, var(--background));
+  color: var(--warning);
+}
+
+.admin-dashboard__metric--success {
+  background: color-mix(in oklab, var(--success) 14%, var(--background));
+  color: var(--success);
+}
+
+.admin-dashboard__metric--info {
+  background: color-mix(in oklab, var(--info) 12%, var(--background));
+  color: var(--info);
+}
+
+.admin-dashboard__main {
+  min-width: 0;
+}
+
+.admin-dashboard__section-tabs {
+  display: flex;
+  width: 100%;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: stretch;
+  gap: 0.2rem;
+  overflow-x: auto;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--muted) 45%, transparent);
+  padding: 0.25rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-dashboard__section-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard__section-tabs {
+    display: inline-flex;
+    width: auto;
+    justify-content: center;
+    overflow: visible;
+  }
+}
+
+.admin-dashboard__section-tab {
+  position: relative;
+  flex: 1 1 0;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard__section-tab {
+    flex: 0 0 auto;
+    padding: 0.45rem 1.1rem;
+    font-size: 0.875rem;
+  }
+}
+
+.admin-dashboard__section-tab:hover {
+  color: var(--foreground);
+}
+
+.admin-dashboard__section-tab.is-active {
+  color: var(--background);
+}
+
+.admin-dashboard__section-tab.is-active:hover {
+  color: var(--background);
+}
+
+.admin-dashboard__section-tab-pill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 9999px;
+  background: var(--foreground);
+}
+
+.admin-dashboard__calendar-shell {
+  overflow: hidden;
+  border-radius: 1.5rem;
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--muted) 12%, var(--background));
+  padding: 0.65rem;
+  transition:
+    padding 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard__calendar-shell {
+    overflow-x: auto;
+    border-radius: 1.75rem;
+    padding: 1rem;
+  }
+}
+
+.admin-dashboard__calendar {
+  min-width: 0;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .admin-dashboard__calendar {
+    min-width: 720px;
+  }
+}
+
+.admin-dashboard__calendar--day {
+  min-width: 0;
+}
+
+.admin-dashboard__day-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-dashboard__day-chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  border: 0;
+  border-radius: 1rem;
+  background: transparent;
+  padding: 0.55rem 0.2rem 0.45rem;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.admin-dashboard__day-chip-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--foreground) 92%, transparent);
+}
+
+.admin-dashboard__day-chip.is-selected {
+  color: var(--background);
+}
+
+.admin-dashboard__day-chip.is-today:not(.is-selected) .admin-dashboard__day-chip-number {
+  color: var(--primary);
+}
+
+.admin-dashboard__day-chip-name,
+.admin-dashboard__day-chip-number,
+.admin-dashboard__day-chip-count {
+  position: relative;
+  z-index: 1;
+}
+
+.admin-dashboard__day-chip-name {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-dashboard__day-chip-number {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-dashboard__day-chip-count {
+  min-width: 1rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--primary) 85%, transparent);
+  padding: 0.05rem 0.3rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--primary-foreground);
+}
+
+.admin-dashboard__day-chip.is-selected .admin-dashboard__day-chip-count {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.admin-dashboard__calendar-day-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.15rem 0.35rem 0.75rem;
+}
+
+.admin-dashboard__calendar-day-grid {
+  min-width: 0;
+}
+
+.admin-dashboard__calendar-head,
+.admin-dashboard__calendar-row {
+  display: grid;
+  grid-template-columns: 3.25rem repeat(7, minmax(0, 1fr));
+}
+
+.admin-dashboard__calendar-row.is-single {
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+}
+
+.admin-dashboard__calendar-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: 0.35rem;
+}
+
+.admin-dashboard__calendar-gutter {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0.55rem 0.45rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground);
+  text-transform: lowercase;
+}
+
+.admin-dashboard__calendar-row.is-all-day .admin-dashboard__calendar-gutter {
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-dashboard__calendar-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.55rem 0.35rem 0.75rem;
+  text-align: center;
+}
+
+.admin-dashboard__calendar-day-name {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.admin-dashboard__calendar-day-number {
+  display: inline-flex;
+  min-width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-dashboard__calendar-day.is-today .admin-dashboard__calendar-day-number {
+  min-width: 2.15rem;
+  min-height: 2.15rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.admin-dashboard__calendar-day.is-weekend .admin-dashboard__calendar-day-name,
+.admin-dashboard__calendar-day.is-weekend .admin-dashboard__calendar-day-number {
+  color: color-mix(in oklab, var(--muted-foreground) 80%, transparent);
+}
+
+.admin-dashboard__calendar-body {
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--border) 55%, transparent);
+  border-radius: 1.25rem;
+  background: color-mix(in oklab, var(--background) 88%, transparent);
+}
+
+.admin-dashboard__calendar-row + .admin-dashboard__calendar-row {
+  border-top: 1px solid color-mix(in oklab, var(--border) 45%, transparent);
+}
+
+.admin-dashboard__calendar-row.is-all-day {
+  margin-bottom: 0.45rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--border) 45%, transparent);
+  border-radius: 1.15rem;
+  background: color-mix(in oklab, var(--background) 70%, transparent);
+}
+
+.admin-dashboard__calendar-cell {
+  display: flex;
+  min-height: 3.35rem;
+  flex-direction: column;
+  gap: 0.3rem;
+  border-left: 1px solid color-mix(in oklab, var(--border) 40%, transparent);
+  padding: 0.3rem;
+}
+
+.admin-dashboard__calendar-row.is-all-day .admin-dashboard__calendar-cell {
+  min-height: 3.75rem;
+}
+
+.admin-dashboard__calendar-cell.is-today {
+  background: color-mix(in oklab, var(--primary) 6%, transparent);
+}
+
+.admin-dashboard__calendar-cell.is-weekend {
+  background: color-mix(in oklab, var(--muted) 18%, transparent);
+}
+
+.admin-dashboard__calendar-cell.is-today.is-weekend {
+  background: color-mix(in oklab, var(--primary) 7%, transparent);
+}
+
+.admin-dashboard__calendar-unscheduled {
+  border-radius: 1.5rem;
+  border: 1px solid color-mix(in oklab, var(--border) 55%, transparent);
+  background: color-mix(in oklab, var(--muted) 16%, var(--background));
+  padding: 1rem 1.1rem;
+}
+
+.admin-dashboard__task-block {
+  display: block;
+  border-radius: 0.85rem;
+  background: color-mix(in oklab, var(--muted) 28%, var(--background));
+  padding: 0.45rem 0.55rem;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 4%, transparent);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.admin-dashboard__task-block.is-compact {
+  padding: 0.4rem 0.5rem;
+}
+
+.admin-dashboard__task-block:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+
+.admin-dashboard__task-block-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+}
+
+.admin-dashboard__task-block-title {
+  margin: 0;
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.admin-dashboard__task-block-title.is-done {
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklab, var(--success) 55%, transparent);
+}
+
+.admin-dashboard__task-block-time {
+  flex-shrink: 0;
+  font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+.admin-dashboard__task-block-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.admin-dashboard__task-block-status {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: color-mix(in oklab, var(--foreground) 72%, transparent);
+}
+
+.admin-dashboard__task-block-person {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.625rem;
+  color: var(--muted-foreground);
+}
+
+.admin-dashboard__task-block-person > span:first-child {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--background) 80%, transparent);
+  font-size: 0.5625rem;
+  font-weight: 700;
+}
+
+.admin-dashboard__task-block-person-name {
+  max-width: 4.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-dashboard__task-block-unassigned {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--warning);
+}
+
+.admin-dashboard__task-block.is-backlog {
+  background: color-mix(in oklab, var(--muted) 35%, var(--background));
+}
+
+.admin-dashboard__task-block.is-todo {
+  background: color-mix(in oklab, var(--info) 14%, var(--background));
+}
+
+.admin-dashboard__task-block.is-in-progress {
+  background: color-mix(in oklab, var(--primary) 14%, var(--background));
+}
+
+.admin-dashboard__task-block.is-review {
+  background: color-mix(in oklab, var(--warning) 16%, var(--background));
+}
+
+.admin-dashboard__task-block.is-blocked,
+.admin-dashboard__task-block.is-overdue {
+  background: color-mix(in oklab, var(--destructive) 14%, var(--background));
+}
+
+.admin-dashboard__task-block.is-completed {
+  background: color-mix(in oklab, var(--success) 14%, var(--background));
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 6px,
+    color-mix(in oklab, var(--success) 8%, transparent) 6px,
+    color-mix(in oklab, var(--success) 8%, transparent) 12px
+  );
+}
+
+.admin-dashboard__task-block.is-focused {
+  outline: 2px solid color-mix(in oklab, var(--primary) 70%, transparent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 18%, transparent);
+  animation: admin-task-focus 1.1s ease;
+}
+
+@keyframes admin-task-focus {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-2px) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.admin-dashboard__discussions {
+  margin-top: 1rem;
+  border-radius: 1.5rem;
+  background: color-mix(in oklab, var(--muted) 22%, var(--background));
+  padding: 0.85rem 1rem;
+}
+
+.admin-dashboard__discussions summary {
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.admin-dashboard__discussions summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-dashboard__filters {
+  border-radius: 1.75rem;
+  background: color-mix(in oklab, var(--muted) 24%, var(--background));
+  padding: 1rem;
+}
+
+.admin-dashboard__empty {
+  border-radius: 1.75rem;
+  background: color-mix(in oklab, var(--muted) 20%, var(--background));
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-dashboard__header,
+  .admin-dashboard__wordmark,
+  .admin-dashboard__canvas,
+  .admin-dashboard__calendar-shell,
+  .admin-dashboard__metric {
+    transition: none;
+  }
+
+  .admin-dashboard__task-block.is-focused {
+    animation: none;
+  }
+}

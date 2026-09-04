@@ -6,7 +6,7 @@ import { z } from "zod";
 import { requireActiveProfile } from "@/lib/auth/session";
 import { isAppRole } from "@/lib/auth/types";
 import { notifyMany } from "@/lib/notifications/notify";
-import { rolesAllow } from "@/lib/security/authz";
+import { rolesAllow, assertCapability } from "@/lib/security/authz";
 import { createClient } from "@/lib/supabase/server";
 import { recordActivity } from "@/lib/tasks/activity";
 import {
@@ -807,6 +807,17 @@ export async function createTaskFromTemplateAction(input: {
   assigneeIds?: string[];
 }): Promise<M8ActionResult> {
   const profile = await requireActiveProfile();
+
+  try {
+    assertCapability(profile.roles, "create_tasks");
+  } catch {
+    return {
+      ok: false,
+      code: "FORBIDDEN",
+      error: "Only line managers can create tasks from templates.",
+    };
+  }
+
   const parsed = z
     .object({
       templateId: pgUuid,

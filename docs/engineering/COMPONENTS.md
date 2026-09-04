@@ -150,6 +150,21 @@ src/components/
 
 Before you add a one-off control to a page, check whether an existing NestFlow component can be extended. Update this document when you introduce a new shared domain component.
 
+## 11. Admin UI (`src/components/admin/ui/`)
+
+| Component | Contract |
+| --- | --- |
+| `AdminPageShell` | Two-column layout: optional `sidebar` slot + `children` main panel. Responsive stack on small screens. |
+| `AdminMetricBlock` | `{ label, value, tone?, active?, onClick? }` — semantic colour block for sidebar metrics. |
+| `AdminSectionTabs` | `{ tabs: { id, label }[], value, onChange }` — pill segment control for Tasks/Activity/Delivery/People. |
+| `AdminTaskCard` | Simplified task row: title, status badge, assignees, due, activity summary. Uses `taskRowSurfaceClass`. |
+| `AdminActivityItem` | Timeline row for log feed: actor, summary, timestamp. |
+| `AdminDrawerWizard` | `{ steps, currentStep, title, children, footer }` — shared step header/footer for deactivate and assign flows. |
+| `AdminWeekCalendar` | Week grid (Mon–Sun, all-day + hourly rows) for admin Tasks tab. |
+| `AdminWeekTaskBlock` | Calendar task card: title, description, assignee, due time, completed stripe. |
+
+Shared helpers live in `src/components/admin/admin-shared.ts`. Overview composition: `admin-overview.tsx` + `admin-*-panel.tsx`.
+
 ## See Also
 
 - [Design](../design/DESIGN.md)

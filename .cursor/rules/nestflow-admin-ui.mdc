@@ -1,0 +1,37 @@
+---
+description: Admin panel UI conventions for NestFlow
+globs: src/components/admin/**/*
+alwaysApply: false
+---
+
+# NestFlow admin UI
+
+Read before editing admin components.
+
+## Layout
+
+- Use reusable pieces in `src/components/admin/ui/` before adding markup inline.
+- Default shell: metric sidebar (left) + pill tabs + main panel (right).
+- One primary tab row: Tasks, Activity, Delivery, People. No nested Work/People toggle.
+
+## Boss-friendly UX
+
+- Prefer big numbers, short labels, and status colour tints over dense tables.
+- Hide complex flows behind drawers or wizards (deactivate, team assign).
+- Keep drag-and-drop as an optional Advanced section, not the default.
+
+## Security
+
+- Never weaken server guards or RLS to match UI-only restrictions.
+- Oversight-only admins (`admin` without `line_manager` or `hr`) stay view-only on tasks.
+- Align changes with `docs/engineering/ROLE_MATRIX.md` and ADR-003.
+
+## Components
+
+- Search [shoogle.dev](https://shoogle.dev/) for shadcn blocks before bespoke UI.
+- Match NestFlow tokens: `#FF6300` primary, `font-heading`, `rounded-3xl`, semantic status colours.
+
+## Code style
+
+- Small files with plain props. One or two line comments only for non-obvious business rules.
+- No inline imports. Server Components by default; `"use client"` only when needed.

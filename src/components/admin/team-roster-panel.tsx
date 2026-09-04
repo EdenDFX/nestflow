@@ -15,19 +15,12 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { AdminTeamAssignDrawer } from "@/components/admin/admin-team-assign-drawer";
 import { GripVerticalIcon } from "@/components/icons/grip-vertical";
 import { UserIcon } from "@/components/icons/user";
 import { UsersIcon } from "@/components/icons/users";
 
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { setTeamMembershipAction } from "@/lib/admin/actions";
 import type {
   DirectoryUser,
@@ -353,11 +346,6 @@ export function TeamRosterPanel({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [teamId, setTeamId] = useState(teams[0]?.id ?? "");
-  const [userId, setUserId] = useState(
-    () => users.find((user) => user.isActive)?.userId ?? "",
-  );
-  const [asManager, setAsManager] = useState(false);
   const [activePerson, setActivePerson] = useState<DragPerson | null>(null);
 
   const sensors = useSensors(
@@ -419,33 +407,6 @@ export function TeamRosterPanel({
       sourceTeamId,
       isManager: false,
     };
-  }
-
-  function assignMember() {
-    if (!teamId || !userId) return;
-    startTransition(async () => {
-      const result = await setTeamMembershipAction({
-        teamId,
-        userId,
-        isManager: asManager,
-      });
-      if (!result.ok) {
-        toast.error(result.error ?? "Could not assign member.");
-        return;
-      }
-      const target = teams.find((team) => team.id === teamId);
-      const leftGeneral = target != null && !isGeneralTeam(target);
-      toast.success(
-        asManager
-          ? leftGeneral
-            ? "Line manager set (left General)."
-            : "Line manager set on team."
-          : leftGeneral
-            ? "Member added (left General)."
-            : "Member added.",
-      );
-      router.refresh();
-    });
   }
 
   function removeMember(targetTeamId: string, targetUserId: string) {
@@ -547,16 +508,26 @@ export function TeamRosterPanel({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border/80 p-4">
-        <h2 className="font-heading text-base font-semibold">Team assignment</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Drag people onto a team or line manager. Assigning to a line-manager
-          team removes them from General. NestByEden gear roles are never
-          changed from here. Use the form for first-time line manager
-          appointment.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-border/80 p-4">
+        <div>
+          <h2 className="font-heading text-base font-semibold">Teams</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Assign people to line-manager teams. Use the form first; open
+            Advanced roster only when you need drag-and-drop.
+          </p>
+        </div>
+        <AdminTeamAssignDrawer teams={teams} users={users} />
       </div>
 
+      <details className="rounded-2xl border border-border/80 p-4">
+        <summary className="cursor-pointer font-heading text-sm font-semibold">
+          Advanced roster
+        </summary>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Drag people onto a team or line manager. Assigning to a line-manager
+          team removes them from General.
+        </p>
+        <div className="mt-4">
       <DndContext
         sensors={sensors}
         onDragStart={onDragStart}
@@ -612,68 +583,6 @@ export function TeamRosterPanel({
           {activePerson ? <PersonOverlayCard person={activePerson} /> : null}
         </DragOverlay>
       </DndContext>
-
-      <details className="rounded-2xl border border-border/80 p-4">
-        <summary className="cursor-pointer font-heading text-sm font-semibold">
-          Manual assign & set line manager
-        </summary>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Prefer drag-and-drop for members. Open this for exact control or to
-          promote someone to line manager.
-        </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-1.5">
-            <Label>Team</Label>
-            <Select value={teamId} onValueChange={setTeamId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select team" />
-              </SelectTrigger>
-              <SelectContent>
-                {teams.map((team) => (
-                  <SelectItem key={team.id} value={team.id}>
-                    {team.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Person</Label>
-            <Select value={userId} onValueChange={setUserId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select person" />
-              </SelectTrigger>
-              <SelectContent>
-                {users
-                  .filter((user) => user.isActive)
-                  .map((user) => (
-                    <SelectItem key={user.userId} value={user.userId}>
-                      {user.fullName ?? user.email ?? user.userId}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-end gap-2">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={asManager}
-                onChange={(event) => setAsManager(event.target.checked)}
-                className="size-4 rounded border-border"
-              />
-              Set as line manager
-            </label>
-          </div>
-          <div className="flex items-end">
-            <Button
-              type="button"
-              disabled={pending || !teamId || !userId}
-              onClick={assignMember}
-            >
-              Add to team
-            </Button>
-          </div>
         </div>
       </details>
     </div>

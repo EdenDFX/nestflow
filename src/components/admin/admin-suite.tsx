@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { DeactivateUserButton } from "@/components/admin/deactivate-user-button";
 import { TeamRosterPanel } from "@/components/admin/team-roster-panel";
+import { AdminSectionTabs } from "@/components/admin/ui/admin-section-tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,13 +39,21 @@ import type { NestFlowTask, TaskAssignee } from "@/lib/tasks/types";
 import { APP_ROLES, roleLabel, type AppRole } from "@/lib/auth/types";
 import { cn } from "@/lib/utils";
 
-type AdminTab =
-  | "users"
-  | "teams"
-  | "departments"
-  | "permissions"
-  | "audit"
-  | "invites";
+type AdminTab = "directory" | "teams" | "invites" | "org";
+type OrgTab = "departments" | "permissions" | "audit";
+
+const PEOPLE_TABS = [
+  { id: "directory", label: "Directory" },
+  { id: "teams", label: "Teams" },
+  { id: "invites", label: "Invites" },
+  { id: "org", label: "Org" },
+] as const;
+
+const ORG_TABS = [
+  { id: "departments", label: "Departments" },
+  { id: "permissions", label: "Permissions" },
+  { id: "audit", label: "Audit" },
+] as const;
 
 export function AdminSuite({
   users,
@@ -67,7 +76,8 @@ export function AdminSuite({
   openByUser?: Record<string, NestFlowTask[]>;
   embedded?: boolean;
 }) {
-  const [tab, setTab] = useState<AdminTab>("users");
+  const [tab, setTab] = useState<AdminTab>("directory");
+  const [orgTab, setOrgTab] = useState<OrgTab>("departments");
   const [query, setQuery] = useState("");
 
   const filteredUsers = useMemo(() => {
@@ -98,7 +108,7 @@ export function AdminSuite({
             People
           </h2>
           <p className="text-sm text-muted-foreground">
-            Users, teams, departments, permissions, invites, and audit history.
+            Directory, teams, invites, and organisation settings.
           </p>
         </div>
       ) : (
@@ -112,41 +122,24 @@ export function AdminSuite({
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["users", "Users"],
-            ["teams", "Teams"],
-            ["invites", "Invites"],
-            ["departments", "Departments"],
-            ["permissions", "Permissions"],
-            ["audit", "Audit log"],
-          ] as const
-        ).map(([id, label]) => (
-          <Button
-            key={id}
-            type="button"
-            size="sm"
-            variant={tab === id ? "default" : "outline"}
-            onClick={() => setTab(id)}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
+      <AdminSectionTabs
+        tabs={[...PEOPLE_TABS]}
+        value={tab}
+        onChange={(next) => setTab(next as AdminTab)}
+      />
 
-      {tab === "users" || tab === "audit" ? (
+      {tab === "directory" || (tab === "org" && orgTab === "audit") ? (
         <Input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={
-            tab === "users" ? "Search people…" : "Filter audit events…"
+            tab === "directory" ? "Search people…" : "Filter audit events…"
           }
           className="max-w-md"
         />
       ) : null}
 
-      {tab === "users" ? (
+      {tab === "directory" ? (
         <UsersPanel
           users={filteredUsers}
           departments={departments}
@@ -162,11 +155,20 @@ export function AdminSuite({
         />
       ) : null}
       {tab === "invites" ? <InvitesPanel invites={invites} /> : null}
-      {tab === "departments" ? (
-        <DepartmentsPanel departments={departments} />
+      {tab === "org" ? (
+        <div className="space-y-4">
+          <AdminSectionTabs
+            tabs={[...ORG_TABS]}
+            value={orgTab}
+            onChange={(next) => setOrgTab(next as OrgTab)}
+          />
+          {orgTab === "departments" ? (
+            <DepartmentsPanel departments={departments} />
+          ) : null}
+          {orgTab === "permissions" ? <PermissionsPanel /> : null}
+          {orgTab === "audit" ? <AuditPanel events={filteredAudit} /> : null}
+        </div>
       ) : null}
-      {tab === "permissions" ? <PermissionsPanel /> : null}
-      {tab === "audit" ? <AuditPanel events={filteredAudit} /> : null}
     </div>
   );
 }

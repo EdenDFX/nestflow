@@ -136,6 +136,13 @@ Product name is **NestFlow**. “Backlog” is a task status, not the product na
 2. Don't invent statuses, roles, or stack choices that contradict ADRs/PRD.
 3. Prefer updating source docs over stuffing transient chat details into memory.
 
+### Admin panel work
+
+1. Read `.cursor/rules/nestflow-admin-ui.mdc` and DD-010 in `docs/design/DESIGN_DECISIONS.md`.
+2. Reuse `src/components/admin/ui/` components; avoid one-off layout markup.
+3. Ship server-action guards before UI that hides controls (see ADR-006).
+4. Verify admin mutations in the browser after UI changes (invite, roles, teams, deactivate).
+
 ## See Also
 
 - [Documentation style](DOCS_STYLE.md)

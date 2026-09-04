@@ -221,6 +221,34 @@ Board, My Tasks, and role pages inherit the shell. Live counts fill the trailing
 
 ---
 
+## DD-010 — Admin executive layout
+
+| Field | Value |
+| --- | --- |
+| Status | Accepted |
+| Date | 2026-09-04 |
+
+### Context
+
+The administrator Overview serves bosses who need org-wide visibility without operational clutter. A calendar-style productivity reference (Tasky) showed a scannable metric sidebar and pill navigation that fits oversight better than nested tabs and dense grids.
+
+### Decision
+
+- Replace the Work/People top toggle with one Overview shell: **Tasks · Activity · Delivery · People** pill tabs.
+- Add a left **metric stack** (Open, Overdue, Blocked, Completed 7d, Active people) that filters Tasks on click.
+- Simplify task rows into cards with status tint and badges; remove duplicate Roles tab (role editing lives under People → Directory).
+- Move complex People flows into drawers/wizards: deactivate (3 steps), team assign (form drawer), drag-and-drop roster under Advanced.
+- Keep NestFlow brand (Outfit headings, `#FF6300`, semantic status tokens). Do not copy Tasky pastels or calendar time-grid literally.
+- Admins retain all configuration powers; presentation changes only.
+
+### Consequences
+
+- New shared components under `src/components/admin/ui/`.
+- `AdminConsole` becomes a thin wrapper around `AdminOverview`.
+- Agent rule: `.cursor/rules/nestflow-admin-ui.mdc`.
+
+---
+
 ## Template for new decisions
 
 ```md

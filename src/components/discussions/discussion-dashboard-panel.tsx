@@ -13,10 +13,12 @@ export function DiscussionDashboardPanel({
   threads,
   unreadMentionCount = 0,
   limit = 5,
+  embedded = false,
 }: {
   threads: DiscussionThread[];
   unreadMentionCount?: number;
   limit?: number;
+  embedded?: boolean;
 }) {
   const sorted = [...threads].sort((left, right) => {
     const leftMention =
@@ -35,7 +37,30 @@ export function DiscussionDashboardPanel({
   const visible = sorted.slice(0, limit);
 
   return (
-    <section className="rounded-2xl border border-border/80 bg-card">
+    <section
+      className={
+        embedded
+          ? "space-y-3"
+          : "rounded-2xl border border-border/80 bg-card"
+      }
+    >
+      {embedded ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/app/notifications?filter=mentions"
+            className="inline-flex h-8 items-center rounded-full bg-background/70 px-3 text-xs font-medium transition-colors hover:bg-background"
+          >
+            Mention inbox
+          </Link>
+          <Link
+            href="/app/discussions"
+            className="inline-flex h-8 items-center gap-1 rounded-full bg-background/70 px-3 text-xs font-medium transition-colors hover:bg-background"
+          >
+            All discussions
+            <ArrowRightIcon className="inline-flex" size={12} />
+          </Link>
+        </div>
+      ) : (
       <header className="flex flex-col gap-3 border-b border-border/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -69,19 +94,24 @@ export function DiscussionDashboardPanel({
           </Link>
         </div>
       </header>
+      )}
 
       {visible.length === 0 ? (
-        <p className="px-5 py-8 text-sm text-muted-foreground">
+        <p className={embedded ? "text-sm text-muted-foreground" : "px-5 py-8 text-sm text-muted-foreground"}>
           No mentions or discussion threads yet. When someone @mentions you on a
           task, it appears here.
         </p>
       ) : (
-        <ul className="divide-y divide-border/70">
+        <ul className={embedded ? "space-y-2" : "divide-y divide-border/70"}>
           {visible.map((thread) => (
             <li key={thread.taskId}>
               <Link
                 href={`/app/tasks/${thread.taskId}`}
-                className="group flex items-start justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-muted/40"
+                className={
+                  embedded
+                    ? "group flex items-start justify-between gap-3 rounded-2xl bg-background/70 px-4 py-3 transition-colors hover:bg-background"
+                    : "group flex items-start justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-muted/40"
+                }
               >
                 <div className="min-w-0 space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2">

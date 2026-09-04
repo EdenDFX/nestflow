@@ -1,3 +1,4 @@
+import { AdminSuiteFrame } from "@/components/admin/admin-suite-frame";
 import { LineManagerWeeklyPanel } from "@/components/reports/line-manager-weekly-panel";
 import { ReportsDashboard } from "@/components/reports/reports-dashboard";
 import { requireRoles } from "@/lib/auth/guards";
@@ -42,29 +43,39 @@ export default async function ReportsPage({
   const maxEnding = lagosYmd();
   const safeEnding = endingDate > maxEnding ? maxEnding : endingDate;
 
-  if (view === "managers") {
-    const lmReport = await buildLineManagerWeeklyReport({
-      endingDate: safeEnding,
-    });
-    return (
-      <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+  const body =
+    view === "managers" ? (
+      <>
         <ReportsViewTabs active="managers" ending={safeEnding} period={kind} />
-        <LineManagerWeeklyPanel report={lmReport} />
-      </div>
+        <LineManagerWeeklyPanel
+          report={await buildLineManagerWeeklyReport({ endingDate: safeEnding })}
+        />
+      </>
+    ) : (
+      <>
+        {isAdmin ? (
+          <ReportsViewTabs active="staff" ending={safeEnding} period={kind} />
+        ) : null}
+        <ReportsDashboard
+          report={await buildPeriodReportForProfile(profile, kind, {
+            endingDate: safeEnding,
+            department: params.department?.trim() || null,
+          })}
+        />
+      </>
+    );
+
+  if (isAdmin) {
+    return (
+      <AdminSuiteFrame profile={profile}>
+        <div className="mx-auto w-full max-w-7xl space-y-6">{body}</div>
+      </AdminSuiteFrame>
     );
   }
 
-  const report = await buildPeriodReportForProfile(profile, kind, {
-    endingDate: safeEnding,
-    department: params.department?.trim() || null,
-  });
-
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-      {isAdmin ? (
-        <ReportsViewTabs active="staff" ending={safeEnding} period={kind} />
-      ) : null}
-      <ReportsDashboard report={report} />
+      {body}
     </div>
   );
 }

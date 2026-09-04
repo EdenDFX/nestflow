@@ -3,8 +3,8 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { DiscussionDashboardPanel } from "@/components/discussions/discussion-dashboard-panel";
+import type { NavItem } from "@/lib/auth/navigation";
+import type { NestFlowProfile } from "@/lib/auth/types";
 import type {
   AdminReportSnapshot,
   AuditEvent,
@@ -16,30 +16,36 @@ import type {
   OversightTaskRow,
   TeamMembershipRow,
 } from "@/lib/admin/types";
-import type { NestFlowTask, TaskAssignee } from "@/lib/tasks/types";
+import type { NestFlowNotification } from "@/lib/notifications/types";
 import type { DiscussionThread } from "@/lib/tasks/discussion-shared";
+import type { NestFlowTask, TaskAssignee } from "@/lib/tasks/types";
 
-const AdminOversight = dynamic(
+const AdminOverview = dynamic(
   () =>
-    import("@/components/admin/admin-oversight").then((mod) => mod.AdminOversight),
+    import("@/components/admin/admin-overview").then((mod) => mod.AdminOverview),
   {
     loading: () => (
-      <div className="h-[24rem] rounded-xl bg-muted/40" aria-hidden />
-    ),
-  },
-);
-const AdminSuite = dynamic(
-  () => import("@/components/admin/admin-suite").then((mod) => mod.AdminSuite),
-  {
-    loading: () => (
-      <div className="h-[24rem] rounded-xl bg-muted/40" aria-hidden />
+      <div className="admin-dashboard">
+        <div className="admin-dashboard__body">
+          <div className="h-[24rem] rounded-[1.75rem] bg-muted/30" aria-hidden />
+        </div>
+      </div>
     ),
   },
 );
 
-type AdminMode = "work" | "people";
+const DiscussionDashboardPanel = dynamic(
+  () =>
+    import("@/components/discussions/discussion-dashboard-panel").then(
+      (mod) => mod.DiscussionDashboardPanel,
+    ),
+  { ssr: false },
+);
 
 export function AdminConsole({
+  profile,
+  homeHref,
+  routeLinks,
   tasks,
   log,
   report,
@@ -54,7 +60,12 @@ export function AdminConsole({
   openByUser = {},
   discussionThreads = [],
   unreadMentionCount = 0,
+  notifications = [],
+  notificationUnreadCount = 0,
 }: {
+  profile: NestFlowProfile;
+  homeHref: string;
+  routeLinks: NavItem[];
   tasks: OversightTaskRow[];
   log: OversightLogEntry[];
   report: AdminReportSnapshot;
@@ -69,55 +80,57 @@ export function AdminConsole({
   openByUser?: Record<string, NestFlowTask[]>;
   discussionThreads?: DiscussionThread[];
   unreadMentionCount?: number;
+  notifications?: NestFlowNotification[];
+  notificationUnreadCount?: number;
 }) {
-  const [mode, setMode] = useState<AdminMode>("work");
+  const [discussionsOpen, setDiscussionsOpen] = useState(false);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          size="sm"
-          variant={mode === "work" ? "default" : "outline"}
-          onClick={() => setMode("work")}
-        >
-          Work
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant={mode === "people" ? "default" : "outline"}
-          onClick={() => setMode("people")}
-        >
-          People
-        </Button>
-      </div>
-
-      {mode === "work" ? (
-        <AdminOversight
-          tasks={tasks}
-          log={log}
-          report={report}
-          users={oversightUsers}
-        />
-      ) : (
-        <AdminSuite
-          embedded
-          users={users}
-          departments={departments}
-          invites={invites}
-          auditEvents={auditEvents}
-          teams={teams}
-          memberships={memberships}
-          people={people}
-          openByUser={openByUser}
-        />
-      )}
-
-      <DiscussionDashboardPanel
-        threads={discussionThreads}
-        unreadMentionCount={unreadMentionCount}
+    <div className="admin-dashboard">
+      <AdminOverview
+        profile={profile}
+        homeHref={homeHref}
+        routeLinks={routeLinks}
+        tasks={tasks}
+        log={log}
+        report={report}
+        oversightUsers={oversightUsers}
+        users={users}
+        departments={departments}
+        invites={invites}
+        auditEvents={auditEvents}
+        teams={teams}
+        memberships={memberships}
+        people={people}
+        openByUser={openByUser}
+        shell={false}
+        notifications={notifications}
+        notificationUnreadCount={notificationUnreadCount}
       />
+
+      <details
+        className="admin-dashboard__discussions mx-5 mb-8 md:mx-7"
+        open={discussionsOpen}
+        onToggle={(event) =>
+          setDiscussionsOpen((event.currentTarget as HTMLDetailsElement).open)
+        }
+      >
+        <summary>
+          Mentions & discussions
+          {unreadMentionCount > 0 ? (
+            <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+              {unreadMentionCount}
+            </span>
+          ) : null}
+        </summary>
+        <div className="mt-4 px-1 pb-2">
+          <DiscussionDashboardPanel
+            threads={discussionThreads}
+            unreadMentionCount={unreadMentionCount}
+            embedded
+          />
+        </div>
+      </details>
     </div>
   );
 }

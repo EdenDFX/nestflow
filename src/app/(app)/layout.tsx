@@ -1,6 +1,6 @@
 import { Geist_Mono } from "next/font/google";
 
-import { AppShell } from "@/components/layout/app-shell";
+import { AppChromeGate } from "@/components/layout/app-chrome-gate";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { homePathForRoles, navForRoles } from "@/lib/auth/navigation";
@@ -25,14 +25,14 @@ export default async function AuthenticatedLayout({
 
   return (
     <TooltipProvider delayDuration={200}>
-      <AppShell
+      <AppChromeGate
         profile={profile}
         navItems={navItems}
         homeHref={homeHref}
         className={geistMono.variable}
       >
         {children}
-      </AppShell>
+      </AppChromeGate>
       {pane}
       <Toaster richColors closeButton position="top-right" />
     </TooltipProvider>
