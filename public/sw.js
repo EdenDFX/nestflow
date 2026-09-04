@@ -13,7 +13,8 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(data.title || "NestFlow", {
       body: data.body || "",
       data: { href: data.href || "/app/notifications" },
-      icon: "/favicon.ico",
+      icon: "/icons/icon-mark-192.png",
+      badge: "/icons/icon-192.png",
     }),
   );
 });

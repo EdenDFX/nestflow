@@ -22,6 +22,13 @@ export const metadata: Metadata = {
     template: "%s · NestFlow",
   },
   description: "Plan. Assign. Deliver. Internal task management for Nest by Eden.",
+  applicationName: "NestFlow",
+  themeColor: "#FF6300",
+  appleWebApp: {
+    capable: true,
+    title: "NestFlow",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({

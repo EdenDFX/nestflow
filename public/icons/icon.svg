@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="NestFlow">
+  <rect width="512" height="512" rx="112" fill="#FF6300"/>
+  <text x="256" y="256" text-anchor="middle" dominant-baseline="central"
+        font-family="Outfit, Geist, system-ui, sans-serif" font-weight="700"
+        font-size="280" fill="#FFFFFF">N</text>
+</svg>
