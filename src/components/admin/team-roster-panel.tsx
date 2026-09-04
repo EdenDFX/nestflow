@@ -13,7 +13,7 @@ import {
 } from "@dnd-kit/core";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { AdminTeamAssignDrawer } from "@/components/admin/admin-team-assign-drawer";
 import { GripVerticalIcon } from "@/components/icons/grip-vertical";

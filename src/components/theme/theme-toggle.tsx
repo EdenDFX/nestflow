@@ -12,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { playAppSound } from "@/lib/sounds/play";
 import { cn } from "@/lib/utils";
 
 type ThemeToggleProps = {
@@ -38,7 +39,10 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
           size="icon"
           className={cn("relative", className)}
           aria-label="Toggle color theme"
-          onClick={() => setTheme(isDark ? "light" : "dark")}
+          onClick={() => {
+            playAppSound(isDark ? "toggleOff" : "toggleOn");
+            setTheme(isDark ? "light" : "dark");
+          }}
         >
           <SunIcon
             className={cn(

@@ -5,7 +5,7 @@ Reusable UI building blocks, variants, and accessibility expectations.
 | Field | Value |
 | --- | --- |
 | Status | Current |
-| Last updated | 2026-08-14 |
+| Last updated | 2026-09-04 |
 | Foundation | shadcn/ui + Tailwind + NestFlow tokens |
 
 ## Overview
@@ -42,7 +42,7 @@ Built from shadcn/ui and customised:
 | `Avatar` | User identity |
 | `Card` | Use sparingly; prefer non-card layouts except interactive containers |
 | `Table` | List view foundation (with TanStack Table) |
-| `Toast` / `Sonner` | Mutation feedback |
+| `Toast` / `Sonner` | Mutation feedback; sounds via `@/lib/sounds/toast` |
 | `Skeleton` | Loading placeholders |
 | `Switch` | Theme and notification preferences |
 
@@ -50,7 +50,9 @@ Built from shadcn/ui and customised:
 
 | Component | Responsibility | Key states |
 | --- | --- | --- |
-| `AppShell` | Nav, theme toggle, user menu | collapsed / mobile |
+| `AppShell` | Top-bar chrome for Staff / LM / HR (brand, routes, island, tools) | mobile sheet nav |
+| `DynamicIsland` | Spring morph shell for workspace status | idle / strip / timer / notification / action |
+| `GooeyInput` | Aceternity gooey search control | collapsed / expanded |
 | `GradientBars` / `GradientBarsBackground` | Animated NestFlow orange bar stage | reduced-motion off |
 | `AuthLoginForm` | Nest ID or email + password | validating, error, submitting |
 | `NestFlowMark` | Product mark tile (`brand` / `panel` tones) | size sm–lg |
@@ -77,10 +79,12 @@ Built from shadcn/ui and customised:
 | `ActivityFeed` | Historical events | grouped by day |
 | `AttachmentList` | Upload/list/remove via R2 signed URLs | uploading, error |
 | `NotificationBell` | Unread indicator | zero / n |
-| `WorkspaceIsland` | Header status strip | pomodoro, inbox ticker, work pulse |
+| `WorkspaceIsland` | Dynamic Island status (pomodoro, date, inbox, pulse) | idle, strip, timer, notification, action |
 | `NotificationPanel` | In-app list | read/unread |
 | `EmptyState` | No data guidance | with CTA |
 | `PermissionGate` | Conditional render by capability | hidden vs disabled policy |
+
+Sound plumbing lives under `src/lib/sounds/` and `src/components/sounds/`. Client toasts import from `@/lib/sounds/toast`, not `sonner` directly.
 
 ## 4. Status visual language
 
@@ -108,13 +112,25 @@ Use Motion for React selectively:
 
 Avoid continuous looping animations in productivity surfaces.
 
-## 6. Tooltip and hover rules
+## 6. Sound feedback
+
+Use `react-sounds` through NestFlow helpers. Do not call the library ad hoc from feature UIs.
+
+| Helper | Use |
+| --- | --- |
+| `@/lib/sounds/toast` | Default for mutation toasts (`success`, `error`, `reject`, `taskUpdate`) |
+| `playAppSound` / `triggerHaptic` | Island, delete confirm, and other non-toast moments |
+| `AppSoundProvider` | Authenticated app shell; preloads the feedback catalog |
+
+Categories: click, confirm, delete, reject, error, timer, timerComplete, island, taskNotification, taskUpdate, toggleOn, toggleOff. Keep clicks sparse. Pass `{ sound: false }` on a toast when a local control already played the sound. Mute from the account menu (**Sound effects**); preference is stored by `SoundProvider`.
+
+## 7. Tooltip and hover rules
 
 - Icon-only controls require tooltips.
 - Hover styles must have equivalent focus-visible styles.
 - Drag handles need keyboard alternatives documented in UI (menu: Move to status).
 
-## 7. Responsiveness
+## 8. Responsiveness
 
 | Breakpoint intent | Behaviour |
 | --- | --- |
@@ -122,7 +138,7 @@ Avoid continuous looping animations in productivity surfaces.
 | Tablet | Compact shell; usable board |
 | Desktop | Full board + side detail optional |
 
-## 8. Accessibility checklist (per component)
+## 9. Accessibility checklist (per component)
 
 - [ ] Semantic element or correct ARIA role
 - [ ] Labelled controls
@@ -131,12 +147,13 @@ Avoid continuous looping animations in productivity surfaces.
 - [ ] Contrast against light and dark backgrounds
 - [ ] Reduced-motion respect where animation is non-essential
 
-## 9. File organisation
+## 10. File organisation
 
 ```text
 src/components/
   ui/              # shadcn primitives
   layout/          # app shell, nav
+  sounds/          # AppSoundProvider
   tasks/           # board, list, calendar, detail, pane, bulk bar
   admin/           # Overview, Team, People suites
   workspace/       # dashboards, island
@@ -146,11 +163,11 @@ src/components/
   auth/            # sign-in
 ```
 
-## 10. Contribution rule
+## 11. Contribution rule
 
 Before you add a one-off control to a page, check whether an existing NestFlow component can be extended. Update this document when you introduce a new shared domain component.
 
-## 11. Admin UI (`src/components/admin/ui/`)
+## 12. Admin UI (`src/components/admin/ui/`)
 
 | Component | Contract |
 | --- | --- |

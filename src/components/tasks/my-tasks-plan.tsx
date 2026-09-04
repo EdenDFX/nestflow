@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { MentionField } from "@/components/tasks/mention-field";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";

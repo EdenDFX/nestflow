@@ -4,7 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { MentionField } from "@/components/tasks/mention-field";
 import { Button } from "@/components/ui/button";

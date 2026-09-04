@@ -19,7 +19,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { GripHorizontalIcon } from "@/components/icons/grip-horizontal";
 
@@ -385,7 +385,7 @@ export function TeamTaskBoard({
         toast.error(result.error ?? "Could not update status.");
         return;
       }
-      toast.success(`Moved to ${STATUS_LABELS[status]}`);
+      toast.taskUpdate(`Moved to ${STATUS_LABELS[status]}`);
     });
   }
 

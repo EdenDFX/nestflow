@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { AssigneePicker } from "@/components/tasks/assignee-picker";
 import { TaskActivity } from "@/components/tasks/task-activity";

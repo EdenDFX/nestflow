@@ -173,7 +173,7 @@ export function AppMobileNav({
   const displayRole = roleLabel(primaryRole(profile.roles));
 
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" aria-label="Open navigation">

@@ -208,16 +208,17 @@ Authenticated NestFlow needs operational workspace chrome that matches the orang
 
 ### Decision
 
-- App shell uses a pure black stage (`#000000`) with a slim icon rail, top workspace strip, and avatar/notifications
-- Dashboard maps the reference layout to NestFlow: Workspace header, New Task, Open / In progress / Blocked stats, Focus cards, Today’s Tasks with NestFlow statuses
-- Focus and recent-task cards use a stepped blob surface (`SteppedCard`): large radii, top-right notch for circular actions, primary / ink tones with dark outline buttons
-- Live task data fills those cards (M2+); older static preview scaffolding is retired
+- Staff, Line Manager, and HR share a top-bar app shell (no icon rail), aligned with the admin chrome pattern: brand, horizontal route links, centered Dynamic Island, tools
+- Mobile uses a sheet nav; route links appear from about 960px up
 - Shell follows document light/dark theme via CSS tokens (no forced local `.dark` lock)
-- Header `WorkspaceIsland` is a theme-matched status strip: pomodoro, date, person, a live inbox ticker (unread first, then latest update), and a personal work pulse that opens My Tasks.
+- Header `WorkspaceIsland` is a SmoothUI-style Dynamic Island that spring-morphs between idle, strip, timer, notification, and action views (pomodoro, date, person, inbox, work pulse)
+- Search uses Aceternity Gooey Input on desktop and opens the command palette; mobile keeps a compact search button
+- Dashboard maps NestFlow work surfaces: Workspace header, New Task, Open / In progress / Blocked stats, Focus cards, Today’s Tasks with NestFlow statuses
+- Focus and recent-task cards use a stepped blob surface (`SteppedCard`): large radii, top-right notch for circular actions, primary / ink tones with dark outline buttons
 
 ### Consequences
 
-Board, My Tasks, and role pages inherit the shell. Live counts fill the trailing pulse. Pomodoro persists locally. Team presence stays off the island until it is real.
+Board, My Tasks, and role pages inherit the top-bar shell. Live counts fill the trailing pulse. Pomodoro persists locally. Team presence stays off the island until it is real.
 
 ---
 
@@ -246,6 +247,36 @@ The administrator Overview serves bosses who need org-wide visibility without op
 - New shared components under `src/components/admin/ui/`.
 - `AdminConsole` becomes a thin wrapper around `AdminOverview`.
 - Agent rule: `.cursor/rules/nestflow-admin-ui.mdc`.
+
+---
+
+## DD-011 — Sparse UI sounds via react-sounds
+
+| Field | Value |
+| --- | --- |
+| Status | Accepted |
+| Date | 2026-09-04 |
+
+### Context
+
+NestFlow already uses Sonner toasts and the workspace Dynamic Island for feedback. Adding audio without a shared catalog would scatter ad hoc Howler calls and make the app noisy.
+
+### Decision
+
+- Use `react-sounds` + Howler for CDN-hosted SFX.
+- Map product categories (click, confirm, reject, error, timer, island, task notification, task update) in `src/lib/sounds/catalog.ts`.
+- Route mutation feedback through `@/lib/sounds/toast` so success and error share one sound path.
+- Keep chrome clicks sparse; prefer milestone and mutation sounds over per-button clicks.
+- Pair haptics with destructive confirms, timer complete, and island alerts when the Vibration API is available.
+- Respect `SoundProvider` enablement and skip haptics when `prefers-reduced-motion: reduce`.
+- Account menu includes a **Sound effects** checkbox that toggles `useSoundEnabled` (persisted by react-sounds).
+
+### Consequences
+
+- `AppSoundProvider` wraps the authenticated app layout.
+- Feature code imports toast from `@/lib/sounds/toast`, not `sonner` directly.
+- Server notify / push paths still cannot play in-app audio; the island and toast layers own client SFX.
+- Users can mute UI sounds from `AppUserMenu` without leaving the shell.
 
 ---
 

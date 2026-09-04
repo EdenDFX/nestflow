@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { CheckIcon } from "@/components/icons/check";
 import { DeleteIcon } from "@/components/icons/delete";

@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useSoundEnabled } from "react-sounds";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -15,9 +17,11 @@ import {
 import { signOutAction } from "@/lib/auth/actions";
 import { profileInitials } from "@/lib/auth/profile-initials";
 import { primaryRole, roleLabel, type NestFlowProfile } from "@/lib/auth/types";
+import { playAppSound } from "@/lib/sounds/play";
 
 export function AppUserMenu({ profile }: { profile: NestFlowProfile }) {
   const displayRole = roleLabel(primaryRole(profile.roles));
+  const [soundEnabled, setSoundEnabled] = useSoundEnabled();
 
   return (
     <DropdownMenu>
@@ -56,6 +60,22 @@ export function AppUserMenu({ profile }: { profile: NestFlowProfile }) {
         <DropdownMenuItem asChild>
           <Link href="/app/notifications">Inbox</Link>
         </DropdownMenuItem>
+        <DropdownMenuCheckboxItem
+          checked={soundEnabled}
+          onCheckedChange={(checked) => {
+            const next = checked === true;
+            if (next) {
+              setSoundEnabled(true);
+              playAppSound("click");
+            } else {
+              playAppSound("click");
+              setSoundEnabled(false);
+            }
+          }}
+          onSelect={(event) => event.preventDefault()}
+        >
+          Sound effects
+        </DropdownMenuCheckboxItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={(event) => {

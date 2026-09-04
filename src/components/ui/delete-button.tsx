@@ -13,6 +13,7 @@ import {
   type Transition,
 } from "motion/react";
 
+import { playAppSound, triggerHaptic } from "@/lib/sounds/play";
 import { cn } from "@/lib/utils";
 
 const HINGE = "3px 6px";
@@ -171,7 +172,15 @@ export function DeleteButton({
     setOpen(false);
     setStatus(next);
     trigger.current?.focus();
-    (next === "deleted" ? onConfirm : onCancel)?.();
+    if (next === "deleted") {
+      playAppSound("delete");
+      triggerHaptic("heavy");
+      onConfirm?.();
+    } else {
+      playAppSound("reject");
+      triggerHaptic("light");
+      onCancel?.();
+    }
   };
 
   return (

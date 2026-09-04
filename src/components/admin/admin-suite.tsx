@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { DeactivateUserButton } from "@/components/admin/deactivate-user-button";
 import { TeamRosterPanel } from "@/components/admin/team-roster-panel";

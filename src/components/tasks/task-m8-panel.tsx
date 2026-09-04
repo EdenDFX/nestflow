@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { StatusBadge } from "@/components/tasks/status-badge";
 import { Button } from "@/components/ui/button";
@@ -247,7 +247,7 @@ export function TaskM8Panel({
                       toast.error(result.error ?? "Could not reject.");
                       return;
                     }
-                    toast.success("Approval rejected.");
+                    toast.reject("Approval rejected.");
                     refresh();
                   });
                 }}

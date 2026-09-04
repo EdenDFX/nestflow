@@ -9,7 +9,7 @@ import {
   useTransition,
   type KeyboardEvent,
 } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { MentionField } from "@/components/tasks/mention-field";
 import { Button } from "@/components/ui/button";

@@ -23,6 +23,7 @@
   "menuAccent": "subtle",
   "registries": {
     "@lucide-animated": "https://lucide-animated.com/r/{name}.json",
-    "@coss": "https://coss.com/ui/r/{name}.json"
+    "@coss": "https://coss.com/ui/r/{name}.json",
+    "@aceternity": "https://ui.aceternity.com/registry/{name}.json"
   }
 }

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { AssigneePicker } from "@/components/tasks/assignee-picker";
 import { Button } from "@/components/ui/button";
@@ -72,7 +72,7 @@ export function BulkReassignBar({
         toast.error(result.error ?? "Could not update tasks.");
         return;
       }
-      toast.success(`Updated ${selectedIds.length} tasks.`);
+      toast.taskUpdate(`Updated ${selectedIds.length} tasks.`);
       onClear();
       setAssigneeIds([]);
       setDueAt("");

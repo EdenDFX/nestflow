@@ -3,7 +3,7 @@
 import { format, parse } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition, type ReactNode } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -272,7 +272,7 @@ export function PersonalNotesPanel({ notes }: { notes: PersonalNote[] }) {
         toast.error(result.error ?? "Could not delete note.");
         return;
       }
-      toast.success("Note deleted.");
+      toast.success("Note deleted.", { sound: false });
       if (editingId === noteId) setEditingId(null);
       // Let the confirm checkmark land before the list refreshes.
       await new Promise((resolve) => window.setTimeout(resolve, 700));

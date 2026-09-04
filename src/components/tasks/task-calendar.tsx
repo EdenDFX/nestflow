@@ -28,7 +28,7 @@ import {
 } from "date-fns";
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { ChevronLeftIcon } from "@/components/icons/chevron-left";
 import { ChevronRightIcon } from "@/components/icons/chevron-right";
@@ -192,7 +192,7 @@ export function TaskCalendar({
         toast.error(result.error ?? "Could not update due date.");
         return;
       }
-      toast.success(`Moved to ${format(nextDay, "d MMM")}`);
+      toast.taskUpdate(`Moved to ${format(nextDay, "d MMM")}`);
     });
   }
 

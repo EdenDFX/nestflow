@@ -14,7 +14,7 @@ import {
 } from "@dnd-kit/core";
 import Link from "next/link";
 import { useMemo, useState, useTransition, type ReactNode } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/sounds/toast";
 
 import { BadgeAlertIcon } from "@/components/icons/badge-alert";
 import { ChevronRightIcon } from "@/components/icons/chevron-right";
@@ -443,7 +443,7 @@ export function TaskBoard({
         toast.error(result.error ?? "Could not update status.");
         return;
       }
-      toast.success(`Moved to ${STATUS_LABELS[status]}`);
+      toast.taskUpdate(`Moved to ${STATUS_LABELS[status]}`);
     });
   }
 
