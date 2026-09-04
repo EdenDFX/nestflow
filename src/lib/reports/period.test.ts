@@ -4,6 +4,7 @@ import {
   digestPeriodsForToday,
   lagosWeekdayMon1,
   lagosYmd,
+  resolveInteractivePeriodEnding,
   resolvePeriodBounds,
   shiftEndingDate,
 } from "@/lib/reports/period";
@@ -62,6 +63,20 @@ describe("digestPeriodsForToday", () => {
     const kinds = digestPeriodsForToday(new Date("2026-08-01T07:00:00.000Z"));
     expect(lagosYmd(new Date("2026-08-01T07:00:00.000Z"))).toBe("2026-08-01");
     expect(kinds).toEqual(["daily", "monthly"]);
+  });
+});
+
+describe("resolveInteractivePeriodEnding", () => {
+  it("defaults to today for daily and weekly views", () => {
+    const now = new Date("2026-09-03T15:00:00.000Z");
+    expect(resolveInteractivePeriodEnding("daily", now)).toBe("2026-09-03");
+    // Thursday → this week's Sunday (clamped to today on the reports page).
+    expect(resolveInteractivePeriodEnding("weekly", now)).toBe("2026-09-06");
+  });
+
+  it("defaults to the last day of the current month", () => {
+    const now = new Date("2026-09-03T15:00:00.000Z");
+    expect(resolveInteractivePeriodEnding("monthly", now)).toBe("2026-09-30");
   });
 });
 

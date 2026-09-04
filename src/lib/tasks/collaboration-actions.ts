@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { listMentionablePeopleForTask } from "@/lib/admin/queries";
 import { requireActiveProfile } from "@/lib/auth/session";
 import { notifyMany } from "@/lib/notifications/notify";
 import {
@@ -18,7 +19,6 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { recordActivity } from "@/lib/tasks/activity";
 import { parseMentions } from "@/lib/tasks/collaboration-types";
-import { listAssignablePeople } from "@/lib/tasks/queries";
 
 export type CollabActionResult = {
   ok: boolean;
@@ -37,7 +37,8 @@ function revalidateTask(taskId: string) {
   revalidatePath("/app/board");
   revalidatePath("/app/list");
   revalidatePath("/app/work");
-  revalidatePath("/app/calendar");
+  revalidatePath("/app/discussions");
+  revalidatePath("/app/notifications");
 }
 
 export async function addChecklistItemAction(input: {
@@ -187,7 +188,7 @@ export async function addCommentAction(input: {
     return { ok: false, code: "VALIDATION_ERROR", error: "Comment cannot be empty." };
   }
 
-  const people = await listAssignablePeople();
+  const people = await listMentionablePeopleForTask(parsed.data.taskId, profile);
   const mentionedUserIds = parseMentions(parsed.data.body, people);
 
   const supabase = await createClient();
@@ -385,20 +386,35 @@ export async function removeAttachmentAction(input: {
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data: existing, error: fetchError } = await supabase
+    .from("nf_attachments")
+    .select("object_key, file_name")
+    .eq("id", parsed.data.attachmentId)
+    .eq("task_id", parsed.data.taskId)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (fetchError || !existing) {
+    return {
+      ok: false,
+      code: "NOT_FOUND",
+      error: fetchError?.message ?? "Attachment not found.",
+    };
+  }
+
+  const { error } = await supabase
     .from("nf_attachments")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", parsed.data.attachmentId)
     .eq("task_id", parsed.data.taskId)
-    .select("object_key, file_name")
-    .maybeSingle();
+    .is("deleted_at", null);
 
-  if (error || !data) {
-    return { ok: false, code: "INTERNAL", error: error?.message ?? "Could not remove attachment." };
+  if (error) {
+    return { ok: false, code: "INTERNAL", error: error.message };
   }
 
   try {
-    await deleteObject(data.object_key);
+    await deleteObject(existing.object_key);
   } catch (error) {
     console.error("R2 delete failed; metadata soft-deleted", error);
   }
@@ -407,7 +423,7 @@ export async function removeAttachmentAction(input: {
     taskId: parsed.data.taskId,
     actorId: profile.userId,
     eventType: "attachment_removed",
-    summary: `Removed attachment "${data.file_name}"`,
+    summary: `Removed attachment "${existing.file_name}"`,
   });
 
   revalidateTask(parsed.data.taskId);

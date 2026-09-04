@@ -31,6 +31,13 @@ export type StaffPeriodStats = {
   nestId: string | null;
   email: string | null;
   department: string | null;
+  /**
+   * Row basis. "staff" rows report the person's own delivery;
+   * "line_manager" rows report outcomes of tasks the person assigned.
+   */
+  reportKind: "staff" | "line_manager";
+  /** Unique tasks assigned in the period (line-manager rows only). */
+  assigned: number;
   completed: number;
   completedOnTime: number;
   missed: number;
@@ -75,6 +82,34 @@ export type PeriodReport = {
   department?: string | null;
   /** When true, UI prompts for a department before listing everyone. */
   requireDepartment?: boolean;
+};
+
+export type LmBlockListItem = {
+  taskId: string;
+  title: string;
+  blockedReason: string | null;
+  assigneeNames: string[];
+};
+
+export type LineManagerWeeklyStats = {
+  userId: string;
+  fullName: string | null;
+  nestId: string | null;
+  email: string | null;
+  /** Assignments made by this LM in the period. */
+  assigned: number;
+  /** Completions among those assigned tasks in the period. */
+  completed: number;
+  /** Missed deadlines among those assigned tasks in the period. */
+  failed: number;
+  /** Still-open assigned tasks at period end. */
+  unrest: number;
+  blockList: LmBlockListItem[];
+};
+
+export type LineManagerWeeklyReport = {
+  period: PeriodBounds;
+  managers: LineManagerWeeklyStats[];
 };
 
 export function isReportPeriodKind(value: string): value is ReportPeriodKind {

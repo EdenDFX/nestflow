@@ -1,5 +1,10 @@
-import { ListLoading } from "@/components/layout/page-loading";
+import { TaskDetailSkeleton } from "@/components/tasks/task-detail-skeleton";
 
-export default function TaskDetailLoading() {
-  return <ListLoading />;
+/** Full-page task route only. Intercepted opens use @pane loading. */
+export default function TaskDetailPageLoading() {
+  return (
+    <div className="mx-auto max-w-3xl">
+      <TaskDetailSkeleton />
+    </div>
+  );
 }

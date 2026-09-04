@@ -21,7 +21,9 @@ import {
 import { eventLabel, type NestFlowNotification } from "@/lib/notifications/types";
 import { addCommentAction } from "@/lib/tasks/collaboration-actions";
 import { changeTaskStatusAction } from "@/lib/tasks/actions";
-import { canTransition, type TaskAssignee } from "@/lib/tasks/types";
+import type { AppRole } from "@/lib/auth/types";
+import { canRoleTransition } from "@/lib/tasks/status-policy";
+import type { TaskAssignee } from "@/lib/tasks/types";
 import { cn } from "@/lib/utils";
 
 export function NotificationInbox({
@@ -29,11 +31,13 @@ export function NotificationInbox({
   filter,
   taskSummaries,
   people = [],
+  roles,
 }: {
   items: NestFlowNotification[];
   filter: InboxFilter;
   taskSummaries: Record<string, TaskInboxSummary>;
   people?: TaskAssignee[];
+  roles: AppRole[];
 }) {
   const visible = items.filter((item) => matchesInboxFilter(item, filter));
 
@@ -65,6 +69,7 @@ export function NotificationInbox({
               item={item}
               summary={item.taskId ? taskSummaries[item.taskId] : undefined}
               people={people}
+              roles={roles}
             />
           ))}
         </ul>
@@ -77,10 +82,12 @@ function InboxRow({
   item,
   summary,
   people,
+  roles,
 }: {
   item: NestFlowNotification;
   summary?: TaskInboxSummary;
   people: TaskAssignee[];
+  roles: AppRole[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -90,7 +97,8 @@ function InboxRow({
   const href =
     item.href ?? (item.taskId ? `/app/tasks/${item.taskId}` : "/app/notifications");
   const canComplete =
-    summary !== undefined && canTransition(summary.status, "completed");
+    summary !== undefined &&
+    canRoleTransition(roles, summary.status, "completed");
 
   function markRead() {
     if (!unread) return;
@@ -192,6 +200,7 @@ function InboxRow({
         <div className="mt-3 space-y-2">
           <MentionField
             people={people}
+            taskId={item.taskId ?? undefined}
             value={comment}
             onChange={setComment}
             rows={3}

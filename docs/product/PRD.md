@@ -57,7 +57,7 @@ NestFlow solves this by providing:
 | Administrator | Configure organisation, departments, roles, permissions, integrations, and audit |
 | Line Manager | Create and assign team work, monitor progress, unblock staff |
 | HR | Oversee people-related workflows, onboarding tasks, compliance checklists, and employee status |
-| Staff | View assigned work, update progress, comment, complete checklists |
+| Staff | View assigned work, update progress, comment, complete checklists; personal notes (no create-task) |
 
 ### 4.1 Permission principles
 
@@ -75,9 +75,9 @@ NestFlow solves this by providing:
 | --- | --- |
 | Login | Unique Nest ID / work email + password; branded NestFlow experience |
 | Dashboard | Overdue, outstanding, completed, and upcoming work |
-| My Tasks | Personal day plan with inline status, checklist, and comment |
-| Work | Board, list, and calendar in one surface (`/app/work`) |
-| Task detail | Description, checklist, attachments, comments, activity; slide-over pane |
+| My Tasks | Personal day plan with inline status, checklist, and comment; staff Notes notepad |
+| Work | Board, list, and calendar in one surface (`/app/work`); calendar also shows personal notes by day |
+| Task detail | Description, checklist, attachments, discussion chat, activity; slide-over pane; staff use progress view |
 | Notifications centre | In-app history with All, Unread, Mentions, Assignments |
 | Profile / preferences | Theme, notification preferences, security basics |
 | Search | Command palette (⌘K) across accessible tasks and people |
@@ -180,10 +180,12 @@ Users can configure channel preferences where operationally allowed. Chat cards 
 
 ### 7.2 Create and assign a task
 
-1. Manager (or authorised role) creates a task in a workspace.
-2. Sets priority, due date, assignees, tags.
+1. Line manager creates a task in a workspace (always starts in To Do).
+2. Sets priority, optional due date and submit-by time, assignees, tags.
 3. Assignees receive email, in-app, optional push, and optional Google Chat notification.
 4. Task appears in My Tasks and team board.
+5. Staff do not create tasks; they use personal Notes instead. Admin and HR also do not create tasks.
+6. Staff/HR move work to In Progress, Blocked, or Review. Line managers mark Completed. Overdue open tasks return to Backlog automatically.
 
 ### 7.3 Progress a task
 
@@ -241,7 +243,7 @@ Tracked in [ROADMAP.md](ROADMAP.md) as **M8+** and [TASKS.md](TASKS.md) as T-080
 | Advanced automation + templates | T-086 | Shipped |
 | Passkeys / MFA | T-087 | Open |
 | Google Chat notifications | T-088 | Shipped (space webhook; personal DMs later) |
-| Staff period reports + digests | T-089 | Shipped (`/app/reports` + scheduled digests) |
+| Staff period reports + digests | T-089 | Shipped (`/app/reports` for Admin + LM; Admin LM weekly rollup; digests) |
 
 PRD §5 still open under M7.1: Admin org settings (T-071), notification templates gallery (T-072), Admin system health UI (T-073). Search, Mentions, quick update, Admin People, and manager assign are shipped.
 

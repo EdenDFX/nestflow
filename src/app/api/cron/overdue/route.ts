@@ -50,9 +50,41 @@ export async function POST(request: Request) {
 
   let overdue = 0;
   let dueSoon = 0;
+  let movedToBacklog = 0;
 
   for (const task of tasks ?? []) {
     if (!task.due_at) continue;
+
+    const dueAt = new Date(task.due_at);
+    const isOverdue = dueAt.getTime() < now.getTime();
+
+    // Unhandled overdue work returns to Backlog automatically.
+    if (isOverdue && task.status !== "backlog") {
+      const { error: moveError } = await admin
+        .schema("nestflow")
+        .from("tasks")
+        .update({
+          status: "backlog",
+          blocked_reason: null,
+          completed_at: null,
+          updated_at: now.toISOString(),
+        })
+        .eq("id", task.id)
+        .neq("status", "completed")
+        .is("archived_at", null);
+
+      if (!moveError) {
+        movedToBacklog += 1;
+        task.status = "backlog";
+        await admin.schema("nestflow").from("activity_events").insert({
+          task_id: task.id,
+          actor_id: null,
+          event_type: "status_changed",
+          summary: "Moved to Backlog automatically (overdue)",
+          metadata: { from: "overdue", to: "backlog", system: true },
+        });
+      }
+    }
 
     const { data: assignees } = await admin
       .schema("nestflow")
@@ -63,8 +95,6 @@ export async function POST(request: Request) {
     const userIds = (assignees ?? []).map((row) => row.user_id as string);
     if (userIds.length === 0) continue;
 
-    const dueAt = new Date(task.due_at);
-    const isOverdue = dueAt.getTime() < now.getTime();
     const key = dayKey(now);
 
     for (const userId of userIds) {
@@ -101,6 +131,7 @@ export async function POST(request: Request) {
     scanned: tasks?.length ?? 0,
     overdueCreated: overdue,
     dueSoonCreated: dueSoon,
+    movedToBacklog,
   });
 }
 

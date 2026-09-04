@@ -1,12 +1,15 @@
 import { AdminConsole } from "@/components/admin/admin-console";
 import { getAdminOversightData, getAdminSuiteData } from "@/lib/admin/queries";
 import { requireRoles } from "@/lib/auth/guards";
+import { requireActiveProfile } from "@/lib/auth/session";
+import { getDashboardDiscussionSummary } from "@/lib/tasks/discussion-queries";
 
 export default async function AdminPage() {
-  await requireRoles(["admin"]);
-  const [oversight, suite] = await Promise.all([
+  const profile = await requireRoles(["admin"]);
+  const [oversight, suite, discussionSummary] = await Promise.all([
     getAdminOversightData(),
     getAdminSuiteData(),
+    getDashboardDiscussionSummary(profile.userId),
   ]);
 
   return (
@@ -23,6 +26,8 @@ export default async function AdminPage() {
       memberships={suite.memberships}
       people={suite.people}
       openByUser={suite.openByUser}
+      discussionThreads={discussionSummary.discussionThreads}
+      unreadMentionCount={discussionSummary.unreadMentionCount}
     />
   );
 }

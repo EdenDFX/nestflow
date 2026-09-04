@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
 import { BadgeAlertIcon } from "@/components/icons/badge-alert";
 
+import { DiscussionDashboardPanel } from "@/components/discussions/discussion-dashboard-panel";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { StatusBadge } from "@/components/tasks/status-badge";
 import type { ManagedTeamSummary } from "@/lib/admin/queries";
@@ -13,6 +14,7 @@ import type {
   NestFlowWorkspace,
   TaskAssignee,
 } from "@/lib/tasks/types";
+import type { DiscussionThread } from "@/lib/tasks/discussion-queries";
 import { cn } from "@/lib/utils";
 
 type LineManagerDashboardProps = {
@@ -24,6 +26,8 @@ type LineManagerDashboardProps = {
   workspaces: NestFlowWorkspace[];
   people: TaskAssignee[];
   canAssign: boolean;
+  discussionThreads?: DiscussionThread[];
+  unreadMentionCount?: number;
 };
 
 function formatDue(dueAt: string | null) {
@@ -43,6 +47,8 @@ export function LineManagerDashboard({
   workspaces,
   people,
   canAssign,
+  discussionThreads = [],
+  unreadMentionCount = 0,
 }: LineManagerDashboardProps) {
   const firstName = profile.fullName?.trim().split(/\s+/)[0];
   const teamLabel =
@@ -274,6 +280,11 @@ export function LineManagerDashboard({
           </div>
         </section>
       </div>
+
+      <DiscussionDashboardPanel
+        threads={discussionThreads}
+        unreadMentionCount={unreadMentionCount}
+      />
     </div>
   );
 }

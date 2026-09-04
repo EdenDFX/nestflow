@@ -162,6 +162,30 @@ function statusDotLabel(status: TaskStatus, overdue: boolean) {
   }
 }
 
+function taskRowSurfaceClass(status: TaskStatus, overdue: boolean) {
+  if (overdue && status !== "completed") {
+    return "bg-destructive/[0.05] hover:bg-destructive/[0.08]";
+  }
+  switch (status) {
+    case "completed":
+      return "bg-success/[0.05] hover:bg-success/[0.08]";
+    case "blocked":
+      return "bg-destructive/[0.05] hover:bg-destructive/[0.08]";
+    case "review":
+      return "bg-warning/[0.07] hover:bg-warning/[0.11]";
+    case "in_progress":
+      return "bg-primary/[0.05] hover:bg-primary/[0.09]";
+    case "todo":
+      return "bg-info/[0.05] hover:bg-info/[0.09]";
+    case "backlog":
+      return "bg-muted/35 hover:bg-muted/50";
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
 function personInitials(name: string | null | undefined, fallback?: string | null) {
   const source = (name?.trim() || fallback?.trim() || "?").trim();
   const parts = source.split(/\s+/).filter(Boolean);
@@ -541,7 +565,8 @@ function TasksPanel({
                     href={`/app/tasks/${task.id}`}
                     className={cn(
                       "group block rounded-2xl border border-border/70 bg-card transition-colors",
-                      "hover:border-primary/35 hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      taskRowSurfaceClass(status, overdue),
                     )}
                   >
                     <div className="grid min-w-0 gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1.5fr)_auto] sm:items-start lg:grid-cols-[minmax(0,1.6fr)_minmax(7.5rem,0.65fr)_minmax(7.5rem,0.75fr)_minmax(8.5rem,0.85fr)] lg:gap-4">

@@ -16,10 +16,10 @@ const MATRIX: Record<MutationCapability, AppRole[]> = {
   invite_users: ["admin", "hr"],
   manage_departments: ["admin"],
   view_audit: ["admin"],
-  assign_tasks: ["admin", "line_manager", "hr"],
+  assign_tasks: ["line_manager", "hr"],
   manage_team_suite: ["admin", "line_manager"],
   access_hr_workspaces: ["admin", "hr"],
-  create_tasks: ["admin", "line_manager", "hr", "staff"],
+  create_tasks: ["line_manager"],
   comment_checklist: ["admin", "line_manager", "hr", "staff"],
 };
 

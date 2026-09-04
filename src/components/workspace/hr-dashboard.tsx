@@ -4,8 +4,8 @@ import { ArrowRightIcon } from "@/components/icons/arrow-right";
 import { ArrowUpRightIcon } from "@/components/icons/arrow-up-right";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
 
+import { DiscussionDashboardPanel } from "@/components/discussions/discussion-dashboard-panel";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
-import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import {
   SteppedCard,
   SteppedCardActionLink,
@@ -22,6 +22,7 @@ import type {
   NestFlowWorkspace,
   TaskAssignee,
 } from "@/lib/tasks/types";
+import type { DiscussionThread } from "@/lib/tasks/discussion-queries";
 import { cn } from "@/lib/utils";
 
 type HrDashboardProps = {
@@ -34,6 +35,8 @@ type HrDashboardProps = {
   workspaces: NestFlowWorkspace[];
   people: TaskAssignee[];
   canAssign: boolean;
+  discussionThreads?: DiscussionThread[];
+  unreadMentionCount?: number;
 };
 
 function isGeneralTeam(team: NestFlowTeam) {
@@ -63,9 +66,11 @@ export function HrDashboard({
   invites,
   teams,
   memberships,
-  workspaces,
-  people,
-  canAssign,
+  workspaces: _workspaces,
+  people: _people,
+  canAssign: _canAssign,
+  discussionThreads = [],
+  unreadMentionCount = 0,
 }: HrDashboardProps) {
   const firstName = profile.fullName?.trim().split(/\s+/)[0];
 
@@ -88,7 +93,6 @@ export function HrDashboard({
     (team) => team.managerIds.length === 0,
   );
 
-  const hrWorkspaces = workspaces.filter((w) => w.kind === "hr");
   const queuePreview = openHrTasks.slice(0, 5);
   const invitePreview = pendingInvites.slice(0, 6);
   const placementPreview = unrostered.slice(0, 8);
@@ -150,13 +154,6 @@ export function HrDashboard({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {hrWorkspaces.length > 0 ? (
-            <TaskCreateDialog
-              workspaces={hrWorkspaces}
-              people={people}
-              canAssign={canAssign}
-            />
-          ) : null}
           <Link
             href="/app/people"
             className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted"
@@ -444,6 +441,11 @@ export function HrDashboard({
           </div>
         </section>
       </div>
+
+      <DiscussionDashboardPanel
+        threads={discussionThreads}
+        unreadMentionCount={unreadMentionCount}
+      />
     </div>
   );
 }

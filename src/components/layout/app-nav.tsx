@@ -51,6 +51,7 @@ const navIcons: Record<NavIcon, RailIcon> = {
   people: UserIcon,
   admin: LayersIcon,
   reports: ChartColumnIncreasingIcon,
+  discussions: AlignLeftIcon,
 };
 
 function isActivePath(pathname: string, href: string) {

@@ -2,9 +2,9 @@ import {
   listDepartments,
   listDirectoryUsers,
   listManagedTeamMemberIds,
+  listUserIdsWithRoles,
 } from "@/lib/admin/queries";
 import type { AppRole, NestFlowProfile } from "@/lib/auth/types";
-import { primaryRole } from "@/lib/auth/types";
 import {
   addCalendarDays,
   lagosYmd,
@@ -18,6 +18,9 @@ import type {
   ReportPeriodKind,
   ReportTaskDetail,
   StaffPeriodStats,
+  LineManagerWeeklyReport,
+  LineManagerWeeklyStats,
+  LmBlockListItem,
 } from "@/lib/reports/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -82,6 +85,8 @@ function emptyStats(person: PersonRow): StaffPeriodStats {
     nestId: person.nestId,
     email: person.email,
     department: person.department,
+    reportKind: "staff",
+    assigned: 0,
     completed: 0,
     completedOnTime: 0,
     missed: 0,
@@ -496,6 +501,191 @@ async function fetchReportRawData(
   };
 }
 
+async function fetchManagerAssignmentData(
+  managerIds: string[],
+  period: PeriodBounds,
+  system: boolean,
+): Promise<{
+  assignments: AssigneeMetaRow[];
+  tasks: TaskRow[];
+  workspaces: WorkspaceRow[];
+}> {
+  if (managerIds.length === 0) {
+    return { assignments: [], tasks: [], workspaces: [] };
+  }
+
+  if (system) {
+    const admin = createAdminClient();
+    if (!admin) {
+      throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for system reports.");
+    }
+
+    const { data: rows, error } = await admin
+      .schema("nestflow")
+      .from("task_assignees")
+      .select("task_id, user_id, assigned_at, assigned_by")
+      .in("assigned_by", managerIds)
+      .gte("assigned_at", period.start.toISOString())
+      .lt("assigned_at", period.end.toISOString());
+    if (error) throw new Error(error.message);
+
+    const assignments = (rows ?? []) as AssigneeMetaRow[];
+    const taskIds = [...new Set(assignments.map((row) => row.task_id))];
+    if (taskIds.length === 0) {
+      return { assignments, tasks: [], workspaces: [] };
+    }
+
+    const [{ data: taskRows, error: taskError }, { data: wsRows }] =
+      await Promise.all([
+        admin
+          .schema("nestflow")
+          .from("tasks")
+          .select(
+            "id, workspace_id, title, status, due_at, blocked_reason, completed_at, archived_at, created_at, updated_at",
+          )
+          .in("id", taskIds),
+        admin.schema("nestflow").from("workspaces").select("id, name"),
+      ]);
+    if (taskError) throw new Error(taskError.message);
+
+    return {
+      assignments,
+      tasks: (taskRows ?? []) as TaskRow[],
+      workspaces: (wsRows ?? []) as WorkspaceRow[],
+    };
+  }
+
+  const supabase = await createClient();
+  const { data: rows, error } = await supabase
+    .from("nf_task_assignees")
+    .select("task_id, user_id, assigned_at, assigned_by")
+    .in("assigned_by", managerIds)
+    .gte("assigned_at", period.start.toISOString())
+    .lt("assigned_at", period.end.toISOString());
+  if (error) throw new Error(error.message);
+
+  const assignments = (rows ?? []) as AssigneeMetaRow[];
+  const taskIds = [...new Set(assignments.map((row) => row.task_id))];
+  if (taskIds.length === 0) {
+    return { assignments, tasks: [], workspaces: [] };
+  }
+
+  const [{ data: taskRows, error: taskError }, { data: wsRows }] =
+    await Promise.all([
+      supabase
+        .from("nf_tasks")
+        .select(
+          "id, workspace_id, title, status, due_at, blocked_reason, completed_at, archived_at, created_at, updated_at",
+        )
+        .in("id", taskIds),
+      supabase.from("nf_workspaces").select("id, name"),
+    ]);
+  if (taskError) throw new Error(taskError.message);
+
+  return {
+    assignments,
+    tasks: (taskRows ?? []) as TaskRow[],
+    workspaces: (wsRows ?? []) as WorkspaceRow[],
+  };
+}
+
+/**
+ * Line-manager rows in period reports: instead of the person's own delivery,
+ * report the outcomes of tasks they assigned in the period (assigned,
+ * completed, missed, overdue, blocked).
+ */
+export function aggregateManagerPeriodRows(params: {
+  period: PeriodBounds;
+  managers: PersonRow[];
+  assignments: AssigneeMetaRow[];
+  tasks: TaskRow[];
+  workspaces: WorkspaceRow[];
+}): StaffPeriodStats[] {
+  const { period, managers, assignments, tasks, workspaces } = params;
+  const workspaceName = new Map(workspaces.map((w) => [w.id, w.name]));
+  const tasksById = new Map(tasks.map((t) => [t.id, t]));
+
+  const taskIdsByManager = new Map<string, Set<string>>();
+  for (const row of assignments) {
+    if (!row.assigned_by) continue;
+    const set = taskIdsByManager.get(row.assigned_by) ?? new Set<string>();
+    set.add(row.task_id);
+    taskIdsByManager.set(row.assigned_by, set);
+  }
+
+  return managers.map((person) => {
+    const stats = emptyStats(person);
+    stats.reportKind = "line_manager";
+    const detailKeys = new Set<string>();
+
+    const pushDetail = (detail: ReportTaskDetail) => {
+      const key = `${detail.kind}:${detail.id}`;
+      if (detailKeys.has(key)) return;
+      detailKeys.add(key);
+      stats.details.push(detail);
+    };
+
+    const toDetail = (
+      task: TaskRow,
+      kind: ReportTaskDetail["kind"],
+    ): ReportTaskDetail => ({
+      id: task.id,
+      title: task.title,
+      workspaceName: workspaceName.get(task.workspace_id) ?? null,
+      status: task.status,
+      dueAt: task.due_at,
+      completedAt: task.completed_at,
+      blockedReason: task.blocked_reason,
+      kind,
+    });
+
+    for (const taskId of taskIdsByManager.get(person.userId) ?? []) {
+      const task = tasksById.get(taskId);
+      if (!task) continue;
+      stats.assigned += 1;
+
+      if (
+        task.status === "completed" &&
+        task.completed_at &&
+        inRange(task.completed_at, period.start, period.end)
+      ) {
+        stats.completed += 1;
+        if (wasOnTime(task.due_at, task.completed_at)) {
+          stats.completedOnTime += 1;
+        }
+        pushDetail(toDetail(task, "completed"));
+      }
+
+      if (
+        task.due_at &&
+        inRange(task.due_at, period.start, period.end) &&
+        !wasOnTime(task.due_at, task.completed_at)
+      ) {
+        stats.missed += 1;
+        pushDetail(toDetail(task, "missed"));
+      }
+
+      if (
+        !task.archived_at &&
+        isOpenStatus(task.status) &&
+        task.due_at &&
+        new Date(task.due_at).getTime() < period.end.getTime()
+      ) {
+        stats.overdue += 1;
+        pushDetail(toDetail(task, "overdue"));
+      }
+
+      if (!task.archived_at && task.status === "blocked") {
+        stats.blocked += 1;
+        pushDetail(toDetail(task, "blocked"));
+      }
+    }
+
+    stats.details.sort((a, b) => a.title.localeCompare(b.title));
+    return stats;
+  });
+}
+
 function normalizeDepartmentName(value: string | null | undefined) {
   return value?.trim().toLowerCase() ?? "";
 }
@@ -529,18 +719,21 @@ export async function buildPeriodReportForProfile(
     endingDate: options?.endingDate,
   });
   const { people: allPeople, scope } = await loadReportPeople(profile);
-  const requireDepartment = primaryRole(profile.roles) === "admin" && scope === "org";
+  // Org-wide viewers (Admin and HR) pick a department first.
+  const requireDepartment = scope === "org";
   const departmentParam = options?.department?.trim() || null;
+  // HR without the admin role cannot read org-wide task data under RLS,
+  // so their report uses the service-role client (read-only aggregates).
+  const useSystemClient = scope === "org" && !profile.roles.includes("admin");
 
-  const catalogNames =
-    requireDepartment || scope === "org"
-      ? (await listDepartments()).map((row) => row.name)
-      : [];
+  const catalogNames = requireDepartment
+    ? (await listDepartments()).map((row) => row.name)
+    : [];
   const departments = [
     ...new Set([...catalogNames, ...listReportDepartments(allPeople)]),
   ].sort((a, b) => a.localeCompare(b));
 
-  // Admins pick a department first; org-wide dump is opt-in via "all".
+  // Org-wide viewers pick a department first; the full dump is opt-in via "all".
   const effectiveDepartment =
     requireDepartment && !departmentParam ? null : departmentParam;
 
@@ -549,18 +742,45 @@ export async function buildPeriodReportForProfile(
       ? []
       : filterPeopleByDepartment(allPeople, effectiveDepartment);
 
-  const raw = await fetchReportRawData(
-    people.map((p) => p.userId),
-    period,
-    false,
-  );
+  // Line managers are reported on the tasks they assigned, not their own
+  // delivery, so split them out of the staff aggregation.
+  const lmIds = await listUserIdsWithRoles(["line_manager"]);
+  const managerPeople = people.filter((person) => lmIds.has(person.userId));
+  const staffPeople = people.filter((person) => !lmIds.has(person.userId));
+
+  const [raw, managerData] = await Promise.all([
+    fetchReportRawData(
+      staffPeople.map((p) => p.userId),
+      period,
+      useSystemClient,
+    ),
+    fetchManagerAssignmentData(
+      managerPeople.map((p) => p.userId),
+      period,
+      useSystemClient,
+    ),
+  ]);
   const report = aggregateStaffPeriod({
     period,
-    people,
+    people: staffPeople,
     ...raw,
   });
+  const managerRows = aggregateManagerPeriodRows({
+    period,
+    managers: managerPeople,
+    ...managerData,
+  });
+
+  const staff = [...report.staff, ...managerRows].sort((a, b) => {
+    const left = a.fullName ?? a.email ?? a.userId;
+    const right = b.fullName ?? b.email ?? b.userId;
+    return left.localeCompare(right);
+  });
+
   return {
     ...report,
+    staff,
+    summary: { ...report.summary, staffCount: staff.length },
     scope,
     departments,
     department: effectiveDepartment,
@@ -585,6 +805,168 @@ export async function buildPeriodReportForUserIds(params: {
     ...raw,
   });
   return { ...report, scope: params.scope };
+}
+
+type AssigneeMetaRow = {
+  task_id: string;
+  user_id: string;
+  assigned_at: string;
+  assigned_by: string | null;
+};
+
+function emptyLmStats(person: PersonRow): LineManagerWeeklyStats {
+  return {
+    userId: person.userId,
+    fullName: person.fullName,
+    nestId: person.nestId,
+    email: person.email,
+    assigned: 0,
+    completed: 0,
+    failed: 0,
+    unrest: 0,
+    blockList: [],
+  };
+}
+
+/**
+ * Admin-only weekly rollup per line manager: assignments they made,
+ * completions, missed deadlines (failed), open unrest, and block list.
+ */
+export async function buildLineManagerWeeklyReport(options?: {
+  endingDate?: string;
+}): Promise<LineManagerWeeklyReport> {
+  const period = resolvePeriodBounds("weekly", {
+    endingDate: options?.endingDate,
+  });
+
+  const lmIds = await listUserIdsWithRoles(["line_manager"]);
+  const directory = await listDirectoryUsers();
+  const managers: PersonRow[] = directory
+    .filter((user) => user.isActive && lmIds.has(user.userId))
+    .map((user) => ({
+      userId: user.userId,
+      fullName: user.fullName,
+      nestId: user.nestId,
+      email: user.email,
+      department: user.department,
+    }));
+
+  if (managers.length === 0) {
+    return { period, managers: [] };
+  }
+
+  const managerIdList = managers.map((m) => m.userId);
+  const supabase = await createClient();
+
+  const { data: assigneeRows, error: assigneeError } = await supabase
+    .from("nf_task_assignees")
+    .select("task_id, user_id, assigned_at, assigned_by")
+    .in("assigned_by", managerIdList)
+    .gte("assigned_at", period.start.toISOString())
+    .lt("assigned_at", period.end.toISOString());
+
+  if (assigneeError) throw new Error(assigneeError.message);
+
+  const assignments = (assigneeRows ?? []) as AssigneeMetaRow[];
+  const taskIds = [...new Set(assignments.map((row) => row.task_id))];
+
+  let tasks: TaskRow[] = [];
+  if (taskIds.length > 0) {
+    const { data: taskRows, error: taskError } = await supabase
+      .from("nf_tasks")
+      .select(
+        "id, workspace_id, title, status, due_at, blocked_reason, completed_at, archived_at, created_at, updated_at",
+      )
+      .in("id", taskIds);
+    if (taskError) throw new Error(taskError.message);
+    tasks = (taskRows ?? []) as TaskRow[];
+  }
+
+  const tasksById = new Map(tasks.map((task) => [task.id, task]));
+  const personLabelById = new Map(
+    directory.map((user) => [
+      user.userId,
+      user.fullName ?? user.nestId ?? user.email ?? user.userId,
+    ]),
+  );
+
+  // Current assignees for block-list labels (may include people outside period).
+  let currentAssignees: AssigneeRow[] = [];
+  if (taskIds.length > 0) {
+    const { data: currentRows } = await supabase
+      .from("nf_task_assignees")
+      .select("task_id, user_id")
+      .in("task_id", taskIds);
+    currentAssignees = (currentRows ?? []) as AssigneeRow[];
+  }
+  const assigneesByTask = new Map<string, string[]>();
+  for (const row of currentAssignees) {
+    const list = assigneesByTask.get(row.task_id) ?? [];
+    list.push(row.user_id);
+    assigneesByTask.set(row.task_id, list);
+  }
+
+  const byManager = new Map<string, LineManagerWeeklyStats>();
+  for (const manager of managers) {
+    byManager.set(manager.userId, emptyLmStats(manager));
+  }
+
+  // Count unique task assignments per LM in period.
+  const seenAssign = new Set<string>();
+  for (const row of assignments) {
+    const managerId = row.assigned_by;
+    if (!managerId) continue;
+    const stats = byManager.get(managerId);
+    if (!stats) continue;
+    const key = `${managerId}:${row.task_id}`;
+    if (seenAssign.has(key)) continue;
+    seenAssign.add(key);
+    stats.assigned += 1;
+
+    const task = tasksById.get(row.task_id);
+    if (!task) continue;
+
+    if (
+      task.status === "completed" &&
+      inRange(task.completed_at, period.start, period.end)
+    ) {
+      stats.completed += 1;
+    }
+
+    if (
+      task.due_at &&
+      inRange(task.due_at, period.start, period.end) &&
+      !wasOnTime(task.due_at, task.completed_at)
+    ) {
+      stats.failed += 1;
+    }
+
+    if (!task.archived_at && isOpenStatus(task.status)) {
+      stats.unrest += 1;
+    }
+
+    if (!task.archived_at && task.status === "blocked") {
+      const item: LmBlockListItem = {
+        taskId: task.id,
+        title: task.title,
+        blockedReason: task.blocked_reason,
+        assigneeNames: (assigneesByTask.get(task.id) ?? []).map(
+          (id) => personLabelById.get(id) ?? id,
+        ),
+      };
+      if (!stats.blockList.some((entry) => entry.taskId === item.taskId)) {
+        stats.blockList.push(item);
+      }
+    }
+  }
+
+  const result = [...byManager.values()].sort((a, b) => {
+    const left = a.fullName ?? a.email ?? a.userId;
+    const right = b.fullName ?? b.email ?? b.userId;
+    return left.localeCompare(right);
+  });
+
+  return { period, managers: result };
 }
 
 /** Active profiles that hold admin, hr, or line_manager (digest recipients). */

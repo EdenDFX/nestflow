@@ -1,15 +1,24 @@
 "use client";
 
-import { useMemo, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useState, type KeyboardEvent, type RefObject } from "react";
 
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { personLabel } from "@/lib/people/label";
+import { loadMentionablePeopleAction } from "@/lib/tasks/mention-actions";
 import type { TaskAssignee } from "@/lib/tasks/types";
 import { cn } from "@/lib/utils";
 
+const SUGGESTION_LIMIT = 12;
+
 export function MentionField({
-  people,
+  people: initialPeople,
+  taskId,
   value,
   onChange,
   placeholder,
@@ -17,8 +26,11 @@ export function MentionField({
   rows = 3,
   id,
   singleLine = false,
+  textareaRef,
+  onKeyDown: onKeyDownProp,
 }: {
   people: TaskAssignee[];
+  taskId?: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -26,8 +38,32 @@ export function MentionField({
   rows?: number;
   id?: string;
   singleLine?: boolean;
+  textareaRef?: RefObject<HTMLTextAreaElement | null>;
+  onKeyDown?: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
 }) {
   const [highlight, setHighlight] = useState(0);
+  const [people, setPeople] = useState(initialPeople);
+
+  useEffect(() => {
+    setPeople(initialPeople);
+  }, [initialPeople]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function refreshPeople() {
+      const loaded = await loadMentionablePeopleAction(taskId);
+      if (!cancelled && loaded.length > 0) {
+        setPeople(loaded);
+      }
+    }
+
+    void refreshPeople();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [taskId]);
 
   const mention = useMemo(() => {
     const match = value.match(/@([A-Za-z0-9._-]*)$/);
@@ -47,8 +83,10 @@ export function MentionField({
         if (!q) return true;
         return nest.includes(q) || name.includes(q) || email.includes(q);
       })
-      .slice(0, 6);
+      .slice(0, SUGGESTION_LIMIT);
   }, [mention, people]);
+
+  const suggestionsOpen = suggestions.length > 0;
 
   function insert(person: TaskAssignee) {
     const nest = person.nestId;
@@ -59,27 +97,34 @@ export function MentionField({
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) {
-    if (suggestions.length === 0) return;
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setHighlight((index) => (index + 1) % suggestions.length);
-      return;
-    }
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setHighlight((index) => (index - 1 + suggestions.length) % suggestions.length);
-      return;
-    }
-    if (event.key === "Enter" || event.key === "Tab") {
-      const person = suggestions[highlight];
-      if (person) {
+    if (suggestions.length > 0) {
+      if (event.key === "ArrowDown") {
         event.preventDefault();
-        insert(person);
+        setHighlight((index) => (index + 1) % suggestions.length);
+        return;
+      }
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        setHighlight((index) => (index - 1 + suggestions.length) % suggestions.length);
+        return;
+      }
+      if (event.key === "Enter" || event.key === "Tab") {
+        const person = suggestions[highlight];
+        if (person) {
+          event.preventDefault();
+          insert(person);
+          return;
+        }
+      }
+      if (event.key === "Escape") {
+        onChange(value);
+        setHighlight(0);
+        return;
       }
     }
-    if (event.key === "Escape") {
-      onChange(value);
-      setHighlight(0);
+
+    if (!singleLine && onKeyDownProp && event.currentTarget instanceof HTMLTextAreaElement) {
+      onKeyDownProp(event as KeyboardEvent<HTMLTextAreaElement>);
     }
   }
 
@@ -98,6 +143,7 @@ export function MentionField({
     />
   ) : (
     <Textarea
+      ref={textareaRef}
       id={id}
       value={value}
       onChange={(event) => {
@@ -112,13 +158,20 @@ export function MentionField({
   );
 
   return (
-    <div className="relative space-y-1">
-      {field}
-      {suggestions.length > 0 ? (
-        <ul
-          className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-border bg-popover py-1 shadow-sm"
-          role="listbox"
-        >
+    <Popover open={suggestionsOpen}>
+      <PopoverAnchor asChild>
+        <div className="w-full min-w-0">{field}</div>
+      </PopoverAnchor>
+      <PopoverContent
+        align="start"
+        side="top"
+        sideOffset={6}
+        collisionPadding={12}
+        className="w-[var(--radix-popover-trigger-width)] max-h-[min(15rem,40dvh)] overflow-y-auto p-0 shadow-lg"
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onCloseAutoFocus={(event) => event.preventDefault()}
+      >
+        <ul role="listbox" className="py-1">
           {suggestions.map((person, index) => (
             <li key={person.userId}>
               <button
@@ -126,7 +179,7 @@ export function MentionField({
                 role="option"
                 aria-selected={index === highlight}
                 className={cn(
-                  "flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm",
+                  "flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm",
                   index === highlight && "bg-muted",
                 )}
                 onMouseDown={(event) => {
@@ -134,15 +187,15 @@ export function MentionField({
                   insert(person);
                 }}
               >
-                <span className="truncate">{personLabel(person)}</span>
-                <span className="truncate text-[11px] text-muted-foreground">
+                <span className="min-w-0 truncate">{personLabel(person)}</span>
+                <span className="shrink-0 text-[11px] text-muted-foreground">
                   @{person.nestId ?? "no-id"}
                 </span>
               </button>
             </li>
           ))}
         </ul>
-      ) : null}
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 }

@@ -34,10 +34,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { changeTaskStatusAction } from "@/lib/tasks/actions";
+import type { AppRole } from "@/lib/auth/types";
+import { canRoleTransition } from "@/lib/tasks/status-policy";
 import {
   STATUS_LABELS,
   TASK_STATUSES,
-  canTransition,
   type NestFlowTask,
   type TaskStatus,
 } from "@/lib/tasks/types";
@@ -131,15 +132,17 @@ function GraphTaskCard({
   onToggle,
   onMove,
   dragging,
+  roles,
 }: {
   task: NestFlowTask;
   expanded: boolean;
   onToggle: () => void;
   onMove: (taskId: string, status: TaskStatus) => void;
   dragging?: boolean;
+  roles: AppRole[];
 }) {
   const moves = TASK_STATUSES.filter((status) =>
-    canTransition(task.status, status),
+    canRoleTransition(roles, task.status, status),
   );
 
   return (
@@ -237,11 +240,13 @@ function DraggableTaskNode({
   expanded,
   onToggle,
   onMove,
+  roles,
 }: {
   task: NestFlowTask;
   expanded: boolean;
   onToggle: () => void;
   onMove: (taskId: string, status: TaskStatus) => void;
+  roles: AppRole[];
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -268,6 +273,7 @@ function DraggableTaskNode({
         onToggle={onToggle}
         onMove={onMove}
         dragging={isDragging}
+        roles={roles}
       />
     </div>
   );
@@ -279,12 +285,14 @@ function StatusBranch({
   expandedId,
   onToggle,
   onMove,
+  roles,
 }: {
   status: TaskStatus;
   tasks: NestFlowTask[];
   expandedId: string | null;
   onToggle: (taskId: string) => void;
   onMove: (taskId: string, status: TaskStatus) => void;
+  roles: AppRole[];
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -314,6 +322,7 @@ function StatusBranch({
               expanded={expandedId === task.id}
               onToggle={() => onToggle(task.id)}
               onMove={onMove}
+              roles={roles}
             />
           </div>
         ))
@@ -362,7 +371,13 @@ function WideConnectors() {
   );
 }
 
-export function TaskBoard({ initialTasks }: { initialTasks: NestFlowTask[] }) {
+export function TaskBoard({
+  initialTasks,
+  roles,
+}: {
+  initialTasks: NestFlowTask[];
+  roles: AppRole[];
+}) {
   const [tasks, setTasks] = useState(initialTasks);
   const [prevInitialTasks, setPrevInitialTasks] = useState(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -393,9 +408,9 @@ export function TaskBoard({ initialTasks }: { initialTasks: NestFlowTask[] }) {
   function moveTask(taskId: string, status: TaskStatus, blockedReason?: string) {
     const current = tasks.find((task) => task.id === taskId);
     if (!current || current.status === status) return;
-    if (!canTransition(current.status, status)) {
+    if (!canRoleTransition(roles, current.status, status)) {
       toast.error(
-        `Cannot move from ${STATUS_LABELS[current.status]} to ${STATUS_LABELS[status]}.`,
+        `Cannot move from ${STATUS_LABELS[current.status]} to ${STATUS_LABELS[status]} with your role.`,
       );
       return;
     }
@@ -510,6 +525,7 @@ export function TaskBoard({ initialTasks }: { initialTasks: NestFlowTask[] }) {
                       expandedId={expandedId}
                       onToggle={toggleExpanded}
                       onMove={moveTask}
+                      roles={roles}
                     />
                   </div>
                 </div>
@@ -527,6 +543,7 @@ export function TaskBoard({ initialTasks }: { initialTasks: NestFlowTask[] }) {
                 onToggle={() => undefined}
                 onMove={moveTask}
                 dragging
+                roles={roles}
               />
             </div>
           ) : null}

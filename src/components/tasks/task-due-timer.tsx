@@ -66,9 +66,9 @@ export function TaskDueTimer({
       <span
         className={cn(
           "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums",
-          tone === "on-primary" && "bg-[#1c1917]/10 text-[#1c1917]/70",
-          tone === "on-ink" && "bg-white/10 text-white/60",
-          tone === "surface" && "bg-muted text-muted-foreground",
+          tone === "on-primary" && "bg-success/20 text-success-foreground",
+          tone === "on-ink" && "bg-success/25 text-success-foreground",
+          tone === "surface" && "bg-success/15 text-success",
           className,
         )}
       >

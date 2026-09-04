@@ -23,7 +23,7 @@ export function HeaderIslandFallback() {
 }
 
 export function HeaderBellFallback() {
-  return <div className="size-9 shrink-0 rounded-full bg-muted/60" aria-hidden />;
+  return <div className="size-8 shrink-0 rounded-full bg-muted/60" aria-hidden />;
 }
 
 export async function HeaderIsland({

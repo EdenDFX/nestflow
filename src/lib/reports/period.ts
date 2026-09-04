@@ -218,6 +218,30 @@ export function periodHref(
   return `/app/reports?${params.toString()}`;
 }
 
+/**
+ * Default ending date for the interactive reports UI.
+ * Unlike digest defaults, this includes the in-progress day, week, or month.
+ */
+export function resolveInteractivePeriodEnding(
+  kind: ReportPeriodKind,
+  now: Date = new Date(),
+): string {
+  const today = lagosYmd(now);
+
+  if (kind === "daily") {
+    return today;
+  }
+
+  if (kind === "weekly") {
+    const weekday = lagosWeekdayMon1(now);
+    if (weekday === 7) return today;
+    return addCalendarDays(today, 7 - weekday);
+  }
+
+  const { y, m } = parseYmd(today);
+  return formatYmd(y, m, daysInMonth(y, m));
+}
+
 /** Shift an ending date by one period for prev/next navigation. */
 export function shiftEndingDate(
   kind: ReportPeriodKind,

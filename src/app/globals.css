@@ -188,6 +188,35 @@
   display: none;
 }
 
+/* Soft graph-paper canvas for the personal note editor */
+.nf-editor-paper {
+  position: relative;
+  isolation: isolate;
+  background-color: color-mix(in oklab, var(--card) 92%, var(--background));
+}
+
+.nf-editor-paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("/patterns/editor-grid.png");
+  background-repeat: repeat;
+  background-size: 220px auto;
+  opacity: 0.5;
+}
+
+.dark .nf-editor-paper::before {
+  opacity: 0.16;
+  filter: invert(1) contrast(1.15);
+}
+
+.nf-editor-paper > * {
+  position: relative;
+  z-index: 1;
+}
+
 @keyframes auth-glow {
   0%,
   100% {

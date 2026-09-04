@@ -26,10 +26,12 @@ export function TaskAttachments({
   taskId,
   attachments,
   r2Configured,
+  readOnly = false,
 }: {
   taskId: string;
   attachments: TaskAttachment[];
   r2Configured: boolean;
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -86,6 +88,7 @@ export function TaskAttachments({
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-heading text-lg font-semibold">Attachments</h2>
+        {readOnly ? null : (
         <div>
           <input
             ref={inputRef}
@@ -103,6 +106,7 @@ export function TaskAttachments({
             {uploading ? "Uploading…" : "Upload"}
           </Button>
         </div>
+        )}
       </div>
 
       {!r2Configured ? (
@@ -153,6 +157,7 @@ export function TaskAttachments({
                 >
                   <DownloadIcon className="inline-flex" size={14} />
                 </Button>
+                {readOnly ? null : (
                 <Button
                   type="button"
                   size="icon-sm"
@@ -176,6 +181,7 @@ export function TaskAttachments({
                 >
                   <DeleteIcon className="inline-flex" size={14} />
                 </Button>
+                )}
               </div>
             </li>
           ))

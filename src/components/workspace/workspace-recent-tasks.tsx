@@ -4,10 +4,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { ArrowUpRightIcon } from "@/components/icons/arrow-up-right";
-import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { SearchIcon } from "@/components/icons/search";
-import { SlidersHorizontalIcon } from "@/components/icons/sliders-horizontal";
 
+import { StatusBadge } from "@/components/tasks/status-badge";
 import { TaskDueTimer } from "@/components/tasks/task-due-timer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -18,7 +17,6 @@ import {
 import { UserAvatars } from "@/components/ui/user-avatars";
 import { openCommandPalette } from "@/lib/search/types";
 import {
-  STATUS_LABELS,
   type NestFlowTask,
   type TaskStatus,
 } from "@/lib/tasks/types";
@@ -41,7 +39,50 @@ const filterToStatus: Record<Exclude<StatusFilter, "All">, TaskStatus> = {
   Review: "review",
 };
 
-/** Card surface by task status (To Do green, Blocked red, Review yellow, Completed grey). */
+const statusPriority: Record<TaskStatus, number> = {
+  blocked: 0,
+  review: 1,
+  in_progress: 2,
+  todo: 3,
+  backlog: 4,
+  completed: 5,
+};
+
+function sortTasksForHome(tasks: NestFlowTask[]): NestFlowTask[] {
+  const now = Date.now();
+
+  return [...tasks].sort((left, right) => {
+    const statusDiff = statusPriority[left.status] - statusPriority[right.status];
+    if (statusDiff !== 0) {
+      return statusDiff;
+    }
+
+    const leftDue = left.dueAt ? new Date(left.dueAt).getTime() : null;
+    const rightDue = right.dueAt ? new Date(right.dueAt).getTime() : null;
+    const leftOverdue = leftDue !== null && leftDue < now;
+    const rightOverdue = rightDue !== null && rightDue < now;
+
+    if (leftOverdue !== rightOverdue) {
+      return leftOverdue ? -1 : 1;
+    }
+
+    if (leftDue !== null && rightDue !== null && leftDue !== rightDue) {
+      return leftDue - rightDue;
+    }
+
+    if (leftDue !== null) {
+      return -1;
+    }
+
+    if (rightDue !== null) {
+      return 1;
+    }
+
+    return new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
+  });
+}
+
+/** Card surface by task status (To Do neutral, Blocked red, Review yellow, Completed green). */
 function toneForStatus(status: TaskStatus): SteppedCardTone {
   switch (status) {
     case "todo":
@@ -85,10 +126,11 @@ export function WorkspaceRecentTasks({ tasks }: WorkspaceRecentTasksProps) {
   const [taskFilter, setTaskFilter] = useState<StatusFilter>("All");
 
   const visibleTasks = useMemo(() => {
+    const sorted = sortTasksForHome(tasks);
     const filtered =
       taskFilter === "All"
-        ? tasks
-        : tasks.filter((task) => task.status === filterToStatus[taskFilter]);
+        ? sorted
+        : sorted.filter((task) => task.status === filterToStatus[taskFilter]);
     return filtered.slice(0, 8);
   }, [taskFilter, tasks]);
 
@@ -127,13 +169,10 @@ export function WorkspaceRecentTasks({ tasks }: WorkspaceRecentTasksProps) {
                 "Someone",
               image: assignee.avatarUrl,
             }));
-            const greyed = task.status === "completed";
-
             return (
               <SteppedCard
                 key={task.id}
                 tone={tone}
-                className={cn(greyed && "grayscale-[0.35]")}
                 cornerActions={
                   <SteppedCardActionLink
                     href={`/app/tasks/${task.id}`}
@@ -197,31 +236,7 @@ export function WorkspaceRecentTasks({ tasks }: WorkspaceRecentTasksProps) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span
-                    className={cn(
-                      "inline-flex min-w-0 items-center gap-1.5 rounded-full border border-border/80 bg-background/70 px-3 py-1.5 text-xs font-medium",
-                      greyed && "border-border/60 bg-background/40",
-                    )}
-                  >
-                    {lead ? (
-                      <Avatar className="size-4" size="sm">
-                        {lead.avatarUrl ? (
-                          <AvatarImage src={lead.avatarUrl} alt="" />
-                        ) : null}
-                        <AvatarFallback className="bg-foreground/15 text-[7px]">
-                          {personInitials(lead)}
-                        </AvatarFallback>
-                      </Avatar>
-                    ) : null}
-                    <span className="truncate">
-                      {STATUS_LABELS[task.status]}
-                    </span>
-                    <ChevronDownIcon
-                      className="inline-flex shrink-0 opacity-70"
-                      size={14}
-                      aria-hidden
-                    />
-                  </span>
+                  <StatusBadge status={task.status} />
                 </div>
               </SteppedCard>
             );
@@ -251,9 +266,6 @@ function FilterRow<T extends string>({
       >
         <SearchIcon className="inline-flex" size={14} />
       </button>
-      <span className="flex size-8 items-center justify-center rounded-full border border-border text-muted-foreground">
-        <SlidersHorizontalIcon className="inline-flex" size={14} />
-      </span>
       {filters.map((filter) => {
         const isActive = filter === active;
         return (

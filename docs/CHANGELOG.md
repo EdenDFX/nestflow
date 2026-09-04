@@ -11,6 +11,17 @@ Write entries for people who use the product. Don't list internal refactors or d
 
 ### Added
 
+- Optional due date and submit-by time on create task and full-edit task detail
+- Staff progress-only task view (status, checklist, discussion); managers/HR/Admin keep full edit
+- Chat-style discussion thread on tasks (upgraded comments)
+- Personal notes notepad for staff (replaces create-task / self-tasks)
+- Personal notes on the calendar by day (`noted_on`); click a note to open it
+- Animated notification bell with ringing and rolling unread count
+- Confirm-to-delete control on personal notes
+- Graph-paper note editor dialog for creating personal notes
+- Calendar day picker on the note editor (coss Calendar)
+- Admin-only Line Manager weekly rollup (assigned, completed, failed, unrest, block list)
+- Role-owned status workflow: LM creates into To Do and completes; staff/HR progress In Progress / Blocked / Review; overdue open tasks auto-move to Backlog
 - Unified Work surface (`/app/work`) for board, list, and calendar, with a slide-over task pane
 - Command palette (⌘K) over tasks and people the viewer can access
 - Mentions filter on the notification inbox
@@ -25,11 +36,14 @@ Write entries for people who use the product. Don't list internal refactors or d
 - Admin performance/delivery report extras (pending approvals, recurring open, hours logged, 30-day completion rate)
 - Team performance grid shows logged time per person
 - HR People suite: Templates & automation (task templates + simple automation rules)
-- Staff performance reports (`/app/reports`) with daily, weekly, and monthly charts for Line Managers, HR, and Admin
+- Staff performance reports (`/app/reports`) with daily, weekly, and monthly charts for Line Managers and Admin
 - Scheduled performance digests (in-app, email, web push) via `/api/cron/performance-reports`
 
 ### Changed
 
+- Only line managers can create tasks (Admin/HR/Staff cannot); new tasks always start in To Do
+- Staff can no longer create tasks; use Notes instead
+- `/app/reports` is Admin + Line Manager only (HR removed); Admin gets a Line managers tab
 - Admin navigation is Overview + Reports only (My Tasks removed; `/app/my-tasks` redirects admins home)
 - Admin Reports requires a department selection before listing staff (All departments remains available)
 - Dark mode app shell uses a pure black stage (`#000000`), matching DD-009

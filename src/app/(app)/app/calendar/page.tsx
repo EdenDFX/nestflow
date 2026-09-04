@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { TaskCalendar } from "@/components/tasks/task-calendar";
 import { requireActiveProfile } from "@/lib/auth/session";
 import { canAccessWorkViews } from "@/lib/auth/navigation";
+import { listPersonalNotes } from "@/lib/notes/queries";
 import { listTasks } from "@/lib/tasks/queries";
 
 export default async function CalendarPage() {
@@ -11,7 +12,10 @@ export default async function CalendarPage() {
     redirect("/app/work?view=calendar");
   }
 
-  const tasks = await listTasks();
+  const [tasks, notes] = await Promise.all([
+    listTasks(),
+    listPersonalNotes(profile.userId),
+  ]);
   const dated = tasks.filter((task) => task.dueAt);
 
   return (
@@ -22,10 +26,10 @@ export default async function CalendarPage() {
         </h1>
         <p className="text-sm text-muted-foreground sm:text-base">
           {dated.length} task{dated.length === 1 ? "" : "s"} with due dates.
-          Drag a task onto another day to reschedule.
+          Your notes appear on the day you pick. Click a note to open it.
         </p>
       </div>
-      <TaskCalendar tasks={tasks} />
+      <TaskCalendar tasks={tasks} notes={notes} />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
 import { Button } from "@/components/ui/button";
 import type { ManagedTeamSummary } from "@/lib/admin/queries";
 import type { WorkloadRow } from "@/lib/admin/types";
+import type { AppRole } from "@/lib/auth/types";
 import type {
   NestFlowTask,
   NestFlowWorkspace,
@@ -25,10 +26,12 @@ export function TeamSuite({
   workspaces,
   people,
   canAssign,
+  canCreateTasks = false,
   defaultAssigneeId,
   managedTeams,
   isOrgWide,
   initialPersonId,
+  roles,
 }: {
   tasks: NestFlowTask[];
   blocked: NestFlowTask[];
@@ -36,10 +39,12 @@ export function TeamSuite({
   workspaces: NestFlowWorkspace[];
   people: TaskAssignee[];
   canAssign: boolean;
+  canCreateTasks?: boolean;
   defaultAssigneeId?: string;
   managedTeams: ManagedTeamSummary[];
   isOrgWide: boolean;
   initialPersonId?: string | null;
+  roles: AppRole[];
 }) {
   const [tab, setTab] = useState<TeamTab>(
     initialPersonId ? "board" : "performance",
@@ -98,12 +103,14 @@ export function TeamSuite({
             </div>
           </dl>
         </div>
-        <TaskCreateDialog
-          workspaces={workspaces}
-          people={people}
-          canAssign={canAssign}
-          defaultAssigneeId={defaultAssigneeId}
-        />
+        {canCreateTasks ? (
+          <TaskCreateDialog
+            workspaces={workspaces}
+            people={people}
+            canAssign={canAssign}
+            defaultAssigneeId={defaultAssigneeId}
+          />
+        ) : null}
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -137,6 +144,7 @@ export function TeamSuite({
           people={people}
           canAssign={canAssign}
           initialAssigneeId={initialPersonId ?? undefined}
+          roles={roles}
         />
       ) : null}
 

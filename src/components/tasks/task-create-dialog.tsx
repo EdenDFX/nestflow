@@ -25,15 +25,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { createTaskAction } from "@/lib/tasks/actions";
+import { composeDueAt } from "@/lib/tasks/due-at";
 import {
   PRIORITY_LABELS,
-  STATUS_LABELS,
   TASK_PRIORITIES,
-  TASK_STATUSES,
   type NestFlowWorkspace,
   type TaskAssignee,
   type TaskPriority,
-  type TaskStatus,
 } from "@/lib/tasks/types";
 
 type TaskCreateDialogProps = {
@@ -57,10 +55,9 @@ export function TaskCreateDialog({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [workspaceId, setWorkspaceId] = useState(workspaces[0]?.id ?? "");
-  const [status, setStatus] = useState<TaskStatus>("todo");
   const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [dueAt, setDueAt] = useState("");
-  const [blockedReason, setBlockedReason] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [dueTime, setDueTime] = useState("");
   const [assigneeIds, setAssigneeIds] = useState<string[]>(
     defaultAssigneeId ? [defaultAssigneeId] : [],
   );
@@ -70,10 +67,9 @@ export function TaskCreateDialog({
     setTitle("");
     setDescription("");
     setWorkspaceId(workspaces[0]?.id ?? "");
-    setStatus("todo");
     setPriority("medium");
-    setDueAt("");
-    setBlockedReason("");
+    setDueDate("");
+    setDueTime("");
     setAssigneeIds(defaultAssigneeId ? [defaultAssigneeId] : []);
     setTagsInput("");
   }
@@ -95,10 +91,10 @@ export function TaskCreateDialog({
         workspaceId,
         title,
         description,
-        status,
+        status: "todo",
         priority,
-        dueAt: dueAt || null,
-        blockedReason: status === "blocked" ? blockedReason : null,
+        dueAt: composeDueAt(dueDate, dueTime),
+        blockedReason: null,
         assigneeIds: canAssign ? assigneeIds : [],
         tags,
       });
@@ -108,7 +104,7 @@ export function TaskCreateDialog({
         return;
       }
 
-      toast.success("Task created.");
+      toast.success("Task created in To Do.");
       setOpen(false);
       reset();
       router.refresh();
@@ -188,47 +184,32 @@ export function TaskCreateDialog({
             </div>
 
             <div className="space-y-2">
-              <Label>Status</Label>
-              <Select
-                value={status}
-                onValueChange={(value) => setStatus(value as TaskStatus)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TASK_STATUSES.map((value) => (
-                    <SelectItem key={value} value={value}>
-                      {STATUS_LABELS[value]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="dueDate">Due date</Label>
+              <Input
+                id="dueDate"
+                type="date"
+                value={dueDate}
+                onChange={(event) => setDueDate(event.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                New tasks always start in To Do.
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="dueAt">Due date</Label>
+              <Label htmlFor="dueTime">Submit by (time)</Label>
               <Input
-                id="dueAt"
-                type="date"
-                value={dueAt}
-                onChange={(event) => setDueAt(event.target.value)}
+                id="dueTime"
+                type="time"
+                value={dueTime}
+                onChange={(event) => setDueTime(event.target.value)}
+                disabled={!dueDate}
               />
+              <p className="text-xs text-muted-foreground">
+                Optional. Requires a due date.
+              </p>
             </div>
           </div>
-
-          {status === "blocked" ? (
-            <div className="space-y-2">
-              <Label htmlFor="blockedReason">Blocked reason</Label>
-              <Input
-                id="blockedReason"
-                value={blockedReason}
-                onChange={(event) => setBlockedReason(event.target.value)}
-                required
-                placeholder="What is blocking this?"
-              />
-            </div>
-          ) : null}
 
           {canAssign ? (
             <div className="space-y-2">

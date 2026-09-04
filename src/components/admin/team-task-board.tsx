@@ -35,10 +35,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { WorkloadRow } from "@/lib/admin/types";
 import { changeTaskStatusAction } from "@/lib/tasks/actions";
+import type { AppRole } from "@/lib/auth/types";
+import { canRoleTransition } from "@/lib/tasks/status-policy";
 import {
   STATUS_LABELS,
   TASK_STATUSES,
-  canTransition,
   type NestFlowTask,
   type TaskAssignee,
   type TaskStatus,
@@ -75,16 +76,18 @@ function TeamBoardCard({
   onMove,
   selected,
   onToggleSelect,
+  roles,
 }: {
   task: NestFlowTask;
   dragging?: boolean;
   onMove: (taskId: string, status: TaskStatus) => void;
   selected?: boolean;
   onToggleSelect?: (taskId: string) => void;
+  roles: AppRole[];
 }) {
   const assignee = task.assignees[0];
   const moves = TASK_STATUSES.filter((status) =>
-    canTransition(task.status, status),
+    canRoleTransition(roles, task.status, status),
   );
   const overdue = isOverdue(task);
 
@@ -185,11 +188,13 @@ function SortableTeamCard({
   onMove,
   selected,
   onToggleSelect,
+  roles,
 }: {
   task: NestFlowTask;
   onMove: (taskId: string, status: TaskStatus) => void;
   selected?: boolean;
   onToggleSelect?: (taskId: string) => void;
+  roles: AppRole[];
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id, data: { status: task.status } });
@@ -210,6 +215,7 @@ function SortableTeamCard({
         onMove={onMove}
         selected={selected}
         onToggleSelect={onToggleSelect}
+        roles={roles}
       />
     </div>
   );
@@ -221,12 +227,14 @@ function TeamBoardColumn({
   onMove,
   selectedIds,
   onToggleSelect,
+  roles,
 }: {
   status: TaskStatus;
   tasks: NestFlowTask[];
   onMove: (taskId: string, status: TaskStatus) => void;
   selectedIds?: string[];
   onToggleSelect?: (taskId: string) => void;
+  roles: AppRole[];
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -262,6 +270,7 @@ function TeamBoardColumn({
                 onMove={onMove}
                 selected={selectedIds?.includes(task.id)}
                 onToggleSelect={onToggleSelect}
+                roles={roles}
               />
             ))
           )}
@@ -277,12 +286,14 @@ export function TeamTaskBoard({
   people = [],
   canAssign = false,
   initialAssigneeId,
+  roles,
 }: {
   initialTasks: NestFlowTask[];
   roster: WorkloadRow[];
   people?: TaskAssignee[];
   canAssign?: boolean;
   initialAssigneeId?: string;
+  roles: AppRole[];
 }) {
   const [tasks, setTasks] = useState(initialTasks);
   const [prevInitialTasks, setPrevInitialTasks] = useState(initialTasks);
@@ -339,9 +350,9 @@ export function TeamTaskBoard({
   function moveTask(taskId: string, status: TaskStatus, blockedReason?: string) {
     const current = tasks.find((task) => task.id === taskId);
     if (!current || current.status === status) return;
-    if (!canTransition(current.status, status)) {
+    if (!canRoleTransition(roles, current.status, status)) {
       toast.error(
-        `Cannot move from ${STATUS_LABELS[current.status]} to ${STATUS_LABELS[status]}.`,
+        `Cannot move from ${STATUS_LABELS[current.status]} to ${STATUS_LABELS[status]} with your role.`,
       );
       return;
     }
@@ -472,6 +483,7 @@ export function TeamTaskBoard({
               status={status}
               tasks={columns[status]}
               onMove={moveTask}
+              roles={roles}
               selectedIds={canAssign ? selected : undefined}
               onToggleSelect={
                 canAssign
@@ -489,7 +501,12 @@ export function TeamTaskBoard({
         </div>
         <DragOverlay>
           {activeTask ? (
-            <TeamBoardCard task={activeTask} dragging onMove={moveTask} />
+            <TeamBoardCard
+              task={activeTask}
+              dragging
+              onMove={moveTask}
+              roles={roles}
+            />
           ) : null}
         </DragOverlay>
       </DndContext>

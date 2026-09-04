@@ -2,7 +2,7 @@ import {
   MarkAllReadButton,
 } from "@/components/notifications/notification-list";
 import { NotificationInbox } from "@/components/notifications/notification-inbox";
-import { listAssignablePeopleForProfile } from "@/lib/admin/queries";
+import { listMentionablePeopleForProfile } from "@/lib/admin/queries";
 import { requireActiveProfile } from "@/lib/auth/session";
 import { isInboxFilter } from "@/lib/notifications/inbox";
 import { listNotifications } from "@/lib/notifications/queries";
@@ -18,7 +18,7 @@ export default async function NotificationsPage({
   const filter = isInboxFilter(params.filter) ? params.filter : "all";
   const [{ items, unreadCount }, people] = await Promise.all([
     listNotifications(80),
-    listAssignablePeopleForProfile(profile),
+    listMentionablePeopleForProfile(profile),
   ]);
   const taskSummaries = await listTaskInboxSummaries(
     items
@@ -46,6 +46,7 @@ export default async function NotificationsPage({
         filter={filter}
         taskSummaries={taskSummaries}
         people={people}
+        roles={profile.roles}
       />
     </div>
   );

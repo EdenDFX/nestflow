@@ -8,22 +8,23 @@ import { requireActiveProfile } from "@/lib/auth/session";
 import { isAppRole, type AppRole } from "@/lib/auth/types";
 import { listManagedTeamMemberIds, listUserIdsWithRoles } from "@/lib/admin/queries";
 import { notifyMany } from "@/lib/notifications/notify";
-import { rolesAllow } from "@/lib/security/authz";
+import { rolesAllow, assertCapability } from "@/lib/security/authz";
 import { createClient } from "@/lib/supabase/server";
 import { recordActivity } from "@/lib/tasks/activity";
+import { isAdminTaskOversightOnly } from "@/lib/tasks/interaction-mode";
 import {
   runAutomationsForTask,
   spawnRecurringInstanceIfNeeded,
 } from "@/lib/tasks/m8-actions";
 import { listOpenDependencyTitles } from "@/lib/tasks/m8-queries";
 import {
-  canTransition,
   isTaskStatus,
   STATUS_LABELS,
   TASK_PRIORITIES,
   TASK_STATUSES,
   type TaskStatus,
 } from "@/lib/tasks/types";
+import { canRoleTransition } from "@/lib/tasks/status-policy";
 import { pgUuid } from "@/lib/validation/ids";
 
 export type ActionResult = {
@@ -131,8 +132,11 @@ async function assertAssigneesInScope(
     return null;
   }
 
-  // Admins keep full assign scope.
-  if (profile.roles.includes("admin")) {
+  // Admins with line_manager or hr keep full assign scope.
+  if (
+    profile.roles.includes("admin") &&
+    !isAdminTaskOversightOnly(profile.roles)
+  ) {
     return null;
   }
 
@@ -232,16 +236,18 @@ export async function createTaskAction(
     };
   }
 
-  if (
-    parsed.data.status === "blocked" &&
-    !parsed.data.blockedReason?.trim()
-  ) {
+  try {
+    assertCapability(profile.roles, "create_tasks");
+  } catch {
     return {
       ok: false,
-      code: "VALIDATION_ERROR",
-      error: "Blocked tasks need a reason.",
+      code: "FORBIDDEN",
+      error: "Only line managers can create tasks.",
     };
   }
+
+  // Line managers always create into To Do; staff progress from there.
+  const createStatus: TaskStatus = "todo";
 
   if (parsed.data.assigneeIds.length > 0 && !canAssign(profile.roles)) {
     return {
@@ -269,14 +275,12 @@ export async function createTaskAction(
       workspace_id: parsed.data.workspaceId,
       title: parsed.data.title,
       description: parsed.data.description,
-      status: parsed.data.status,
+      status: createStatus,
       priority: parsed.data.priority,
       due_at: dueAt,
-      blocked_reason:
-        parsed.data.status === "blocked" ? parsed.data.blockedReason : null,
+      blocked_reason: null,
       created_by: profile.userId,
-      completed_at:
-        parsed.data.status === "completed" ? new Date().toISOString() : null,
+      completed_at: null,
     })
     .select("id")
     .single();
@@ -381,8 +385,29 @@ export async function updateTaskAction(
 
   const supabase = await createClient();
 
+  const canEditDetails =
+    !isAdminTaskOversightOnly(profile.roles) &&
+    (profile.roles.includes("admin") ||
+      profile.roles.includes("hr") ||
+      profile.roles.includes("line_manager"));
+
+  const detailFieldsRequested =
+    parsed.data.title !== undefined ||
+    parsed.data.description !== undefined ||
+    parsed.data.priority !== undefined ||
+    parsed.data.dueAt !== undefined ||
+    parsed.data.assigneeIds !== undefined;
+
+  if (detailFieldsRequested && !canEditDetails) {
+    return {
+      ok: false,
+      code: "FORBIDDEN",
+      error: "You can update progress only. Ask a manager to change task details.",
+    };
+  }
+
   let previousStatus: TaskStatus | null = null;
-  if (parsed.data.status !== undefined) {
+  if (parsed.data.status !== undefined || parsed.data.dueAt !== undefined) {
     const { data: current } = await supabase
       .from("nf_tasks")
       .select("status")
@@ -391,6 +416,18 @@ export async function updateTaskAction(
     if (current && isTaskStatus(current.status as string)) {
       previousStatus = current.status as TaskStatus;
     }
+  }
+
+  const staysCompleted =
+    previousStatus === "completed" &&
+    (parsed.data.status === undefined || parsed.data.status === "completed");
+
+  if (parsed.data.dueAt !== undefined && staysCompleted) {
+    return {
+      ok: false,
+      code: "CONFLICT",
+      error: "Completed tasks cannot be rescheduled.",
+    };
   }
 
   const updates: Record<string, unknown> = {
@@ -409,6 +446,16 @@ export async function updateTaskAction(
         : null;
   }
   if (parsed.data.status !== undefined) {
+    if (
+      previousStatus &&
+      !canRoleTransition(profile.roles, previousStatus, parsed.data.status)
+    ) {
+      return {
+        ok: false,
+        code: "CONFLICT",
+        error: `Cannot move from ${STATUS_LABELS[previousStatus]} to ${STATUS_LABELS[parsed.data.status]} with your role.`,
+      };
+    }
     if (
       parsed.data.status === "blocked" &&
       !parsed.data.blockedReason?.trim()
@@ -573,11 +620,11 @@ export async function changeTaskStatusAction(
   const from = current.status as TaskStatus;
   const to = parsed.data.status;
 
-  if (!isTaskStatus(from) || !canTransition(from, to)) {
+  if (!isTaskStatus(from) || !canRoleTransition(profile.roles, from, to)) {
     return {
       ok: false,
       code: "CONFLICT",
-      error: `Cannot move from ${from} to ${to}.`,
+      error: `Cannot move from ${STATUS_LABELS[from] ?? from} to ${STATUS_LABELS[to] ?? to} with your role.`,
     };
   }
 
@@ -663,6 +710,19 @@ export async function archiveTaskAction(taskId: string): Promise<ActionResult> {
 
   if (!pgUuid.safeParse(taskId).success) {
     return { ok: false, code: "VALIDATION_ERROR", error: "Invalid task id." };
+  }
+
+  const canArchive =
+    !isAdminTaskOversightOnly(profile.roles) &&
+    (profile.roles.includes("admin") ||
+      profile.roles.includes("hr") ||
+      profile.roles.includes("line_manager"));
+  if (!canArchive) {
+    return {
+      ok: false,
+      code: "FORBIDDEN",
+      error: "Only managers, HR, or admins can archive tasks.",
+    };
   }
 
   const supabase = await createClient();

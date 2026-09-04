@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { personLabel } from "@/lib/people/label";
+import type { AppRole } from "@/lib/auth/types";
 import { changeTaskStatusAction } from "@/lib/tasks/actions";
 import { addCommentAction, toggleChecklistItemAction } from "@/lib/tasks/collaboration-actions";
 import type { ChecklistItem } from "@/lib/tasks/collaboration-types";
@@ -25,10 +26,10 @@ import {
   groupMyTasks,
   type MyTaskBucket,
 } from "@/lib/tasks/my-tasks-groups";
+import { canRoleTransition } from "@/lib/tasks/status-policy";
 import {
   STATUS_LABELS,
   TASK_STATUSES,
-  canTransition,
   type NestFlowTask,
   type TaskAssignee,
   type TaskStatus,
@@ -50,10 +51,12 @@ export function MyTasksPlan({
   tasks,
   checklists = {},
   people = [],
+  roles,
 }: {
   tasks: NestFlowTask[];
   checklists?: Record<string, ChecklistItem[]>;
   people?: TaskAssignee[];
+  roles: AppRole[];
 }) {
   const grouped = useMemo(() => groupMyTasks(tasks), [tasks]);
   const [completedOpen, setCompletedOpen] = useState(false);
@@ -94,6 +97,7 @@ export function MyTasksPlan({
                       bucket={bucket}
                       checklist={checklists[task.id] ?? []}
                       people={people}
+                      roles={roles}
                     />
                   ))}
                 </ul>
@@ -127,6 +131,7 @@ export function MyTasksPlan({
                     bucket={bucket}
                     checklist={checklists[task.id] ?? []}
                     people={people}
+                    roles={roles}
                   />
                 ))}
               </ul>
@@ -162,11 +167,13 @@ function MyTaskRow({
   bucket,
   checklist,
   people,
+  roles,
 }: {
   task: NestFlowTask;
   bucket: MyTaskBucket;
   checklist: ChecklistItem[];
   people: TaskAssignee[];
+  roles: AppRole[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -175,7 +182,7 @@ function MyTaskRow({
   const doneCount = checklist.filter((item) => item.isDone).length;
 
   function onStatus(next: TaskStatus) {
-    if (!canTransition(task.status, next)) {
+    if (!canRoleTransition(roles, task.status, next)) {
       toast.error(
         `Cannot move from ${STATUS_LABELS[task.status]} to ${STATUS_LABELS[next]}.`,
       );
@@ -285,7 +292,7 @@ function MyTaskRow({
                   <SelectItem
                     key={status}
                     value={status}
-                    disabled={!canTransition(task.status, status)}
+                    disabled={!canRoleTransition(roles, task.status, status)}
                   >
                     {STATUS_LABELS[status]}
                   </SelectItem>
@@ -320,6 +327,7 @@ function MyTaskRow({
           <div className="min-w-0 flex-1">
             <MentionField
               people={people}
+              taskId={task.id}
               value={comment}
               onChange={setComment}
               placeholder="One-line update. Use @NestID."

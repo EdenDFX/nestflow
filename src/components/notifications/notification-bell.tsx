@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 
-import { BellIcon } from "@/components/icons/bell";
-
 import {
   MarkAllReadButton,
   NotificationList,
@@ -16,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NotificationBell as NotificationBellTrigger } from "@/components/ui/notification-bell";
 import type { NestFlowNotification } from "@/lib/notifications/types";
 
 export function NotificationBell({
@@ -28,24 +27,7 @@ export function NotificationBell({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="relative rounded-full"
-          aria-label={
-            unreadCount > 0
-              ? `Notifications, ${unreadCount} unread`
-              : "Notifications"
-          }
-        >
-          <BellIcon className="inline-flex" />
-          {unreadCount > 0 ? (
-            <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          ) : null}
-        </Button>
+        <NotificationBellTrigger count={unreadCount} max={9} size={32} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between px-3 py-2">

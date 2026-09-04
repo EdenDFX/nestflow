@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { DiscussionDashboardPanel } from "@/components/discussions/discussion-dashboard-panel";
 import type {
   AdminReportSnapshot,
   AuditEvent,
@@ -16,6 +17,7 @@ import type {
   TeamMembershipRow,
 } from "@/lib/admin/types";
 import type { NestFlowTask, TaskAssignee } from "@/lib/tasks/types";
+import type { DiscussionThread } from "@/lib/tasks/discussion-shared";
 
 const AdminOversight = dynamic(
   () =>
@@ -50,6 +52,8 @@ export function AdminConsole({
   memberships,
   people = [],
   openByUser = {},
+  discussionThreads = [],
+  unreadMentionCount = 0,
 }: {
   tasks: OversightTaskRow[];
   log: OversightLogEntry[];
@@ -63,6 +67,8 @@ export function AdminConsole({
   memberships: TeamMembershipRow[];
   people?: TaskAssignee[];
   openByUser?: Record<string, NestFlowTask[]>;
+  discussionThreads?: DiscussionThread[];
+  unreadMentionCount?: number;
 }) {
   const [mode, setMode] = useState<AdminMode>("work");
 
@@ -107,6 +113,11 @@ export function AdminConsole({
           openByUser={openByUser}
         />
       )}
+
+      <DiscussionDashboardPanel
+        threads={discussionThreads}
+        unreadMentionCount={unreadMentionCount}
+      />
     </div>
   );
 }

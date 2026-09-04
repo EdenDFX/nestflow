@@ -9,7 +9,6 @@ import { DeactivateUserButton } from "@/components/admin/deactivate-user-button"
 import { TeamRosterPanel } from "@/components/admin/team-roster-panel";
 import { TemplatesAutomationPanel } from "@/components/admin/templates-automation-panel";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/status-badge";
-import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,13 +91,6 @@ export function PeopleSuite({
             HR queues, team rosters, employee status, and invite coordination.
           </p>
         </div>
-        {hrWorkspaceIds.size > 0 ? (
-          <TaskCreateDialog
-            workspaces={workspaces.filter((w) => w.kind === "hr")}
-            people={people}
-            canAssign={canAssign}
-          />
-        ) : null}
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -119,8 +111,8 @@ export function PeopleSuite({
         <div className="space-y-2">
           {hrTasks.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No open people/HR workspace tasks yet. Create one to start an
-              onboarding or compliance queue.
+              No open people/HR workspace tasks yet. Line managers create and
+              assign work into To Do for the team to progress.
             </p>
           ) : (
             hrTasks.map((task) => (

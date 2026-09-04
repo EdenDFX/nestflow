@@ -171,6 +171,8 @@ notification_channel: in_app | email | push | chat
 
 Exact SQL policies live in migrations and are tested per role.
 
+`nestflow_tasks_select` allows `created_by = auth.uid()` before `can_view_task(id)`. That short-circuit is required so `INSERT … RETURNING` (and the app’s `insert().select()`) works for non-admin creators. `can_view_task` re-queries `tasks`, and the in-flight row is not visible to that nested select during RETURNING.
+
 ## 7. Object storage (Cloudflare R2)
 
 NestFlow stores heavy files in **private Cloudflare R2** buckets. Postgres stores metadata only. See [ADR-004](../decisions/ADR-004-cloudflare-r2-attachments.md).
@@ -290,8 +292,17 @@ Optional notification channel (ADR-005). Space incoming webhook in v1.
 
 - Enum value `performance_digest` on `nestflow.notification_event_type`
 - Prefs: `email_performance_digest`, `push_performance_digest` (default true) on `notification_preferences` + `nf_notification_preferences`
-- In-app surface: `/app/reports` (Admin, Line Manager, HR)
+- In-app surface: `/app/reports` (Admin, Line Manager). Admin Line Manager weekly rollup at `?view=managers`
 - Cron: `POST /api/cron/performance-reports` daily at 07:00 UTC; sends weekly on Lagos Monday and monthly on Lagos day 1
+
+## 20. Personal notes (applied)
+
+- Table: `nestflow.personal_notes` (`id`, `user_id`, `title`, `body`, `noted_on`, `created_at`, `updated_at`)
+- `noted_on`: calendar day (date) the note appears on; defaults to Lagos today; backfilled from `created_at` for existing rows
+- Public view: `nf_personal_notes` with `security_invoker = true`
+- FORCE RLS; owner-only select/insert/update/delete (`user_id = auth.uid()`)
+- Staff create surface replaces self-create tasks
+- Calendar shows personal notes for `noted_on`; click opens a read dialog
 
 ## See Also
 

@@ -24,7 +24,8 @@ export function AppUserMenu({ profile }: { profile: NestFlowProfile }) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="h-10 gap-2 rounded-full px-1.5 sm:px-2"
+          aria-label="Account menu"
+          className="size-10 rounded-full p-0"
         >
           <Avatar className="size-8 ring-2 ring-border">
             {profile.avatarUrl ? (

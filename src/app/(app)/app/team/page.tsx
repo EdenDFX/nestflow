@@ -4,6 +4,7 @@ import {
   getTeamSuiteData,
   listAssignablePeopleForProfile,
 } from "@/lib/admin/queries";
+import { rolesAllow } from "@/lib/security/authz";
 import { listWorkspaces } from "@/lib/tasks/queries";
 
 export default async function TeamPage({
@@ -13,10 +14,8 @@ export default async function TeamPage({
 }) {
   const profile = await requireRoles(["admin", "line_manager"]);
   const params = await searchParams;
-  const canAssign =
-    profile.roles.includes("admin") ||
-    profile.roles.includes("line_manager") ||
-    profile.roles.includes("hr");
+  const canAssign = rolesAllow(profile.roles, "assign_tasks");
+  const canCreateTasks = rolesAllow(profile.roles, "create_tasks");
 
   const [{ tasks, blocked, workload, managedTeams, isOrgWide }, workspaces, people] =
     await Promise.all([
@@ -36,10 +35,12 @@ export default async function TeamPage({
       workspaces={workspaces}
       people={people}
       canAssign={canAssign}
+      canCreateTasks={canCreateTasks}
       defaultAssigneeId={profile.userId}
       managedTeams={managedTeams}
       isOrgWide={isOrgWide}
       initialPersonId={params.person}
+      roles={profile.roles}
     />
   );
 }

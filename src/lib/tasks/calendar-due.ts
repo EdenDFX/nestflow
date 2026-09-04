@@ -1,6 +1,13 @@
 import { format } from "date-fns";
 
+import type { TaskStatus } from "@/lib/tasks/types";
+
 const DAY_KEY = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** Calendar drag only shifts due dates; completed work stays fixed. */
+export function canRescheduleTaskOnCalendar(status: TaskStatus): boolean {
+  return status !== "completed";
+}
 
 export function calendarDayKey(date: Date): string {
   return format(date, "yyyy-MM-dd");

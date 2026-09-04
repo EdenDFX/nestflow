@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { periodHref, shiftEndingDate } from "@/lib/reports/period";
+import { lagosYmd, periodHref, shiftEndingDate } from "@/lib/reports/period";
 import type {
   PeriodReport,
   ReportPeriodKind,
@@ -93,6 +93,7 @@ function StatCard({
 function StaffDetail({ row }: { row: StaffPeriodStats }) {
   const [open, setOpen] = useState(false);
   const name = row.fullName ?? row.email ?? row.nestId ?? "Staff";
+  const isManager = row.reportKind === "line_manager";
 
   return (
     <article className="rounded-3xl border border-border/70 bg-card">
@@ -103,39 +104,77 @@ function StaffDetail({ row }: { row: StaffPeriodStats }) {
         aria-expanded={open}
       >
         <div className="min-w-0">
-          <p className="truncate font-heading text-base font-semibold">{name}</p>
+          <div className="flex min-w-0 items-center gap-2">
+            <p className="truncate font-heading text-base font-semibold">
+              {name}
+            </p>
+            {isManager ? (
+              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase text-primary">
+                Line manager
+              </span>
+            ) : null}
+          </div>
           <p className="truncate text-xs text-muted-foreground">
             {[row.department, row.nestId, row.email].filter(Boolean).join(" · ") ||
               "No profile extras"}
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-5 sm:text-sm">
-          <Metric label="Done" value={row.completed} />
-          <Metric label="Missed" value={row.missed} warn={row.missed > 0} />
-          <Metric label="Overdue" value={row.overdue} warn={row.overdue > 0} />
-          <Metric label="Blocked" value={row.blocked} warn={row.blocked > 0} />
-          <Metric
-            label="On-time"
-            value={row.onTimeRate == null ? "—" : `${row.onTimeRate}%`}
-          />
-        </div>
+        {isManager ? (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-5 sm:text-sm">
+            <Metric label="Assigned" value={row.assigned} />
+            <Metric label="Done" value={row.completed} />
+            <Metric label="Missed" value={row.missed} warn={row.missed > 0} />
+            <Metric
+              label="Overdue"
+              value={row.overdue}
+              warn={row.overdue > 0}
+            />
+            <Metric
+              label="Blocked"
+              value={row.blocked}
+              warn={row.blocked > 0}
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-5 sm:text-sm">
+            <Metric label="Done" value={row.completed} />
+            <Metric label="Missed" value={row.missed} warn={row.missed > 0} />
+            <Metric label="Overdue" value={row.overdue} warn={row.overdue > 0} />
+            <Metric label="Blocked" value={row.blocked} warn={row.blocked > 0} />
+            <Metric
+              label="On-time"
+              value={row.onTimeRate == null ? "—" : `${row.onTimeRate}%`}
+            />
+          </div>
+        )}
       </button>
 
       {open ? (
         <div className="space-y-3 border-t border-border/70 px-4 py-4">
-          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-            <span>{hoursFromMinutes(row.minutesLogged)}h logged</span>
-            <span>
-              Avg cycle{" "}
-              {row.avgCycleHours == null ? "—" : `${row.avgCycleHours}h`}
-            </span>
-            <span>
-              Created {row.created} · Updated {row.updated}
-            </span>
-          </div>
+          {isManager ? (
+            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+              <span>
+                Assigned {row.assigned} task{row.assigned === 1 ? "" : "s"} in
+                this period. Outcomes below cover those assignments.
+              </span>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+              <span>{hoursFromMinutes(row.minutesLogged)}h logged</span>
+              <span>
+                Avg cycle{" "}
+                {row.avgCycleHours == null ? "—" : `${row.avgCycleHours}h`}
+              </span>
+              <span>
+                Created {row.created} · Updated {row.updated}
+              </span>
+            </div>
+          )}
           {row.details.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No task-level events in this period.
+              {isManager
+                ? "No outcome events on assigned tasks in this period."
+                : "No task-level events in this period."}
             </p>
           ) : (
             <ul className="space-y-2">
@@ -253,6 +292,9 @@ export function ReportsDashboard({ report }: { report: PeriodReport }) {
 
   const prevEnding = shiftEndingDate(kind, ending, -1);
   const nextEnding = shiftEndingDate(kind, ending, 1);
+  const maxEnding = lagosYmd();
+  const canGoNext = nextEnding <= maxEnding;
+  const isInProgress = ending >= maxEnding;
 
   function onDepartmentChange(value: string) {
     router.push(periodHref(kind, ending, { department: value }));
@@ -309,12 +351,24 @@ export function ReportsDashboard({ report }: { report: PeriodReport }) {
             </Button>
             <p className="min-w-0 flex-1 text-center text-sm font-medium sm:flex-none">
               {report.period.label}
+              {isInProgress ? (
+                <span className="ml-1 text-xs font-normal text-muted-foreground">
+                  (in progress)
+                </span>
+              ) : null}
             </p>
-            <Button asChild size="sm" variant="outline">
+            <Button asChild size="sm" variant="outline" disabled={!canGoNext}>
               <Link
-                href={periodHref(kind, nextEnding, {
-                  department: departmentOpt,
-                })}
+                href={
+                  canGoNext
+                    ? periodHref(kind, nextEnding, {
+                        department: departmentOpt,
+                      })
+                    : periodHref(kind, ending, { department: departmentOpt })
+                }
+                aria-disabled={!canGoNext}
+                tabIndex={canGoNext ? undefined : -1}
+                className={cn(!canGoNext && "pointer-events-none opacity-50")}
               >
                 Next
               </Link>
@@ -370,7 +424,7 @@ export function ReportsDashboard({ report }: { report: PeriodReport }) {
         <div className="rounded-3xl border border-dashed border-border/70 px-6 py-16 text-center">
           <p className="font-heading text-lg font-semibold">Pick a department</p>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Admin reports stay scoped by department so you are not dumped into
+            Reports stay scoped by department so you are not dumped into
             the full organisation list by default. Select a department above,
             or choose All departments when you need the org view.
           </p>
@@ -560,11 +614,12 @@ export function ReportsDashboard({ report }: { report: PeriodReport }) {
           <section className="space-y-3">
             <div className="space-y-1">
               <h2 className="font-heading text-lg font-semibold">
-                Each staff member
+                Each person
               </h2>
               <p className="text-sm text-muted-foreground">
                 Expand a row for task-level completed, missed, overdue, and
-                blocked detail.{" "}
+                blocked detail. Line managers are measured on the tasks they
+                assigned: assigned, done, missed, overdue, and blocked.{" "}
                 {hoursFromMinutes(report.summary.minutesLogged)}h logged in
                 total.
               </p>

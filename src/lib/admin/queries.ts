@@ -252,6 +252,87 @@ export async function listAssignablePeopleForProfile(profile: {
   return people.filter((person) => person.userId === profile.userId);
 }
 
+/** @mention autocomplete: all active profiles visible via RLS (not assignment-scoped). */
+export async function listMentionablePeopleForProfile(_profile: {
+  userId: string;
+  roles: AppRole[];
+}): Promise<TaskAssignee[]> {
+  return listAssignablePeople();
+}
+
+function sortMentionPeople(
+  people: TaskAssignee[],
+  priorityIds: Set<string>,
+): TaskAssignee[] {
+  return [...people].sort((left, right) => {
+    const leftPriority = priorityIds.has(left.userId) ? 0 : 1;
+    const rightPriority = priorityIds.has(right.userId) ? 0 : 1;
+    if (leftPriority !== rightPriority) {
+      return leftPriority - rightPriority;
+    }
+
+    const leftLabel = (left.fullName ?? left.nestId ?? "").toLowerCase();
+    const rightLabel = (right.fullName ?? right.nestId ?? "").toLowerCase();
+    return leftLabel.localeCompare(rightLabel);
+  });
+}
+
+/** Task thread mentions: everyone visible via RLS, task participants first. */
+export async function listMentionablePeopleForTask(
+  taskId: string,
+  profile: { userId: string; roles: AppRole[] },
+): Promise<TaskAssignee[]> {
+  const supabase = await createClient();
+
+  const [allPeople, privilegedIds, taskRow, commentRows, assigneeRows] =
+    await Promise.all([
+      listAssignablePeople(),
+      listUserIdsWithRoles(["admin", "hr", "line_manager"]),
+      supabase.from("nf_tasks").select("created_by").eq("id", taskId).maybeSingle(),
+      supabase.from("nf_comments").select("author_id").eq("task_id", taskId),
+      supabase
+        .from("nf_task_assignees")
+        .select("user_id")
+        .eq("task_id", taskId),
+    ]);
+
+  const priorityIds = new Set<string>([
+    profile.userId,
+    ...privilegedIds,
+    ...(taskRow.data?.created_by ? [taskRow.data.created_by as string] : []),
+    ...(assigneeRows.data ?? []).map((row) => row.user_id as string),
+    ...(commentRows.data ?? []).map((row) => row.author_id as string),
+  ]);
+
+  const byId = new Map(allPeople.map((person) => [person.userId, person]));
+  const missingIds = [...priorityIds].filter((id) => !byId.has(id));
+
+  if (missingIds.length > 0) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, nest_id, email, avatar_url")
+      .in("id", missingIds)
+      .is("deleted_at", null)
+      .eq("status", "Active");
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    for (const row of data ?? []) {
+      byId.set(row.id as string, {
+        userId: row.id as string,
+        fullName: row.full_name as string | null,
+        nestId: row.nest_id as string | null,
+        email: row.email as string | null,
+        avatarUrl: row.avatar_url as string | null,
+      });
+    }
+  }
+
+  return sortMentionPeople([...byId.values()], priorityIds);
+}
+
 /** Active NestFlow users that have any of the given roles. */
 export async function listUserIdsWithRoles(
   roles: AppRole[],

@@ -6,7 +6,7 @@ Stable project memory for AI agents and future sessions. Store only approved, du
 
 When this file disagrees with an ADR or PRD, the ADR/PRD wins. Update this file after decisions are accepted.
 
-Last reviewed: 2026-08-14
+Last reviewed: 2026-09-03
 
 ## Product
 
@@ -114,6 +114,12 @@ Backlog → To Do → In Progress → Blocked → Review → Completed
 - Soft-launch version is `1.0.0`. M7.1 close-out and M8 work sit under `[Unreleased]` in `docs/CHANGELOG.md` until the next tagged release.
 - Role home paths: Admin `/app/admin`, HR `/app/people`, Line Manager `/app`, Staff `/app/my-tasks`
 - Work surface: Staff and Line Managers use `/app/work` (board / list / calendar). `/app/board`, `/app/list`, and `/app/calendar` redirect there. HR keeps Calendar in nav; Admin nav is Overview + Reports (department-scoped by default).
+- Staff cannot create tasks; they use a personal notes notepad (`nestflow.personal_notes` / `nf_personal_notes` with `noted_on`). Notes appear on the calendar for that day. Only Line Managers create tasks (always start in To Do). Admin and HR do not create tasks.
+- Status ownership: Staff/HR set In Progress, Blocked, Review (can leave To Do). Line Managers set To Do and Completed (cannot set In Progress / Blocked / Review). Admin may set any status. Overdue open tasks auto-move to Backlog via `/api/cron/overdue`.
+- Staff assignees get a progress-only task view (status, checklist, discussion). Full edit (title, due date/time, assignees, archive) is Admin / HR / Line Manager.
+- Task comments render as a chat-style Discussion thread.
+- Create/edit task supports optional due date and optional submit-by time (combined into `due_at`).
+- Staff period reports: `/app/reports` for Admin + Line Manager. Admin-only Line Manager weekly rollup at `/app/reports?view=managers` (assigned, completed, failed/missed, unrest, block list). HR does not see reports nav.
 - Task detail can open as a slide-over pane from work views (`@pane` intercepting route)
 - Command palette (⌘K) searches accessible tasks and people (T-035 / T-079)
 - Mentions inbox: notifications `?filter=mentions` (T-077). My Tasks day plan supports inline status, checklist ticks, and a one-line @mention comment (T-078)

@@ -29,6 +29,14 @@ describe("rolesAllow capability matrix", () => {
     expect(rolesAllow(["staff"], "view_audit")).toBe(false);
     expect(rolesAllow(["staff"], "access_hr_workspaces")).toBe(false);
     expect(rolesAllow(["staff"], "assign_tasks")).toBe(false);
+    expect(rolesAllow(["staff"], "create_tasks")).toBe(false);
+  });
+
+  it("allows only line managers to create tasks", () => {
+    expect(rolesAllow(["line_manager"], "create_tasks")).toBe(true);
+    expect(rolesAllow(["hr"], "create_tasks")).toBe(false);
+    expect(rolesAllow(["admin"], "create_tasks")).toBe(false);
+    expect(rolesAllow(["staff"], "create_tasks")).toBe(false);
   });
 
   it("allows line managers team suite but not HR workspaces", () => {
@@ -46,11 +54,12 @@ describe("rolesAllow capability matrix", () => {
     expect(rolesAllow(["hr"], "assign_tasks")).toBe(true);
   });
 
-  it("allows admin everything in the matrix", () => {
+  it("allows admin everything except task assignment in the matrix", () => {
     expect(rolesAllow(["admin"], "manage_users")).toBe(true);
     expect(rolesAllow(["admin"], "view_audit")).toBe(true);
     expect(rolesAllow(["admin"], "access_hr_workspaces")).toBe(true);
     expect(rolesAllow(["admin"], "manage_team_suite")).toBe(true);
+    expect(rolesAllow(["admin"], "assign_tasks")).toBe(false);
   });
 });
 
@@ -83,8 +92,15 @@ describe("nav work views", () => {
     const adminNav = navForRoles(["admin"]);
     expect(adminNav.map((item) => item.href)).toEqual([
       "/app/admin",
+      "/app/discussions",
       "/app/reports",
     ]);
+  });
+
+  it("shows Reports to HR", async () => {
+    const { navForRoles } = await import("@/lib/auth/navigation");
+    const hrNav = navForRoles(["hr"]);
+    expect(hrNav.some((item) => item.href === "/app/reports")).toBe(true);
   });
 });
 

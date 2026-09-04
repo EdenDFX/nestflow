@@ -25,13 +25,14 @@ const toneClassName: Record<SteppedCardTone, string> = {
   ink: "bg-foreground/[0.06] text-foreground [--nf-step-cut:var(--background)] dark:bg-white/[0.06]",
   muted:
     "border border-border/80 bg-card text-card-foreground [--nf-step-cut:var(--background)]",
-  todo: "bg-emerald-500/12 text-emerald-950 [--nf-step-cut:var(--background)] dark:bg-emerald-500/15 dark:text-emerald-100",
+  todo:
+    "border border-border/80 bg-secondary/80 text-foreground [--nf-step-cut:var(--background)] dark:bg-secondary/40",
   blocked:
     "bg-red-500/12 text-red-950 [--nf-step-cut:var(--background)] dark:bg-red-500/15 dark:text-red-100",
   review:
     "bg-amber-400/18 text-amber-950 [--nf-step-cut:var(--background)] dark:bg-amber-400/15 dark:text-amber-100",
   completed:
-    "border border-border/70 bg-muted/70 text-muted-foreground opacity-90 [--nf-step-cut:var(--background)]",
+    "bg-success/15 text-success [--nf-step-cut:var(--background)] dark:bg-success/20 dark:text-success",
 };
 
 /** True when the tone uses a lightish face (dark text in light mode). */

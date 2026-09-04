@@ -1,19 +1,22 @@
-import { ArrowDownRightIcon } from "@/components/icons/arrow-down-right";
-import { ArrowUpRightIcon } from "@/components/icons/arrow-up-right";
-import { ChevronDownIcon } from "@/components/icons/chevron-down";
+import Link from "next/link";
 
+import { ArrowUpRightIcon } from "@/components/icons/arrow-up-right";
+
+import { NotesCreateDialog, PersonalNotesPanel } from "@/components/notes/personal-notes-panel";
+import { DiscussionDashboardPanel } from "@/components/discussions/discussion-dashboard-panel";
+import { StatusBadge } from "@/components/tasks/status-badge";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
-import {
-  SteppedCard,
-  SteppedCardActionLink,
-} from "@/components/ui/stepped-card";
+import { TaskDueTimer } from "@/components/tasks/task-due-timer";
 import { WorkspaceRecentTasks } from "@/components/workspace/workspace-recent-tasks";
 import { roleLabel, type AppRole, type NestFlowProfile } from "@/lib/auth/types";
+import type { PersonalNote } from "@/lib/notes/types";
+import type { DiscussionThread } from "@/lib/tasks/discussion-shared";
 import type {
   NestFlowTask,
   NestFlowWorkspace,
   TaskAssignee,
   TaskCounters,
+  TaskStatus,
 } from "@/lib/tasks/types";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +28,62 @@ type WorkspaceDashboardProps = {
   workspaces: NestFlowWorkspace[];
   people: TaskAssignee[];
   canAssign: boolean;
+  canCreateTasks?: boolean;
+  notes?: PersonalNote[];
+  discussionThreads?: DiscussionThread[];
+  unreadMentionCount?: number;
 };
+
+const statusPriority: Record<TaskStatus, number> = {
+  blocked: 0,
+  review: 1,
+  in_progress: 2,
+  todo: 3,
+  backlog: 4,
+  completed: 5,
+};
+
+function pickPriorityTask(tasks: NestFlowTask[]): NestFlowTask | null {
+  const active = tasks.filter(
+    (task) => task.status !== "completed" && task.status !== "backlog",
+  );
+
+  if (active.length === 0) {
+    return null;
+  }
+
+  const now = Date.now();
+
+  return [...active].sort((left, right) => {
+    const statusDiff = statusPriority[left.status] - statusPriority[right.status];
+    if (statusDiff !== 0) {
+      return statusDiff;
+    }
+
+    const leftDue = left.dueAt ? new Date(left.dueAt).getTime() : null;
+    const rightDue = right.dueAt ? new Date(right.dueAt).getTime() : null;
+    const leftOverdue = leftDue !== null && leftDue < now;
+    const rightOverdue = rightDue !== null && rightDue < now;
+
+    if (leftOverdue !== rightOverdue) {
+      return leftOverdue ? -1 : 1;
+    }
+
+    if (leftDue !== null && rightDue !== null && leftDue !== rightDue) {
+      return leftDue - rightDue;
+    }
+
+    if (leftDue !== null) {
+      return -1;
+    }
+
+    if (rightDue !== null) {
+      return 1;
+    }
+
+    return new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
+  })[0];
+}
 
 export function WorkspaceDashboard({
   profile,
@@ -35,43 +93,42 @@ export function WorkspaceDashboard({
   workspaces,
   people,
   canAssign,
+  canCreateTasks = true,
+  notes = [],
+  discussionThreads = [],
+  unreadMentionCount = 0,
 }: WorkspaceDashboardProps) {
   const firstName = profile.fullName?.split(" ")[0];
+  const priorityTask = pickPriorityTask(tasks);
 
-  const focusItems = [
+  const welcomeParts = [
+    firstName ? `Welcome back, ${firstName}` : "Welcome back",
+    roleLabel(role),
+    profile.nestId ?? null,
+  ].filter(Boolean);
+
+  const quickLinks = [
     {
       id: "my",
       title: "My assignments",
-      subtitle: `${counters.open} open on your plate`,
-      badge: "Assigned",
       href: "/app/my-tasks",
     },
     {
       id: "board",
       title: "Work board",
-      subtitle: "Move work across statuses",
-      badge: "Board",
       href: "/app/work?view=board",
     },
     {
       id: "list",
       title: "Work list",
-      subtitle: "Sort, filter, and bulk update",
-      badge: "List",
       href: "/app/work?view=list",
     },
     {
-      id: "overdue",
-      title: "Overdue",
-      subtitle:
-        counters.overdue > 0
-          ? `${counters.overdue} need attention`
-          : "Nothing overdue",
-      badge: "Due",
-      href: "/app/my-tasks",
+      id: "calendar",
+      title: "Calendar",
+      href: "/app/calendar",
     },
   ].filter((item) => {
-    // Admin home skips Board and List; those views are for staff and line managers.
     if (role === "admin" && (item.id === "board" || item.id === "list")) {
       return false;
     }
@@ -80,99 +137,108 @@ export function WorkspaceDashboard({
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-            Workspace
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Welcome back{firstName ? `, ${firstName}` : ""}. Signed in as{" "}
-            {roleLabel(role)}.
-            {profile.nestId ? ` Nest ID ${profile.nestId}.` : null}
-          </p>
-        </div>
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+              Workspace
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {welcomeParts.join(" · ")}
+            </p>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <TaskCreateDialog
-            workspaces={workspaces}
-            people={people}
-            canAssign={canAssign}
-            defaultAssigneeId={profile.userId}
-          />
+          <p className="text-sm font-medium text-foreground">
+            {counters.open} open · {counters.inProgress} in progress ·{" "}
+            {counters.blocked} blocked
+            {counters.overdue > 0 ? ` · ${counters.overdue} overdue` : null}
+          </p>
 
           <div className="flex flex-wrap gap-2">
-            <StatPill label="Open" value={String(counters.open)} trend="up" />
+            <StatPill label="Open" value={String(counters.open)} tone="primary" />
             <StatPill
               label="In progress"
               value={String(counters.inProgress)}
-              trend="up"
               tone="success"
             />
             <StatPill
               label="Blocked"
               value={String(counters.blocked)}
-              trend="down"
               tone="danger"
             />
           </div>
         </div>
+
+        <div className="shrink-0">
+          {canCreateTasks ? (
+            <TaskCreateDialog
+              workspaces={workspaces}
+              people={people}
+              canAssign={canAssign}
+              defaultAssigneeId={profile.userId}
+            />
+          ) : (
+            <NotesCreateDialog />
+          )}
+        </div>
       </div>
 
-      <section className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="font-heading text-lg font-semibold">Focus</h2>
-            <span className="rounded-full border border-primary/50 px-2.5 py-0.5 text-xs font-medium text-primary">
-              {focusItems.length}
+      {priorityTask ? (
+        <Link
+          href={`/app/tasks/${priorityTask.id}`}
+          className="group flex flex-col gap-3 rounded-[1.75rem] border border-border/80 bg-card p-5 transition-colors hover:border-primary/40 hover:bg-accent/30 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div className="min-w-0 space-y-1">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Needs attention
+            </p>
+            <p className="truncate font-heading text-xl font-semibold tracking-tight group-hover:underline">
+              {priorityTask.title}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status={priorityTask.status} />
+            <TaskDueTimer
+              dueAt={priorityTask.dueAt}
+              status={priorityTask.status}
+              tone="surface"
+            />
+            <span className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors group-hover:border-primary/40 group-hover:text-foreground">
+              <ArrowUpRightIcon className="inline-flex" size={16} aria-hidden />
             </span>
           </div>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {focusItems.map((item) => {
-            return (
-              <SteppedCard
-                key={item.id}
-                tone="muted"
-                cornerActions={
-                  <SteppedCardActionLink
-                    href={item.href}
-                    aria-label={`Open ${item.title}`}
-                  >
-                    <ArrowUpRightIcon className="inline-flex" />
-                  </SteppedCardActionLink>
-                }
-              >
-                <div className="space-y-4">
-                  <div className="flex size-11 items-center justify-center rounded-full bg-primary/12 text-sm font-semibold text-primary">
-                    {item.badge.slice(0, 1)}
-                  </div>
-                  <div className="space-y-1.5 pe-2">
-                    <h3 className="font-heading text-xl font-semibold tracking-tight">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {item.subtitle}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background/70 px-3 py-1.5 text-xs font-medium">
-                    {item.badge}
-                    <ChevronDownIcon className="inline-flex opacity-70" size={14} aria-hidden />
-                  </span>
-                  <span className="text-xs font-medium text-muted-foreground">
-                    NestFlow
-                  </span>
-                </div>
-              </SteppedCard>
-            );
-          })}
-        </div>
-      </section>
+        </Link>
+      ) : null}
 
       <WorkspaceRecentTasks tasks={tasks} />
+
+      <section className="space-y-3">
+        <h2 className="font-heading text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Quick links
+        </h2>
+        <nav
+          aria-label="Workspace quick links"
+          className="flex flex-wrap gap-2"
+        >
+          {quickLinks.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-muted/40 px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-foreground"
+            >
+              {item.title}
+              <ArrowUpRightIcon className="inline-flex opacity-70" size={14} aria-hidden />
+            </Link>
+          ))}
+        </nav>
+      </section>
+
+      {!canCreateTasks ? <PersonalNotesPanel notes={notes} /> : null}
+
+      <DiscussionDashboardPanel
+        threads={discussionThreads}
+        unreadMentionCount={unreadMentionCount}
+      />
     </div>
   );
 }
@@ -180,37 +246,24 @@ export function WorkspaceDashboard({
 function StatPill({
   label,
   value,
-  trend,
   tone = "primary",
 }: {
   label: string;
   value: string;
-  trend: "up" | "down";
   tone?: "primary" | "success" | "danger";
 }) {
-  const toneClass =
+  const dotClass =
     tone === "success"
-      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300"
+      ? "bg-emerald-500"
       : tone === "danger"
-        ? "bg-red-500/15 text-red-600 dark:text-red-300"
-        : "bg-primary/15 text-primary";
+        ? "bg-red-500"
+        : "bg-primary";
 
   return (
     <div className="flex items-center gap-2 rounded-full border border-border/80 bg-muted/60 px-3 py-1.5">
+      <span className={cn("size-2 shrink-0 rounded-full", dotClass)} aria-hidden />
       <span className="text-sm font-semibold tabular-nums">{value}</span>
       <span className="text-xs text-muted-foreground">{label}</span>
-      <span
-        className={cn(
-          "inline-flex size-5 items-center justify-center rounded-full",
-          toneClass,
-        )}
-      >
-        {trend === "up" ? (
-          <ArrowUpRightIcon className="inline-flex" size={12} />
-        ) : (
-          <ArrowDownRightIcon className="inline-flex" size={12} />
-        )}
-      </span>
     </div>
   );
 }
